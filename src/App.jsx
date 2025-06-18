@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useDebounce } from './hooks/useDebounce.js';
+import { useDebounce } from "./hooks/useDebounce.js";
 import Spinner from "./components/Spinner.jsx";
 import Search from "./components/Search.jsx";
 import { getTrendingMovies, updateSearchCount } from "./appwrite.js";
@@ -27,14 +27,13 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   //setting the trending movies from appwrite database
-  const [trendingMovies, setTrendingMovies] = useState([]);
+  //const [trendingMovies, setTrendingMovies] = useState([]);
 
   //setting the movies list from api fetch
   const [movieList, setMovieList] = useState([]);
 
   //waiting for the movies to load
   const [isLoading, setIsLoading] = useState(false);
-
 
   //making request via async function
   const fetchMovies = async (query = "") => {
@@ -44,10 +43,10 @@ const App = () => {
 
     try {
       const endpoint = query
-      //passing the search query to api to get the searched movie
-        ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
-       //else use the default api to get the movies
-        : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+        ? //passing the search query to api to get the searched movie
+          `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
+        : //else use the default api to get the movies
+          `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
 
       const response = await fetch(endpoint, API_OPTIONS);
 
@@ -67,9 +66,9 @@ const App = () => {
       setMovieList(data.results || []);
 
       //update search count
-      if (query && data.results.length > 0) {
+      /*if (query && data.results.length > 0) {
         await updateSearchCount(query, data.results[0]);
-      }
+      }*/
 
       //If API doesnt work
     } catch (error) {
@@ -81,7 +80,7 @@ const App = () => {
   };
 
   //making request to update trending movies count
-  const loadTrendingMovies = async () => {
+  /*const loadTrendingMovies = async () => {
     try {
 
       const movies = await getTrendingMovies();
@@ -90,7 +89,7 @@ const App = () => {
     } catch (error) {
       console.error(`Error Fetching Trending Movies From Appwrite : ${error}`);
     }
-  }
+  }*/
 
   //run fetch api after page loads
   //also run fetch api for search term
@@ -100,9 +99,10 @@ const App = () => {
   }, [debouncedSearchTerm]);
 
   //run fetch api for trending movies
-  useEffect(() => {
+  /*useEffect(() => {
     loadTrendingMovies();
   }, []);
+  */
 
   return (
     <main>
@@ -112,10 +112,12 @@ const App = () => {
         <header>
           <img src="./popcorn.png" alt="Hero Banner" />
           <h1 className="text-gradient">EZ Movies.</h1>
-          <p className="text-desciption">Discover movies and shows you'll love with just a few clicks!</p>
+          <p className="text-desciption">
+            Discover movies and shows you'll love with just a few clicks!
+          </p>
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
-        {trendingMovies.length > 0 && (
+        {/*{trendingMovies.length > 0 && (
           <section className="trending">
             <h2>Trending Movies</h2>
             <ul>
@@ -127,12 +129,12 @@ const App = () => {
               ))}
             </ul>
           </section>
-        )}
+        )}*/}
         {/* Here we call isLoading and error message from the state. if both are false we load the movies from movieList */}
         <section className="all-movies">
-          <h2>All Movies</h2>
+          <h2 className="mt-[40px]">All Movies</h2>
           {isLoading ? (
-            <Spinner/>
+            <Spinner />
           ) : errorMessage ? (
             <p className="text-red-500">{errorMessage}</p>
           ) : (
