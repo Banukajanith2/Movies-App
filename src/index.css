@@ -17,7 +17,7 @@
 
   --breakpoint-xs: 480px;
 
-  --background-image-hero-pattern: url("/hero-bg.png");
+  --background-image-hero-pattern: url("/background4.png");
 }
 
 @layer base {
@@ -97,7 +97,7 @@
     @apply space-y-9;
 
     & ul {
-      @apply grid grid-cols-1 gap-5 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4;
+      @apply grid gap-5 grid-cols-2 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-5;
     }
   }
 
