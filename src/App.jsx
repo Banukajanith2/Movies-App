@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useDebounce } from './hooks/useDebounce.js';
 import Spinner from "./components/Spinner.jsx";
 import Search from "./components/Search.jsx";
+import { getTrendingMovies, updateSearchCount } from "./appwrite.js";
 import MovieCard from "./components/MovieCard.jsx";
 
 //get api key to make the request
@@ -21,9 +22,12 @@ const App = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   //only fetch data when the search term changes and after 500 ms of typing using debounce
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const debouncedSearchTerm = useDebounce(searchTerm, 700);
 
   const [errorMessage, setErrorMessage] = useState("");
+
+  //setting the trending movies from appwrite database
+  const [trendingMovies, setTrendingMovies] = useState([]);
 
   //setting the movies list from api fetch
   const [movieList, setMovieList] = useState([]);
@@ -62,6 +66,11 @@ const App = () => {
       //if API is good, set the movie list
       setMovieList(data.results || []);
 
+      //update search count
+      if (query && data.results.length > 0) {
+        await updateSearchCount(query, data.results[0]);
+      }
+
       //If API doesnt work
     } catch (error) {
       setErrorMessage("Error Fetching Movies from API : " + error);
@@ -71,12 +80,29 @@ const App = () => {
     }
   };
 
+  //making request to update trending movies count
+  const loadTrendingMovies = async () => {
+    try {
+
+      const movies = await getTrendingMovies();
+      setTrendingMovies(movies);
+
+    } catch (error) {
+      console.error(`Error Fetching Trending Movies From Appwrite : ${error}`);
+    }
+  }
+
   //run fetch api after page loads
   //also run fetch api for search term
   //run the search through debounce
   useEffect(() => {
     fetchMovies(debouncedSearchTerm);
   }, [debouncedSearchTerm]);
+
+  //run fetch api for trending movies
+  useEffect(() => {
+    loadTrendingMovies();
+  }, []);
 
   return (
     <main>
@@ -89,9 +115,22 @@ const App = () => {
           <p className="text-desciption">Discover movies and shows you'll love with just a few clicks!</p>
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
+        {trendingMovies.length > 0 && (
+          <section className="trending">
+            <h2>Trending Movies</h2>
+            <ul>
+              {trendingMovies.map((movie, index) => (
+                <li key={movie.$id}>
+                  <p>{index + 1}</p>
+                  <img src={movie.poster} alt={movie.title} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
         {/* Here we call isLoading and error message from the state. if both are false we load the movies from movieList */}
         <section className="all-movies">
-          <h2 className="mt-[40px]">• All Movies</h2>
+          <h2 className="mt-50px">All Movies</h2>
           {isLoading ? (
             <Spinner />
           ) : errorMessage ? (
@@ -105,6 +144,7 @@ const App = () => {
             </ul>
           )}
         </section>
+        <footer></footer>
       </div>
     </main>
   );
