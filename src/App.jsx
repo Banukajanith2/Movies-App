@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useDebounce } from './hooks/useDebounce.js';
 import Spinner from "./components/Spinner.jsx";
 import Search from "./components/Search.jsx";
 import MovieCard from "./components/MovieCard.jsx";
@@ -18,6 +19,10 @@ const API_OPTIONS = {
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState("");
+
+  //only fetch data when the search term changes and after 500 ms of typing using debounce
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
   const [errorMessage, setErrorMessage] = useState("");
 
   //setting the movies list from api fetch
@@ -25,6 +30,7 @@ const App = () => {
 
   //waiting for the movies to load
   const [isLoading, setIsLoading] = useState(false);
+
 
   //making request via async function
   const fetchMovies = async (query = "") => {
@@ -67,12 +73,10 @@ const App = () => {
 
   //run fetch api after page loads
   //also run fetch api for search term
-  useEffect(
-    (effect) => {
-      fetchMovies(searchTerm);
-    },
-    [searchTerm]
-  );
+  //run the search through debounce
+  useEffect(() => {
+    fetchMovies(debouncedSearchTerm);
+  }, [debouncedSearchTerm]);
 
   return (
     <main>
@@ -81,14 +85,13 @@ const App = () => {
       <div className="wrapper">
         <header>
           <img src="./hero.png" alt="Hero Banner" />
-          <h1>
-            Find <span className="text-gradient">Movies</span> You'll Enjoy!
-          </h1>
+          <h1 className="text-gradient">EZ Movies</h1>
+          <p className="text-desciption">Discover movies you'll love with just a few clicks!</p>
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
         {/* Here we call isLoading and error message from the state. if both are false we load the movies from movieList */}
         <section className="all-movies">
-          <h2 className="mt-[40px]">All Movies</h2>
+          <h2 className="mt-[40px]">All Movies 🎬</h2>
           {isLoading ? (
             <Spinner />
           ) : errorMessage ? (
