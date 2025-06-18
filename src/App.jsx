@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Spinner from "./components/Spinner.jsx";
 import Search from "./components/Search.jsx";
+import MovieCard from "./components/MovieCard.jsx";
 
 //get api key to make the request
 const API_BASE_URL = "https://api.themoviedb.org/3";
@@ -23,7 +24,7 @@ const App = () => {
   const [movieList, setMovieList] = useState([]);
 
   //waiting for the movies to load
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   //making request via async function
   const fetchMovies = async () => {
@@ -40,7 +41,8 @@ const App = () => {
         throw new Error("Failed to fetch movies");
       }
       const data = await response.json();
-
+      //console.log(data);
+      
       if (data.Response === "False") {
         setErrorMessage(data.Error || "Failed to Fetch Movies");
         setMovieList([]);
@@ -54,7 +56,7 @@ const App = () => {
       setErrorMessage("Error Fetching Movies from API : " + error);
     } finally {
       //stop the loading animation
-      setIsLoading(true);
+      setIsLoading(false);
     }
   };
 
@@ -77,6 +79,7 @@ const App = () => {
         </header>
         {/* Here we call isLoading and error message from the state. if both are false we load the movies from movieList */}
         <section className="all-movies">
+          <h2 className="mt-[20px]">All Movies</h2>
           {isLoading ? (
             <Spinner />
           ) : errorMessage ? (
@@ -85,7 +88,7 @@ const App = () => {
             <ul>
               {/* Mapping over the movieList array and giving each movie an id using key */}
               {movieList.map((movie) => (
-                <p key={movie.id} className="text-white">{movie.title}</p>
+               <MovieCard key={movie.id} movie={movie} />
               ))}
             </ul>
           )}
