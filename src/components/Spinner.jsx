@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 const Spinner = () => {
   return (
-    <StyledWrapper>
+    <StyledWrapper className='flex justify-center'>
       <div className="loading-wave">
         <div className="loading-bar" />
         <div className="loading-bar" />
