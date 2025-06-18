@@ -84,9 +84,9 @@ const App = () => {
 
       <div className="wrapper">
         <header>
-          <img src="./hero.png" alt="Hero Banner" />
-          <h1 className="text-gradient">EZ Movies</h1>
-          <p className="text-desciption">Discover movies you'll love with just a few clicks!</p>
+          <img src="./popcorn.png" alt="Hero Banner" />
+          <h1 className="text-gradient">EZ Movies.</h1>
+          <p className="text-desciption">Discover movies and shows you'll love with just a few clicks!</p>
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
         {/* Here we call isLoading and error message from the state. if both are false we load the movies from movieList */}
