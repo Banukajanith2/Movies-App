@@ -158,9 +158,9 @@ const App = () => {
             <button
               key={num}
               onClick={() => setPage(num)}
-              className={`px-3 py-1 rounded ${
+              className={`px-3 py-1 rounded shadow-inner shadow-light-100/10 ${
                 page === num
-                  ? "bg-purple-100 text-white"
+                  ? "bg-dark-100 text-white"
                   : "bg-light-200/5 text-white hover:bg-purple-100"
               }`}
             >
