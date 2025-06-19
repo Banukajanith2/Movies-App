@@ -20,6 +20,7 @@ const API_OPTIONS = {
 };
 
 const App = () => {
+
   const [searchTerm, setSearchTerm] = useState("");
 
   //only fetch data when the search term changes and after 500 ms of typing using debounce
@@ -34,7 +35,6 @@ const App = () => {
   const [movieList, setMovieList] = useState([]);
 
   const [page, setPage] = useState(1);
-
 
   //waiting for the movies to load
   const [isLoading, setIsLoading] = useState(false);
@@ -109,7 +109,7 @@ const App = () => {
   }, []);
 
   return (
-    <main className="select-none">
+    <main className="select-none fade-in">
       <div className="pattern" />
       <div className="footer-img" />
 
@@ -128,14 +128,14 @@ const App = () => {
             <h2>Trending Movies</h2>
             <ul>
               {trendingMovies.map((movie, index) => (
-                <li key={movie.id}>
+                <li key={movie.id} className="fade-in">
                   <p>{index + 1}</p>
                   <img src={movie.poster} alt={movie.title} />
                 </li>
               ))}
             </ul>
           </section>
-        )} 
+        )}
         {/* Here we call isLoading and error message from the state. if both are false we load the movies from movieList */}
         <section className="all-movies">
           <h2 className="mt-[10px]">Popular Movies</h2>
@@ -144,7 +144,7 @@ const App = () => {
           ) : errorMessage ? (
             <p className="text-red-500">{errorMessage}</p>
           ) : (
-            <ul>
+            <ul className="fade-in">
               {/* Mapping over the movieList array and giving each movie an id using key */}
               {movieList.map((movie) => (
                 <MovieCard key={movie.id} movie={movie} />

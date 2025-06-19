@@ -3,6 +3,17 @@
 
 @import "tailwindcss";
 
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
 @theme {
   --color-primary: #030014;
 
@@ -81,7 +92,7 @@
     }
 
     & ul li img {
-      @apply w-[127px] h-[180px] rounded-lg object-cover -ml-3.5;
+      @apply w-[127px] h-[180px] rounded-lg object-cover -ml-3.5 cursor-pointer hover:w-[140px] transition-all duration-200 ease-in-out;
     }
   }
 
@@ -110,10 +121,14 @@
   }
 
   .movie-card {
-    @apply bg-dark-100 p-5 rounded-2xl shadow-inner shadow-light-100/10;
+    @apply bg-dark-100 cursor-pointer p-5 rounded-2xl shadow-inner shadow-light-100/10 hover:shadow-gray-100 transition-shadow duration-300 ease-in-out relative overflow-hidden;
 
     & img {
-      @apply rounded-lg h-auto w-full;
+      @apply rounded-lg w-full h-[250px] object-cover transition-all duration-300 ease-in-out;
+    }
+
+    &:hover img {
+      @apply h-[200px];
     }
 
     & h3 {
@@ -146,6 +161,22 @@
 
     & .content .year {
       @apply text-gray-100 font-medium text-base;
+    }
+
+    & .watch {
+      @apply absolute bottom-0 pb-5 text-white font-semibold opacity-0 translate-y-full transition-all duration-300 ease-in-out;
+
+        p {
+        @apply transition-all duration-200 ease-in-out;
+
+        &:hover {
+          @apply underline;
+        }
+      }
+    }
+    
+    &:hover .watch {
+      @apply opacity-100 translate-y-0;
     }
   }
 
@@ -198,7 +229,8 @@
 }
 
 ::-webkit-scrollbar {
-  height: 8px; /* horizontal scrollbar height */
+  height: 5px; /* horizontal scrollbar height */
+  width: 5px; /* vertical scrollbar width */
 }
 
 ::-webkit-scrollbar-track {

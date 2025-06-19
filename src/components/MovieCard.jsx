@@ -27,6 +27,11 @@ const MovieCard = ({
         <p className="year">
           {release_date ? release_date.split("-")[0] : "N/A"}
         </p>
+        <div className="watch">
+          <p>
+            Watch Now →
+          </p>
+        </div>
       </div>
     </div>
   );
