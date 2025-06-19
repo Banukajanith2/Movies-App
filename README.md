@@ -36,8 +36,8 @@ A modern movie browsing app built with **React** and powered by the **TMDB (The 
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-username/ez-movies-app.git
-cd ez-movies-app 
+git clone https://github.com/banukajanith2/Movies-App.git
+cd movies-app 
 ```
 
 ### 2. Install dependencies
@@ -51,7 +51,7 @@ npm install
 
 - Sign in and generate a new API key
 
-### 4. Create a `.env` file
+### 4. Create a `.env.local` file
 ```bash
 VITE_TMDB_API_KEY=your_tmdb_api_key_here
 VITE_TMDB_BASE_URL=https://api.themoviedb.org/3
