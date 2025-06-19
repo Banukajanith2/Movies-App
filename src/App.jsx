@@ -109,7 +109,7 @@ const App = () => {
   }, []);
 
   return (
-    <main className="select-none pointer-events-none">
+    <main className="select-none">
       <div className="pattern" />
       <div className="footer-img" />
 
