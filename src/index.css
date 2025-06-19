@@ -9,6 +9,8 @@
   --color-light-100: #cecefb;
   --color-light-200: #a8b5db;
 
+  --color-purple-100: #AB8BFF;
+
   --color-gray-100: #9ca4ab;
 
   --color-dark-100: #0f0d23;
@@ -60,7 +62,7 @@
   }
 
   .wrapper {
-    @apply px-5 py-12 xs:p-10 max-w-7xl mx-auto flex flex-col relative z-10;
+    @apply px-5 xs:p-10 max-w-7xl mx-auto flex flex-col relative z-10;
   }
 
   .trending {
@@ -193,4 +195,21 @@
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+::-webkit-scrollbar {
+  height: 8px; /* horizontal scrollbar height */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #AB8BFF; /* custom color */
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #030014;
 }

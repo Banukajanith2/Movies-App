@@ -33,11 +33,14 @@ const App = () => {
   //setting the movies list from api fetch
   const [movieList, setMovieList] = useState([]);
 
+  const [page, setPage] = useState(1);
+
+
   //waiting for the movies to load
   const [isLoading, setIsLoading] = useState(false);
 
   //making request via async function
-  const fetchMovies = async (query = "") => {
+  const fetchMovies = async (query = "", pageNumber = 1) => {
     //show loading animation before loading movies from api
     setIsLoading(true);
     setErrorMessage("");
@@ -45,9 +48,9 @@ const App = () => {
     try {
       const endpoint = query
         ? //passing the search query to api to get the searched movie
-          `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
+          `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}&page=${pageNumber}`
         : //else use the default api to get the movies
-          `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+          `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&page=${pageNumber}`;
 
       const response = await fetch(endpoint, API_OPTIONS);
 
@@ -96,8 +99,9 @@ const App = () => {
   //also run fetch api for search term
   //run the search through debounce
   useEffect(() => {
-    fetchMovies(debouncedSearchTerm);
-  }, [debouncedSearchTerm]);
+    fetchMovies(debouncedSearchTerm, page);
+}, [debouncedSearchTerm, page]);
+
 
   //run fetch api for trending movies
   useEffect(() => {
@@ -148,6 +152,23 @@ const App = () => {
             </ul>
           )}
         </section>
+        
+        <div className="flex overflow-x-scroll overflow-y-hidden pb-4 gap-2 mt-10">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30].map((num) => (
+            <button
+              key={num}
+              onClick={() => setPage(num)}
+              className={`px-3 py-1 rounded ${
+                page === num
+                  ? "bg-purple-100 text-white"
+                  : "bg-light-200/5 text-white hover:bg-purple-100"
+              }`}
+            >
+              {num}
+            </button>
+          ))}
+        </div>
+        
         <footer className="bg-light-200/5 p-5 mt-10 rounded-2xl shadow-inner shadow-light-100/10">
           <div className="flex flex-col items-center gap-4">
             
