@@ -138,7 +138,7 @@ const App = () => {
         )}
         {/* Here we call isLoading and error message from the state. if both are false we load the movies from movieList */}
         <section className="all-movies">
-          <h2 className="mt-[10px]">All Movies</h2>
+          <h2 className="mt-[10px]">Popular Movies</h2>
           {isLoading ? (
             <Spinner />
           ) : errorMessage ? (
