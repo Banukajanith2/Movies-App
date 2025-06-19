@@ -17,7 +17,9 @@
 
   --breakpoint-xs: 480px;
 
-  --background-image-hero-pattern: url("/background4.png");
+  --background-image-hero-pattern: url("/background.png");
+
+  --background-image-footer-pattern: url("/footer.png");
 }
 
 @layer base {
@@ -53,6 +55,10 @@
     @apply bg-hero-pattern w-full h-screen bg-center bg-cover absolute z-0;
   }
 
+  .footer-img {
+      @apply bg-footer-pattern w-full h-screen bg-center bg-cover absolute bottom-0 z-0;
+  }
+
   .wrapper {
     @apply px-5 py-12 xs:p-10 max-w-7xl mx-auto flex flex-col relative z-10;
   }
@@ -73,7 +79,7 @@
     }
 
     & ul li img {
-      @apply w-[127px] h-[150px] rounded-lg object-cover -ml-3.5;
+      @apply w-[127px] h-[180px] rounded-lg object-cover -ml-3.5;
     }
   }
 
@@ -138,6 +144,30 @@
 
     & .content .year {
       @apply text-gray-100 font-medium text-base;
+    }
+  }
+
+  .social-icons {
+    @apply flex justify-center gap-5 text-white;
+
+    & a {
+      @apply hover:text-blue-500 transition-colors;
+    }
+
+    & a:nth-child(2) {
+      @apply hover:text-sky-400;
+    }
+
+    & a:nth-child(3) {
+      @apply hover:text-pink-500;
+    }
+
+    & a:nth-child(4) {
+      @apply hover:text-blue-700;
+    }
+
+    & svg {
+      @apply w-6 h-6;
     }
   }
 }
