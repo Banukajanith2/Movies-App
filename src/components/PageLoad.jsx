@@ -15,7 +15,7 @@ export default function PageLoad() {
       {showApp ? (
         <App />
       ) : (
-        <div className="fixed inset-0 bg-dark-100 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-dark-100 flex items-center justify-center z-99">
           <Spinner />
         </div>
       )}

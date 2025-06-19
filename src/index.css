@@ -121,7 +121,7 @@
   }
 
   .movie-card {
-    @apply bg-dark-100 cursor-pointer p-5 rounded-2xl shadow-inner shadow-light-100/10 hover:shadow-gray-100 transition-shadow duration-300 ease-in-out relative overflow-hidden;
+    @apply bg-dark-100 cursor-pointer p-5 rounded-2xl hover:border-b-10 border-indigo-500 shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 ease-in-out relative overflow-hidden;
 
     & img {
       @apply rounded-lg w-full h-[250px] object-cover transition-all duration-300 ease-in-out;
@@ -206,7 +206,7 @@
 }
 
 @utility text-gradient {
-  @apply  bg-linear-to-r from-[#D6C7FF] to-[#AB8BFF] bg-clip-text text-transparent;
+  @apply  bg-linear-to-r from-[#D6C7FF] to-indigo-500 bg-clip-text text-transparent;
 }
 
 @utility text-desciption {
@@ -229,7 +229,7 @@
 }
 
 ::-webkit-scrollbar {
-  height: 5px; /* horizontal scrollbar height */
+  height: 7px; /* horizontal scrollbar height */
   width: 5px; /* vertical scrollbar width */
 }
 
@@ -238,7 +238,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #AB8BFF; /* custom color */
+  background-color: #615eff; /* custom color */
   border-radius: 6px;
   box-shadow: inset 0 2px 4px 0 rgba(156, 164, 171, 0.1);
 }

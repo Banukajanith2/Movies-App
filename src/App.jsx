@@ -161,7 +161,7 @@ const App = () => {
               className={`px-3 py-1 rounded shadow-inner shadow-light-100/10 ${
                 page === num
                   ? "bg-dark-100 text-white"
-                  : "bg-light-200/5 text-white hover:bg-purple-100"
+                  : "bg-light-200/5 text-white hover:bg-indigo-500"
               }`}
             >
               {num}

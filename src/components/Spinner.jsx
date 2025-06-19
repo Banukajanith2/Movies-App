@@ -27,7 +27,7 @@ const StyledWrapper = styled.div`
     width: 20px;
     height: 10px;
     margin: 0 5px;
-    background-color: #AB8BFF;
+    background-color: #615eff;
     border-radius: 5px;
     animation: loading-wave-animation 1s ease-in-out infinite;
   }
