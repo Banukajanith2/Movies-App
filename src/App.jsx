@@ -135,7 +135,7 @@ const App = () => {
               ))}
             </ul>
           </section>
-        )}
+        )} 
         {/* Here we call isLoading and error message from the state. if both are false we load the movies from movieList */}
         <section className="all-movies">
           <h2 className="mt-[10px]">Popular Movies</h2>
