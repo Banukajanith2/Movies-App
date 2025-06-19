@@ -3,7 +3,8 @@ import { useDebounce } from "./hooks/useDebounce.js";
 import Spinner from "./components/Spinner.jsx";
 import Search from "./components/Search.jsx";
 import MovieCard from "./components/MovieCard.jsx";
-import { getTrendingMovies, updateSearchCount } from "./FirestoreService.js"; //using Firebase
+import { getTrendingMovies, updateSearchCount } from "./FirestoreService.js"; 
+//using Firebase, Firestore as Backend
 
 //get api key to make the request
 const API_BASE_URL = "https://api.themoviedb.org/3";
