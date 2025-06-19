@@ -36,7 +36,7 @@ A modern movie browsing app built with **React** and powered by the **TMDB (The 
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-username/ez-movies-app.git
+git clone https://github.com/banukajanith2/Movies-App.git
 cd ez-movies-app 
 ```
 
