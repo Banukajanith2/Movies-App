@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { useDebounce } from "./hooks/useDebounce.js";
 import Spinner from "./components/Spinner.jsx";
 import Search from "./components/Search.jsx";
@@ -21,10 +20,11 @@ const API_OPTIONS = {
 };
 
 const App = () => {
+  
   const [searchTerm, setSearchTerm] = useState("");
 
   //only fetch data when the search term changes and after 500 ms of typing using debounce
-  const debouncedSearchTerm = useDebounce(searchTerm, 700);
+  const debouncedSearchTerm = useDebounce(searchTerm, 1000);
 
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -97,17 +97,11 @@ const App = () => {
     }
   };
 
-  //navigating to movies from trending movies
-  const navigate = useNavigate();
-  const handleClick = () => {
-    navigate("/movies");
-  };
-
   //scrollable trending section
   const ulRef = useRef(null);
 
   const scrollTrending = (direction) => {
-    const amount = 300;
+    const amount = 500;
     if (ulRef.current) {
       ulRef.current.scrollBy({
         left: direction === "left" ? -amount : amount,

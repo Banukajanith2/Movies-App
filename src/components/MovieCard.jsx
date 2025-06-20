@@ -1,17 +1,33 @@
-
 import { useNavigate } from "react-router-dom";
-useNavigate
 
-const MovieCard = ({movie: { title, vote_average, poster_path, release_date, original_language },}) => {
+const MovieCard = ({
+  movie: {
+    id,
+    title,
+    vote_average,
+    poster_path,
+    release_date,
+    original_language,
+  },
+}) => {
+  const navigate = useNavigate();
 
-  const navigate = useNavigate(); // Hook to navigate programmatically
-
+  // Convert movie title + id to a slug
+  const createSlug = (title, id) => {
+    const slug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-") // replaces spaces and symbols with -
+      .replace(/(^-|-$)/g, "");    // trims starting/ending dashes
+    return `${slug}-${id}`;
+  };
+  
   const handleClick = () => {
-    navigate("/movies"); // 👈 navigate to any route you want
+    const slug = createSlug(title, id);
+    navigate(`/movie/${slug}`);
   };
 
   return (
-    <div className="movie-card">
+    <div className="movie-card" onClick={handleClick}>
       <img
         src={
           poster_path
@@ -29,13 +45,13 @@ const MovieCard = ({movie: { title, vote_average, poster_path, release_date, ori
           <p>{vote_average ? vote_average.toFixed(1) : "N/A"}</p>
         </div>
         <span>•</span>
-        <p className="lang">{original_language ? 'English' : 'Foreign'}</p>
+        <p className="lang">{original_language === "en" ? "English" : "Foreign"}</p>
         <span>•</span>
         <p className="year">
           {release_date ? release_date.split("-")[0] : "N/A"}
         </p>
         <div className="watch">
-          <p onClick={handleClick}>
+          <p style={{ cursor: "pointer" }}>
             Watch Now →
           </p>
         </div>

@@ -8,7 +8,8 @@ createRoot(document.getElementById('root')).render(
   <HashRouter>
     <Routes>
       <Route path='/' element={<PageLoad/>}/>
-      <Route path="/movies" element={<MoviePage />} />
+      <Route path="/movie/:slug" element={<MoviePage />} />
+      <Route path='/404-Error'/>
     </Routes>
   </HashRouter>
 )

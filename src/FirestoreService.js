@@ -34,7 +34,7 @@ export const updateSearchCount = async (searchTerm, movie) => {
         searchKey, // used for matching
         searchTerm, // original input (for display)
         count: 1,
-        movie_id: movie.id,
+        id: movie.id,
         poster_path: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
         title: movie.title,
         vote_average: movie.vote_average,
@@ -53,10 +53,16 @@ export const getTrendingMovies = async () => {
     const q = query(colRef, orderBy("count", "desc"), limit(15));
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    console.log(querySnapshot.docs);
+
+    return querySnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        ...data,
+        id: data.id, // This ensures you use the movie ID
+      };
+    });
+
   } catch (error) {
     console.error("Error fetching trending movies:", error);
     return [];
