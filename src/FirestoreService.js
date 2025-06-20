@@ -12,11 +12,11 @@ import {
 } from "firebase/firestore";
 import db from "./Firebase.js";
 
-const COLLECTION_NAME = "searchTerms"; // You can rename it as you like
+const COLLECTION_NAME = "searchTerms"; // collection name in database
 
 export const updateSearchCount = async (searchTerm, movie) => {
   try {
-    const searchKey = searchTerm.trim().toLowerCase(); // 🔑 normalized key
+    const searchKey = searchTerm.trim().toLowerCase(); // normalized key
 
     const colRef = collection(db, COLLECTION_NAME);
     const q = query(colRef, where("searchKey", "==", searchKey));
@@ -35,7 +35,11 @@ export const updateSearchCount = async (searchTerm, movie) => {
         searchTerm, // original input (for display)
         count: 1,
         movie_id: movie.id,
-        poster: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+        poster_path: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+        title: movie.title,
+        vote_average: movie.vote_average,
+        release_date: movie.release_date,
+        original_language: movie.original_language,
       });
     }
   } catch (error) {
@@ -46,7 +50,7 @@ export const updateSearchCount = async (searchTerm, movie) => {
 export const getTrendingMovies = async () => {
   try {
     const colRef = collection(db, COLLECTION_NAME);
-    const q = query(colRef, orderBy("count", "desc"), limit(5));
+    const q = query(colRef, orderBy("count", "desc"), limit(10));
     const querySnapshot = await getDocs(q);
 
     return querySnapshot.docs.map((doc) => ({

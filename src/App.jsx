@@ -1,12 +1,10 @@
-import { Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDebounce } from "./hooks/useDebounce.js";
 import Spinner from "./components/Spinner.jsx";
 import Search from "./components/Search.jsx";
 import MovieCard from "./components/MovieCard.jsx";
-import MoviePage from "./components/MoviePage.jsx";
-//using Firebase, Firestore as Backend
-import { getTrendingMovies, updateSearchCount } from "./FirestoreService.js";
+import { getTrendingMovies, updateSearchCount } from "./FirestoreService.js"; //using Firestore as Backend
 
 //get api key to make the request
 const API_BASE_URL = "https://api.themoviedb.org/3";
@@ -98,6 +96,12 @@ const App = () => {
     }
   };
 
+  //navigating to movies from trending movies
+  const navigate = useNavigate();
+  const handleClick = () => {
+    navigate("/movies");
+  };
+
   //run fetch api after page loads
   //also run fetch api for search term
   //run the search through debounce
@@ -127,27 +131,26 @@ const App = () => {
         </header>
         {/* Trending Movies Section */}
         {trendingMovies.length > 0 && (
-          <section className="trending">
-            <h2>Trending Movies</h2>
-            <ul>
+          <section className="trending-movies">
+            <h2 className="mb-5">Trending Movies</h2>
+            <button className="slide-left text-white">B</button>
+            <ul className="animate-slide-up">
               {trendingMovies.map((movie, index) => (
-                <li key={movie.id} className="fade-in">
-                  <p>{index + 1}</p>
-                  <img src={movie.poster} alt={movie.title} />
-                </li>
+                <MovieCard key={movie.id} movie={movie} index={index} />
               ))}
             </ul>
+            <button className=" slide-right text-white">B</button>
           </section>
         )}
         {/* Here we call isLoading and error message from the state. if both are false we load the movies from movieList */}
         <section className="all-movies">
-          <h2 className="mt-[10px]">Popular Movies</h2>
+          <h2 className="mb-5">Popular Movies</h2>
           {isLoading ? (
             <Spinner />
           ) : errorMessage ? (
             <p className="text-red-500">{errorMessage}</p>
           ) : (
-            <ul className="fade-in">
+            <ul className="animate-slide-up">
               {/* Mapping over the movieList array and giving each movie an id using key */}
               {movieList.map((movie) => (
                 <MovieCard key={movie.id} movie={movie} />

@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import PageLoad from './components/PageLoad.jsx'
-import MoviePage from './components/MoviePage.jsx'
+import MoviePage from './pages/MoviePage.jsx'
 import './index.css'
 
 createRoot(document.getElementById('root')).render(
