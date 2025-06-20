@@ -141,7 +141,7 @@
     @apply mt-10 relative;
 
     & ul {
-       @apply grid grid-flow-col auto-cols-[200px] gap-5 overflow-x-auto overflow-y-hidden hide-scrollbar;
+       @apply grid grid-flow-col auto-cols-[210px] gap-5 overflow-x-auto overflow-y-hidden hide-scrollbar;
     }
 
     & .slide-left {
