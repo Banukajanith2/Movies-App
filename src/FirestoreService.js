@@ -50,7 +50,7 @@ export const updateSearchCount = async (searchTerm, movie) => {
 export const getTrendingMovies = async () => {
   try {
     const colRef = collection(db, COLLECTION_NAME);
-    const q = query(colRef, orderBy("count", "desc"), limit(10));
+    const q = query(colRef, orderBy("count", "desc"), limit(15));
     const querySnapshot = await getDocs(q);
 
     return querySnapshot.docs.map((doc) => ({

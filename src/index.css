@@ -114,18 +114,18 @@
   }
 
   .search {
-    @apply w-full bg-light-100/5 px-4 py-3 rounded-lg mt-10 max-w-3xl mx-auto;
+    @apply w-full px-4 py-3 mt-10 max-w-3xl mx-auto;
 
     & div {
-      @apply relative flex items-center;
+      @apply relative flex items-center ;
     }
 
     & img {
-      @apply absolute left-2 h-5 w-5;
+      @apply absolute left-5 h-5 w-5;
     }
 
     & input {
-      @apply w-full bg-transparent py-2 sm:pr-10 pl-10 text-base text-gray-200 placeholder-light-200 outline-hidden;
+      @apply w-full  bg-light-100/5 py-5 sm:pr-10 pl-14 text-base text-gray-200 placeholder-light-200 outline-0 focus:ring-2 focus:ring-indigo-500 rounded-md  transition-all duration-300 ease-in-out shadow-lg focus:shadow-indigo-500/30;
     }
   }
 
@@ -145,12 +145,15 @@
     }
 
     & .slide-left {
-      @apply bg-light-100/5 text-light-100/5 hover:bg-light-100 h-[55px] w-[55px] absolute -left-6 z-5 top-[50%] -translate-y-1/3 rounded-4xl;
+      @apply bg-dark-100 border-b-2 border-indigo-500 hover:bg-indigo-500 active:bg-indigo-500 h-[55px] w-[55px] absolute -left-5 z-5 top-[50%] -translate-y-1/3 rounded-4xl flex justify-center items-center transition-all duration-300 ease-in-out;
     }
 
     & .slide-right {
-      @apply bg-light-100/5 text-light-100/5 hover:bg-light-100 h-[55px] w-[55px] absolute -right-6 z-5 top-[50%] -translate-y-1/3 rounded-4xl;
+      @apply bg-dark-100 border-b-2 border-indigo-500 hover:bg-indigo-500 active:bg-indigo-500 h-[55px] w-[55px] absolute -right-5 z-5 top-[50%] -translate-y-1/3 rounded-4xl flex justify-center items-center transition-all duration-300 ease-in-out;
+    }
 
+    & svg {
+      @apply size-7 text-amber-50;
     }
   }
 
