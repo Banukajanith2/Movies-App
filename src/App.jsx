@@ -1,10 +1,12 @@
+import { Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useDebounce } from "./hooks/useDebounce.js";
 import Spinner from "./components/Spinner.jsx";
 import Search from "./components/Search.jsx";
 import MovieCard from "./components/MovieCard.jsx";
-import { getTrendingMovies, updateSearchCount } from "./FirestoreService.js"; 
+import MoviePage from "./components/MoviePage.jsx";
 //using Firebase, Firestore as Backend
+import { getTrendingMovies, updateSearchCount } from "./FirestoreService.js";
 
 //get api key to make the request
 const API_BASE_URL = "https://api.themoviedb.org/3";
@@ -20,7 +22,6 @@ const API_OPTIONS = {
 };
 
 const App = () => {
-
   const [searchTerm, setSearchTerm] = useState("");
 
   //only fetch data when the search term changes and after 500 ms of typing using debounce
@@ -48,7 +49,9 @@ const App = () => {
     try {
       const endpoint = query
         ? //passing the search query to api to get the searched movie
-          `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}&page=${pageNumber}`
+          `${API_BASE_URL}/search/movie?query=${encodeURIComponent(
+            query
+          )}&page=${pageNumber}`
         : //else use the default api to get the movies
           `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&page=${pageNumber}`;
 
@@ -100,8 +103,7 @@ const App = () => {
   //run the search through debounce
   useEffect(() => {
     fetchMovies(debouncedSearchTerm, page);
-}, [debouncedSearchTerm, page]);
-
+  }, [debouncedSearchTerm, page]);
 
   //run fetch api for trending movies
   useEffect(() => {
@@ -109,6 +111,7 @@ const App = () => {
   }, []);
 
   return (
+    <>
     <main className="select-none fade-in">
       <div className="pattern" />
       <div className="footer-img" />
@@ -152,26 +155,28 @@ const App = () => {
             </ul>
           )}
         </section>
-        
+
         <div className="flex overflow-x-scroll overflow-y-hidden pb-4 gap-2 mt-10">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30].map((num) => (
+          {[
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+            20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+          ].map((num) => (
             <button
               key={num}
               onClick={() => setPage(num)}
               className={`px-3 py-1 rounded shadow-inner shadow-light-100/10 ${
                 page === num
-                  ? "bg-dark-100 text-white"
-                  : "bg-light-200/5 text-white hover:bg-indigo-500"
+                  ? "bg-indigo-500 text-white"
+                  : "bg-dark-100/5 text-white hover:bg-indigo-500"
               }`}
             >
               {num}
             </button>
           ))}
         </div>
-        
+
         <footer className="bg-light-200/5 p-5 mt-10 rounded-2xl shadow-inner shadow-light-100/10">
           <div className="flex flex-col items-center gap-4">
-            
             <div className="social-icons">
               <a
                 href="https://facebook.com"
@@ -245,6 +250,7 @@ const App = () => {
         </footer>
       </div>
     </main>
+    </>
   );
 };
 

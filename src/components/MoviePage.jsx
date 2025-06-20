@@ -1,8 +1,11 @@
 import React from 'react'
 
-function MoviePage() {
+const MoviePage = () => {
   return (
-    <div>MoviePage</div>
+    <div>
+      <p className='text-white'>Movies</p>
+    </div>
+    
   )
 }
 

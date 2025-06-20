@@ -1,8 +1,15 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+useNavigate
 
-const MovieCard = ({
-  movie: { title, vote_average, poster_path, release_date, original_language },
-}) => {
+const MovieCard = ({movie: { title, vote_average, poster_path, release_date, original_language },}) => {
+
+  const navigate = useNavigate(); // Hook to navigate programmatically
+
+  const handleClick = () => {
+    navigate("/movies"); // 👈 navigate to any route you want
+  };
+
   return (
     <div className="movie-card">
       <img
@@ -28,7 +35,7 @@ const MovieCard = ({
           {release_date ? release_date.split("-")[0] : "N/A"}
         </p>
         <div className="watch">
-          <p>
+          <p onClick={handleClick}>
             Watch Now →
           </p>
         </div>

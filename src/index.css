@@ -121,7 +121,7 @@
   }
 
   .movie-card {
-    @apply bg-dark-100 cursor-pointer p-5 rounded-2xl hover:border-b-10 border-indigo-500 shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 ease-in-out relative overflow-hidden;
+    @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:border-b-10 border-indigo-500 shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 ease-in-out relative overflow-hidden;
 
     & img {
       @apply rounded-lg w-full h-[250px] object-cover transition-all duration-300 ease-in-out;
@@ -170,7 +170,7 @@
         @apply transition-all duration-200 ease-in-out;
 
         &:hover {
-          @apply underline;
+          @apply text-indigo-500;
         }
       }
     }
