@@ -4,8 +4,7 @@ import { useDebounce } from "./hooks/useDebounce.js";
 import Spinner from "./components/Spinner.jsx";
 import Search from "./components/Search.jsx";
 import MovieCard from "./components/MovieCard.jsx";
-import { updateSearchCount } from "./FirestoreService.js"; //using Firestore as Backend
-import TrendingMovies from "./components/TrendingMovies.jsx";
+import { getTrendingMovies, updateSearchCount } from "./FirestoreService.js"; //using Firestore as Backend
 
 //get api key to make the request
 const API_BASE_URL = "https://api.themoviedb.org/3";
@@ -21,12 +20,16 @@ const API_OPTIONS = {
 };
 
 const App = () => {
+  
   const [searchTerm, setSearchTerm] = useState("");
 
   //only fetch data when the search term changes and after 500 ms of typing using debounce
   const debouncedSearchTerm = useDebounce(searchTerm, 1000);
 
   const [errorMessage, setErrorMessage] = useState("");
+
+  //setting the trending movies from appwrite database
+  const [trendingMovies, setTrendingMovies] = useState([]);
 
   //setting the movies list from api fetch
   const [movieList, setMovieList] = useState([]);
@@ -82,6 +85,31 @@ const App = () => {
     }
   };
 
+  // Fetch trending movies from Firestore
+  const loadTrendingMovies = async () => {
+    try {
+      const movies = await getTrendingMovies();
+      setTrendingMovies(movies);
+    } catch (error) {
+      console.error(
+        `Error Fetching Trending Movies From Firebase : ${error.message}`
+      );
+    }
+  };
+
+  //scrollable trending section
+  const ulRef = useRef(null);
+
+  const scrollTrending = (direction) => {
+    const amount = 500;
+    if (ulRef.current) {
+      ulRef.current.scrollBy({
+        left: direction === "left" ? -amount : amount,
+        behavior: "smooth",
+      });
+    }
+  };
+
   //run fetch api after page loads
   //also run fetch api for search term
   //run the search through debounce
@@ -89,11 +117,17 @@ const App = () => {
     fetchMovies(debouncedSearchTerm, page);
   }, [debouncedSearchTerm, page]);
 
+  //run fetch api for trending movies
+  useEffect(() => {
+    loadTrendingMovies();
+  }, []);
+
   return (
     <>
       <main className="select-none fade-in">
         <div className="pattern" />
         <div className="footer-img" />
+
         <div className="wrapper">
           <header>
             <img src="./popcorn.png" alt="Hero Banner" />
@@ -101,14 +135,28 @@ const App = () => {
             <p className="text-desciption">
               Discover movies and shows you'll love with just a few clicks!
             </p>
-            <Search
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              className="search"
-            />
+            <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} className="search"/>
           </header>
-          {/* Trending Movies Section with scroll SwiperJs */}
-          <TrendingMovies />
+          {/* Trending Movies Section with scroll btns */}
+          {trendingMovies.length > 0 && (
+            <section className="trending-movies">
+              <h2 className="mb-5">Trending Movies</h2>
+              <button className="slide-left" onClick={() => scrollTrending("left")}>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path fillRule="evenodd" d="M7.72 12.53a.75.75 0 0 1 0-1.06l7.5-7.5a.75.75 0 1 1 1.06 1.06L9.31 12l6.97 6.97a.75.75 0 1 1-1.06 1.06l-7.5-7.5Z" clipRule="evenodd" />
+                </svg>
+                </button>
+              <ul ref={ulRef} className="animate-slide-up">
+                {trendingMovies.map((movie, index) => (
+                  <MovieCard key={movie.id} movie={movie} index={index} />
+                ))}
+              </ul>
+              <button className="slide-right" onClick={() => scrollTrending("right")}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path fillRule="evenodd" d="M16.28 11.47a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 0 1 1.06-1.06l7.5 7.5Z" clipRule="evenodd" />
+              </svg>
+              </button>
+            </section>
+          )}
           {/* Here we call isLoading and error message from the state. if both are false we load the movies from movieList */}
           <section className="all-movies">
             <h2 className="mb-5">Popular Movies</h2>
@@ -205,7 +253,7 @@ const App = () => {
                   </svg>
                 </a>
               </div>
-              <p className="text-gray-100 font-light text-xs">
+              <p className="text-gray-100 font-bold text-xs">
                 © 2025 EZ Movies - By{" "}
                 <a
                   href="https://github.com/Banukajanith2"
@@ -223,4 +271,4 @@ const App = () => {
   );
 };
 
-export default App;
+//export default App;

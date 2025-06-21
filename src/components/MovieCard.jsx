@@ -46,7 +46,6 @@ const MovieCard = ({
         </div>
         <span>•</span>
         <p className="lang">{original_language === "en" ? "English" : "Foreign"}</p>
-        <span>•</span>
         <p className="year">
           {release_date ? release_date.split("-")[0] : "N/A"}
         </p>

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Spinner from "../components/Spinner";
 import Search from "../components/Search";
+import TrendingMovies from "../components/TrendingMovies";
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -62,7 +63,7 @@ const MoviePage = () => {
 
   return (
     <div className="relative">
-    <img src="footer.png" alt=""className="z-0 absolute bottom-0 w-full"/>
+    <img src="footer.png" alt=""className="z-0 hidden sm:block absolute bottom-0 w-full"/>
     <div className="movie fade-in">
       <nav className="nav">
         <div className="nav-bar">
@@ -158,6 +159,7 @@ const MoviePage = () => {
           </p>
         </div>
       </div>
+      <TrendingMovies />
       <footer className="bg-transparent p-5 mt-5 rounded-2xl z-10">
         <div className="flex flex-col items-center gap-4">
           <div className="social-icons">
