@@ -253,8 +253,7 @@ const App = () => {
                   </svg>
                 </a>
               </div>
-
-              <p className="text-gray-100 font-bold">
+              <p className="text-gray-100 font-light text-xs">
                 © 2025 EZ Movies - By{" "}
                 <a
                   href="https://github.com/Banukajanith2"

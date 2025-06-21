@@ -109,11 +109,10 @@
     @apply max-w-5xl mx-auto p-5;
 
     .error-page-nav {
-      @apply  flex flex-col justify-center items-start mb-15 sm:mb-5;
+      @apply  flex flex-col justify-center items-start mb-16 sm:mb-5;
 
       .error-text {
         @apply bg-linear-to-r from-[#D6C7FF] to-indigo-500 bg-clip-text text-transparent text-xl sm:text-2xl m-0 cursor-pointer;
-    
       }
     }
   }
@@ -227,14 +226,14 @@
   }
 
   .movie {
-    @apply mt-0 mb-0 sm:mb-5 max-w-5xl flex flex-col mx-auto ;
+    @apply max-w-5xl flex flex-col mx-auto ;
 
     & .backdrop {
       @apply flex h-[250px] sm:h-[55vh] overflow-hidden relative cursor-pointer;
     }
 
     & .backdrop-img {
-      @apply rounded-lg w-[100%] object-cover object-center hover:w-[120%];
+      @apply rounded-lg w-[100%] object-cover object-center hover:w-[120%] hover:opacity-50 transition3s;
     }
 
     & .play-icon {
@@ -242,19 +241,19 @@
     }
 
     & .poster-and-info {
-      @apply rounded-br-lg rounded-bl-xl flex flex-row mt-5  bg-linear-to-b from-transparent to-indigo-500/40 pb-5 sm:pb-0;
+      @apply sm:h-[300px] rounded-br-lg rounded-bl-xl flex mt-5 bg-linear-to-b from-transparent to-indigo-500/50;
     }
 
     & .poster {
-      @apply w-2xl hidden sm:block h-full object-cover object-center;
+      @apply hidden sm:block relative;
     }
 
     & .poster-img {
-      @apply object-cover rounded-tl-lg rounded-tr-lg rounded-bl-lg ;
+      @apply h-[100%] w-[100%] object-cover rounded-tl-lg rounded-tr-lg rounded-bl-lg;
     }
 
     & .movie-info {
-      @apply flex flex-col justify-center items-start ml-5 mr-5 text-white;
+      @apply flex-1/2 flex flex-col justify-center items-start ml-5 mr-5 text-white pb-3 sm:pb-3;
     }
 
     & .iframe {

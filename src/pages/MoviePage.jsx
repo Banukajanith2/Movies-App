@@ -61,6 +61,8 @@ const MoviePage = () => {
   };
 
   return (
+    <div className="relative">
+    <img src="footer.png" alt=""className="z-0 absolute bottom-0 w-full"/>
     <div className="movie fade-in">
       <nav className="nav">
         <div className="nav-bar">
@@ -128,7 +130,7 @@ const MoviePage = () => {
         </div>
         <div className="movie-info">
           <h2 className="mb-3">{movie.title}</h2>
-          <p className="mb-3">
+          <p className="mb-3 overflow-y-scroll">
             <strong>Overview :</strong> {movie.overview}
           </p>
           <p>
@@ -156,7 +158,7 @@ const MoviePage = () => {
           </p>
         </div>
       </div>
-      <footer className="bg-transparent p-5 mt-5 rounded-2xl ">
+      <footer className="bg-transparent p-5 mt-5 rounded-2xl z-10">
         <div className="flex flex-col items-center gap-4">
           <div className="social-icons">
             <a
@@ -216,8 +218,7 @@ const MoviePage = () => {
               </svg>
             </a>
           </div>
-
-          <p className="text-gray-100 font-bold">
+          <p className="text-gray-100 font-light text-xs">
             © 2025 EZ Movies - By{" "}
             <a
               href="https://github.com/Banukajanith2"
@@ -229,6 +230,7 @@ const MoviePage = () => {
           </p>
         </div>
       </footer>
+    </div>
     </div>
   );
 };
