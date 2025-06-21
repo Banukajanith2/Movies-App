@@ -98,14 +98,14 @@
   }
 
   .nav-text {
-    @apply bg-linear-to-r from-[#D6C7FF] to-indigo-500 bg-clip-text text-transparent text-xl sm:text-2xl m-0;
+    @apply bg-linear-to-r from-[#D6C7FF] to-indigo-500 bg-clip-text text-transparent text-xl sm:text-2xl m-0 cursor-pointer;
   }
 
   .search-nav {
    @apply h-auto;
 
    & input {
-    @apply text-gray-200 placeholder-light-200/50 outline-0 border-b border-b-indigo-400 rounded-md  transition-all duration-300 ease-in-out shadow-lg focus:shadow-indigo-500/30 ml-3 pl-2 sm:pl-0;
+    @apply text-gray-200 placeholder-light-200/50 outline-0 border-b border-b-indigo-400 rounded-md  transition-all duration-300 ease-in-out shadow-lg focus:shadow-indigo-500/30 ml-3 pl-2 sm:pl-5 sm:pr-5;
    }
   }
 

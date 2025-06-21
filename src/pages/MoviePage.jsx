@@ -19,7 +19,8 @@ const MoviePage = () => {
   const { slug } = useParams();
   const [movie, setMovie] = useState(null);
   const [pageloading, setPageLoading] = useState(true);
-  const navigate = useNavigate();
+  const errornavigate = useNavigate();
+  const homenavigate = useNavigate();
   const [showPlayer, setShowPlayer] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -53,18 +54,21 @@ const MoviePage = () => {
         <Spinner />
       </div>
     );
-  if (!movie) return navigate(`/404-Error`);
+  if (!movie) return errornavigate(`/404-Error`);
+
+  const handleClick = () => {
+    homenavigate('/');
+  };
 
   return (
     <div className="movie fade-in">
       <nav className="nav">
         <div className="nav-bar">
-          <h1 className="nav-text">EZ Movies</h1>
-          
+          <h1 className="nav-text" onClick={handleClick}>EZ Movies</h1>
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} className="search-nav"/>
         </div>
       </nav>
-      <div className="backdrop" onClick={() => setShowPlayer(true)}>
+      <div className="backdrop animate-slide-up" onClick={() => setShowPlayer(true)}>
         {showPlayer ? (
           <div className="player">
             <iframe className="iframe"
@@ -99,7 +103,7 @@ const MoviePage = () => {
         )}
       </div>
 
-      <div className="poster-and-info">
+      <div className="poster-and-info animate-slide-up">
         <div className="poster">
           <img
             className="poster-img"
