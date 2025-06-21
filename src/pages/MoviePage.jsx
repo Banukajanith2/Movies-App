@@ -51,7 +51,7 @@ const MoviePage = () => {
   if (pageloading)
     return (
       <div className="fixed inset-0 bg-dark-100 flex items-center justify-center z-99">
-        <Spinner />
+        <Spinner/>
       </div>
     );
   if (!movie) return errornavigate(`/404-Error`);

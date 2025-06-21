@@ -13,6 +13,22 @@
     opacity: 1;
   }
 }
+@layer utilities {
+  @keyframes slideUp {
+    0% {
+      transform: translateY(7%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s ease forwards;
+  }
+}
 
 @theme {
   --color-primary: #030014;
@@ -63,23 +79,6 @@
   }
 }
 
-@layer utilities {
-  @keyframes slideUp {
-    0% {
-      transform: translateY(7%);
-      opacity: 0;
-    }
-    100% {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  .animate-slide-up {
-    animation: slideUp 0.6s ease forwards;
-  }
-}
-
 @layer components {
   .pattern {
     @apply bg-hero-pattern w-full h-screen bg-center bg-cover absolute z-0;
@@ -90,47 +89,37 @@
   }
 
   .nav-bar {
-    @apply flex flex-row justify-between items-center w-full h-18 pl-3 pr-3 sm:pl-0 sm:pr-0;
+    @apply overflow-hidden flex flex-row justify-between items-center h-18 pl-3 pr-3 sm:pl-0 sm:pr-0;
+
+    .nav-text {
+    @apply  bg-linear-to-r from-[#D6C7FF] to-indigo-500 bg-clip-text text-transparent text-xl sm:text-2xl m-0 cursor-pointer max-w-30 min-w-0;
+    }
+
+    .search-nav {
+    @apply h-auto;
+
+      & input {
+        @apply text-gray-200 placeholder-light-200/50 outline-0 focus:w-md w-30 sm:w-50 transition3s ml-2 pl-1 ;
+      }
+    }
+    
   }
 
-  .nav-home {
-    @apply fill-gray-300 h-6 ;
-  }
+  .error-page {
+    @apply max-w-5xl mx-auto p-5;
 
-  .nav-text {
-    @apply bg-linear-to-r from-[#D6C7FF] to-indigo-500 bg-clip-text text-transparent text-xl sm:text-2xl m-0 cursor-pointer;
-  }
+    .error-page-nav {
+      @apply  flex flex-col justify-center items-start mb-15 sm:mb-5;
 
-  .search-nav {
-   @apply h-auto;
-
-   & input {
-    @apply text-gray-200 placeholder-light-200/50 outline-0 border-b border-b-indigo-400  transition-all duration-300 ease-in-out shadow-lg focus:shadow-indigo-500/30 ml-2 pl-1 w-[115px] sm:w-auto;
-   }
+      .error-text {
+        @apply bg-linear-to-r from-[#D6C7FF] to-indigo-500 bg-clip-text text-transparent text-xl sm:text-2xl m-0 cursor-pointer;
+    
+      }
+    }
   }
 
   .wrapper {
     @apply px-5 xs:p-10 max-w-7xl mx-auto flex flex-col relative z-10;
-  }
-
-  .trending {
-    @apply mt-20;
-
-    & ul {
-      @apply flex flex-row overflow-y-auto gap-5 -mt-10 w-full hide-scrollbar;
-    }
-
-    & ul li {
-      @apply min-w-[230px] flex flex-row items-center;
-    }
-
-    & ul li p {
-      @apply fancy-text mt-[22px] text-nowrap;
-    }
-
-    & ul li img {
-      @apply w-[127px] h-[180px] rounded-lg object-cover -ml-3.5 cursor-pointer hover:w-[140px] transition-all duration-200 ease-in-out;
-    }
   }
 
   .search {
@@ -145,7 +134,7 @@
     }
 
     & input {
-      @apply w-full  bg-light-100/5 py-5 sm:pr-10 pl-14 text-base text-gray-200 placeholder-light-200 outline-0 focus:ring-2 focus:ring-indigo-500 rounded-md  transition-all duration-300 ease-in-out shadow-lg focus:shadow-indigo-500/30;
+      @apply w-full  bg-light-100/5 py-5 sm:pr-10 pl-14 text-base text-gray-200 placeholder-light-200 outline-0 focus:ring-2 focus:ring-indigo-500 rounded-md  transition3s shadow-lg focus:shadow-indigo-500/30;
     }
   }
 
@@ -178,10 +167,10 @@
   }
 
   .movie-card {
-    @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:border-b-10 border-indigo-500 shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 ease-in-out relative overflow-hidden;
+    @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:border-b-10 border-indigo-500 shadow-lg hover:shadow-indigo-500/30 transition3s relative overflow-hidden;
 
     & img {
-      @apply rounded-lg w-full h-[250px] object-cover transition-all duration-300 ease-in-out;
+      @apply rounded-lg w-full h-[250px] object-cover transition3s;
     }
 
     &:hover img {
@@ -221,10 +210,10 @@
     }
 
     & .watch {
-      @apply absolute bottom-0 pb-5 text-white font-semibold opacity-0 translate-y-full transition-all duration-300 ease-in-out;
+      @apply absolute bottom-0 pb-5 text-white font-semibold opacity-0 translate-y-full transition3s;
 
         p {
-        @apply transition-all duration-200 ease-in-out;
+        @apply transition3s;
 
         &:hover {
           @apply text-indigo-500;
@@ -249,7 +238,7 @@
     }
 
     & .play-icon {
-      @apply h-[100px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 fill-gray-300 hover:h-[115px] hover:fill-indigo-500 transition-all duration-300 ease-in-out;
+      @apply h-[100px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 fill-gray-300 hover:h-[115px] hover:fill-indigo-500 transition3s;
     }
 
     & .poster-and-info {
@@ -301,6 +290,10 @@
 
 @utility text-gradient {
   @apply bg-linear-to-r from-[#D6C7FF] to-indigo-500 bg-clip-text text-transparent text-5xl sm:text-7xl;
+}
+
+@utility transition3s {
+  @apply transition-all duration-300 ease-in-out;
 }
 
 @utility text-desciption {
