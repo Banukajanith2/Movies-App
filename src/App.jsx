@@ -135,7 +135,7 @@ const App = () => {
             <p className="text-desciption">
               Discover movies and shows you'll love with just a few clicks!
             </p>
-            <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+            <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} className="search"/>
           </header>
           {/* Trending Movies Section with scroll btns */}
           {trendingMovies.length > 0 && (

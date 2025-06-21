@@ -1,9 +1,9 @@
 import React from "react";
 
-const Search = ({ searchTerm, setSearchTerm }) => {
+const Search = ({ searchTerm, setSearchTerm, className = "" }) => {
   return (
-    <div className="search">
-      <div className="flex">
+    <div className={className}>
+      <div className="flex flex-row">
         <img src="search.svg" alt="search" />
         <input
           type="text"

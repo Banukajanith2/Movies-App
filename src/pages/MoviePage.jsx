@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Spinner from "../components/Spinner";
+import Search from "../components/Search";
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -20,6 +21,7 @@ const MoviePage = () => {
   const [pageloading, setPageLoading] = useState(true);
   const navigate = useNavigate();
   const [showPlayer, setShowPlayer] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const movieId = slug.split("-").pop(); // Extract ID from slug
 
@@ -55,6 +57,13 @@ const MoviePage = () => {
 
   return (
     <div className="movie fade-in">
+      <nav className="nav">
+        <div className="nav-bar">
+          <h1 className="nav-text">EZ Movies</h1>
+          
+          <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} className="search-nav"/>
+        </div>
+      </nav>
       <div className="backdrop" onClick={() => setShowPlayer(true)}>
         {showPlayer ? (
           <div className="player">

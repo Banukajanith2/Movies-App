@@ -89,6 +89,26 @@
       @apply bg-footer-pattern w-full h-screen bg-center bg-cover absolute bottom-0 z-0;
   }
 
+  .nav-bar {
+    @apply flex flex-row justify-between items-center w-full h-15 pl-3 pr-3 sm:pl-0 sm:pr-0;
+  }
+
+  .nav-home {
+    @apply fill-gray-300 h-6 ;
+  }
+
+  .nav-text {
+    @apply bg-linear-to-r from-[#D6C7FF] to-indigo-500 bg-clip-text text-transparent text-xl sm:text-2xl m-0;
+  }
+
+  .search-nav {
+   @apply h-auto;
+
+   & input {
+    @apply text-gray-200 placeholder-light-200/50 outline-0 border-b border-b-indigo-400 rounded-md  transition-all duration-300 ease-in-out shadow-lg focus:shadow-indigo-500/30 ml-3 pl-2 sm:pl-0;
+   }
+  }
+
   .wrapper {
     @apply px-5 xs:p-10 max-w-7xl mx-auto flex flex-col relative z-10;
   }
@@ -218,10 +238,10 @@
   }
 
   .movie {
-    @apply mt-0 mb-0 sm:mt-5 sm:mb-5  max-w-5xl flex flex-col mx-auto ;
+    @apply mt-0 mb-0 sm:mb-5 max-w-5xl flex flex-col mx-auto ;
 
     & .backdrop {
-      @apply flex h-[55dvh] overflow-hidden relative cursor-pointer;
+      @apply flex h-[250px] sm:h-[55vh] overflow-hidden relative cursor-pointer;
     }
 
     & .backdrop-img {
@@ -253,6 +273,7 @@
     }
 
   }
+
   .social-icons {
     @apply flex justify-center gap-5 text-white;
 
