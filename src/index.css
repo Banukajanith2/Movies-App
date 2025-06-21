@@ -217,6 +217,42 @@
     }
   }
 
+  .movie {
+    @apply mt-0 mb-0 sm:mt-5 sm:mb-5  max-w-5xl flex flex-col mx-auto ;
+
+    & .backdrop {
+      @apply flex h-[55dvh] overflow-hidden relative cursor-pointer;
+    }
+
+    & .backdrop-img {
+      @apply rounded-lg w-[100%] object-cover object-center hover:w-[120%];
+    }
+
+    & .play-icon {
+      @apply h-[100px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 fill-gray-300 hover:h-[115px] transition-all duration-300 ease-in-out;
+    }
+
+    & .poster-and-info {
+      @apply rounded-br-lg rounded-bl-xl flex flex-row mt-5  bg-linear-to-b from-transparent to-indigo-500/40 pb-5 sm:pb-0;
+    }
+
+    & .poster {
+      @apply w-2xl hidden sm:block h-full object-cover object-center;
+    }
+
+    & .poster-img {
+      @apply object-cover rounded-tl-lg rounded-tr-lg rounded-bl-lg ;
+    }
+
+    & .movie-info {
+      @apply flex flex-col justify-center items-start ml-5 mr-5 text-white;
+    }
+
+    & .iframe {
+      @apply absolute inset-0 w-full h-full rounded-xl;
+    }
+
+  }
   .social-icons {
     @apply flex justify-center gap-5 text-white;
 

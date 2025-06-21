@@ -193,7 +193,7 @@ const App = () => {
             ))}
           </div>
 
-          <footer className="bg-light-200/5 p-5 mt-10 rounded-2xl shadow-inner shadow-light-100/10">
+          <footer className="bg-tranparent p-5 mt-10 rounded-2xl">
             <div className="flex flex-col items-center gap-4">
               <div className="social-icons">
                 <a
