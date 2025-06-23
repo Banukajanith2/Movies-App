@@ -105,7 +105,6 @@ const App = () => {
         <div className="footer-img" />
         <div className="wrapper">
           <header>
-            <img src="./popcorn.png" alt="Hero Banner" />
             <h1 className="text-gradient">EZ Movies</h1>
             <p className="text-desciption">
               Discover Your Favourite Movies Online
