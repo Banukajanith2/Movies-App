@@ -6,6 +6,7 @@ import MovieCard from "./components/MovieCard.jsx";
 import { updateSearchCount } from "./FirestoreService.js"; //using Firestore as Backend
 import TrendingMovies from "./components/TrendingMovies.jsx";
 import Footer from "./components/Footer.jsx";
+import Pagination from "./components/Pagination.jsx"
 
 //get api key to make the request
 const API_BASE_URL = "https://api.themoviedb.org/3";
@@ -72,7 +73,7 @@ const App = () => {
 
   const fetchPopularMovies = async (pageNumber = 1) => {
     try {
-      const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&page=${pageNumber}`;
+      const endpoint = `${API_BASE_URL}/discover/movie?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc&page=${pageNumber}`;
       const response = await fetch(endpoint, API_OPTIONS);
       if (!response.ok) throw new Error("Failed to fetch popular movies");
 
@@ -144,25 +145,9 @@ const App = () => {
               ))}
             </ul>
           </section>
-
-          <div className="flex overflow-x-scroll overflow-y-hidden pb-4 gap-2 mt-10">
-            {[
-              1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-              20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-            ].map((num) => (
-              <button
-                key={num}
-                onClick={() => setPage(num)}
-                className={`px-3 py-1 rounded shadow-inner shadow-light-100/10 ${
-                  page === num
-                    ? "bg-indigo-500 text-white"
-                    : "bg-dark-100/5 text-white hover:bg-indigo-500"
-                }`}
-              >
-                {num}
-              </button>
-            ))}
-          </div>
+            <div className="flex justify-center mt-5">
+              <Pagination page={page} setPage={setPage} />
+            </div>
           <Footer />
         </div>
       </main>
