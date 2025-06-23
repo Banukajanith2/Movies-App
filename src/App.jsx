@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useRef } from "react";
 import { useDebounce } from "./hooks/useDebounce.js";
 import Spinner from "./components/Spinner.jsx";
 import Search from "./components/Search.jsx";
@@ -37,49 +36,50 @@ const App = () => {
   //waiting for the movies to load
   const [isLoading, setIsLoading] = useState(false);
 
+  const [popularMovies, setPopularMovies] = useState([]);
+
   //making request via async function
-  const fetchMovies = async (query = "", pageNumber = 1) => {
-    //show loading animation before loading movies from api
+  const fetchSearchMovies = async (query, pageNumber = 1) => {
     setIsLoading(true);
     setErrorMessage("");
 
     try {
-      const endpoint = query
-        ? //passing the search query to api to get the searched movie
-          `${API_BASE_URL}/search/movie?query=${encodeURIComponent(
-            query
-          )}&page=${pageNumber}`
-        : //else use the default api to get the movies
-          `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&page=${pageNumber}`;
+      const endpoint = `${API_BASE_URL}/search/movie?query=${encodeURIComponent(
+        query
+      )}&page=${pageNumber}`;
 
       const response = await fetch(endpoint, API_OPTIONS);
+      if (!response.ok) throw new Error("Failed to fetch search results");
 
-      //error handling of the API
-      if (!response.ok) {
-        throw new Error("Failed to fetch movies");
-      }
       const data = await response.json();
-      //console.log(data);
-
       if (data.Response === "False") {
-        setErrorMessage(data.Error || "Failed to Fetch Movies");
+        setErrorMessage(data.Error || "No results found");
         setMovieList([]);
         return;
       }
-      //if API is good, set the movie list
+
       setMovieList(data.results || []);
 
-      // Update search count in Firestore
       if (query && data.results.length > 0) {
         await updateSearchCount(query, data.results[0]);
       }
-
-      //If API doesnt work
     } catch (error) {
-      setErrorMessage("Error Fetching Movies from API : " + error);
+      setErrorMessage("Error Fetching Search Results: " + error);
     } finally {
-      //stop the loading animation
       setIsLoading(false);
+    }
+  };
+
+  const fetchPopularMovies = async (pageNumber = 1) => {
+    try {
+      const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&page=${pageNumber}`;
+      const response = await fetch(endpoint, API_OPTIONS);
+      if (!response.ok) throw new Error("Failed to fetch popular movies");
+
+      const data = await response.json();
+      setPopularMovies(data.results || []);
+    } catch (error) {
+      console.error("Popular Movies Error: ", error);
     }
   };
 
@@ -87,8 +87,16 @@ const App = () => {
   //also run fetch api for search term
   //run the search through debounce
   useEffect(() => {
-    fetchMovies(debouncedSearchTerm, page);
-  }, [debouncedSearchTerm, page]);
+    fetchPopularMovies(page);
+  }, [page]);
+
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      fetchSearchMovies(debouncedSearchTerm);
+    } else {
+      setMovieList([]); // Clear search results if input is cleared
+    }
+  }, [debouncedSearchTerm]);
 
   return (
     <>
@@ -102,29 +110,40 @@ const App = () => {
             <p className="text-desciption">
               Discover Your Favourite Movies Online
             </p>
-            <Search
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              className="search"
-            />
+            <div className="relative sm:w-3xl mx-auto ">
+              <Search
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                className="search"
+              />
+              {debouncedSearchTerm && (
+                <section className="fade-in absolute z-20 w-auto sm:w-3xl mx-auto h-120 overflow-y-scroll rounded-lg">
+                  {isLoading ? (
+                    <p className="text-gray-100 text-center">Loading...</p>
+                  ) : errorMessage ? (
+                    <p className="text-red-500">{errorMessage}</p>
+                  ) : (
+                    <ul className="animate-slide-up grid grid-cols-1">
+                      {movieList.map((movie) => (
+                        <MovieCard key={movie.id} movie={movie} className="search-card"/>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              )}
+            </div>
+
           </header>
           {/* Trending Movies Section with scroll SwiperJs */}
-          <TrendingMovies scrollOnClick={false}/>
+          <TrendingMovies scrollOnClick={false} />
           {/* Here we call isLoading and error message from the state. if both are false we load the movies from movieList */}
-          <section className="all-movies">
+          <section className="all-movies mt-10">
             <h2 className="mb-5">Popular Movies</h2>
-            {isLoading ? (
-              <Spinner />
-            ) : errorMessage ? (
-              <p className="text-red-500">{errorMessage}</p>
-            ) : (
-              <ul className="animate-slide-up">
-                {/* Mapping over the movieList array and giving each movie an id using key */}
-                {movieList.map((movie) => (
-                  <MovieCard key={movie.id} movie={movie} />
-                ))}
-              </ul>
-            )}
+            <ul className="animate-slide-up">
+              {popularMovies.map((movie) => (
+                <MovieCard key={movie.id} movie={movie} className="movie-card h-[350px]"/>
+              ))}
+            </ul>
           </section>
 
           <div className="flex overflow-x-scroll overflow-y-hidden pb-4 gap-2 mt-10">
@@ -145,7 +164,7 @@ const App = () => {
               </button>
             ))}
           </div>
-          <Footer/>
+          <Footer />
         </div>
       </main>
     </>

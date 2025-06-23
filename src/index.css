@@ -41,6 +41,7 @@
   --color-gray-100: #9ca4ab;
 
   --color-dark-100: #0f0d23;
+  --color-dark-200: #1d1a36;
 
   --font-dm-sans: DM Sans, sans-serif;
 
@@ -89,19 +90,72 @@
   }
 
   .nav-bar {
-    @apply overflow-hidden flex flex-row justify-between items-center h-18 pl-3 pr-3 sm:pl-0 sm:pr-0;
+    @apply flex flex-row justify-between items-center h-18 pl-3 pr-3 sm:pl-0 sm:pr-0;
 
     .nav-text {
-    @apply  bg-linear-to-r from-[#D6C7FF] to-indigo-500 bg-clip-text text-transparent text-xl sm:text-2xl m-0 cursor-pointer max-w-30 min-w-0;
+    @apply  bg-linear-to-r from-[#D6C7FF] to-indigo-500 bg-clip-text text-transparent text-xl sm:text-2xl m-0 cursor-pointer max-w-30 min-w-20;
     }
 
     .search-nav {
     @apply h-auto;
 
       & input {
-        @apply text-gray-200 placeholder-light-200/50 outline-0 focus:w-md w-30 sm:w-50 transition3s ml-2 pl-1 ;
+        @apply text-gray-200 placeholder-light-200/50 outline-0 focus:w-60 w-30 sm:w-50 transition3s ml-2 pl-1;
       }
     }
+
+    .search-card-nav {
+    @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:bg-dark-200 transition3s relative overflow-hidden flex flex-row h-[150px];
+
+    & img {
+      @apply rounded-lg object-cover transition3s;
+    }
+
+    & .h3title2 {
+      @apply text-white font-bold text-base line-clamp-1 ;
+    }
+
+    & .h3title1 {
+      @apply hidden;
+    }
+
+    & .content {
+      @apply w-full flex flex-col justify-start p-2 gap-3;
+    }
+
+    & .content2 {
+      @apply w-full flex flex-row gap-2 justify-start;
+    }
+
+    & .rating {
+      @apply flex flex-row gap-1 items-center;
+    }
+
+    & .rating img {
+      @apply size-4 object-contain;
+    }
+
+    & .rating p {
+      @apply font-bold text-base text-white;
+    }
+
+    & .content span {
+      @apply text-sm text-gray-100;
+    }
+
+    & .content .lang {
+      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
+    }
+
+    & .content .year {
+      @apply text-gray-100 font-medium text-base;
+    }
+
+    & .watch {
+      @apply hidden;
+    }
+
+  }
     
   }
 
@@ -122,7 +176,7 @@
   }
 
   .search {
-    @apply w-full px-4 py-3 mt-10 max-w-3xl mx-auto;
+    @apply w-full py-3 mt-10 max-w-3xl mx-auto;
 
     & div {
       @apply relative flex items-center ;
@@ -133,8 +187,61 @@
     }
 
     & input {
-      @apply w-full  bg-light-100/5 py-5 sm:pr-10 pl-14 text-base text-gray-200 placeholder-light-200 outline-0 focus:ring-2 focus:ring-indigo-500 rounded-md  transition3s shadow-lg focus:shadow-indigo-500/30;
+      @apply w-full  bg-light-100/5 py-5 sm:pr-10 pl-14 text-base text-gray-200 placeholder-light-200 outline-0  rounded-md  transition3s shadow-lg focus:shadow-indigo-500/30;
     }
+  }
+
+  .search-card {
+    @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:bg-dark-200 transition3s relative overflow-hidden flex flex-row h-[150px];
+
+    & img {
+      @apply rounded-lg object-cover transition3s;
+    }
+
+    & .h3title2 {
+      @apply text-white font-bold text-base line-clamp-1 ;
+    }
+
+    & .h3title1 {
+      @apply hidden;
+    }
+
+    & .content {
+      @apply w-full flex flex-col justify-start p-2 gap-3;
+    }
+
+    & .content2 {
+      @apply w-full flex flex-row gap-2 justify-start;
+    }
+
+    & .rating {
+      @apply flex flex-row gap-1 items-center;
+    }
+
+    & .rating img {
+      @apply size-4 object-contain;
+    }
+
+    & .rating p {
+      @apply font-bold text-base text-white;
+    }
+
+    & .content span {
+      @apply text-sm text-gray-100;
+    }
+
+    & .content .lang {
+      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
+    }
+
+    & .content .year {
+      @apply text-gray-100 font-medium text-base;
+    }
+
+    & .watch {
+      @apply hidden;
+    }
+
   }
 
   .all-movies {
@@ -146,7 +253,7 @@
   }
 
   .movie-card {
-    @apply bg-dark-100 h-[350px] cursor-pointer pb-5 p-2 rounded-2xl hover:border-b-10 border-indigo-500 shadow-lg hover:shadow-indigo-500/30 transition3s relative overflow-hidden;
+    @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:border-b-10 border-indigo-500 shadow-lg hover:shadow-indigo-500/30 transition3s relative overflow-hidden;
 
     & img {
       @apply rounded-lg w-full h-[250px] object-cover transition3s;
@@ -156,11 +263,15 @@
       @apply h-[200px];
     }
 
-    & h3 {
+    & .h3title1 {
       @apply text-white font-bold text-base line-clamp-1 ;
     }
 
-    & .content {
+    & .h3title2 {
+      @apply hidden;
+    }
+
+    & .content2 {
       @apply mt-2 flex flex-row items-center flex-wrap gap-1;
     }
 

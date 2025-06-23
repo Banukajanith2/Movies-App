@@ -53,7 +53,7 @@ export const getTrendingMovies = async () => {
     const q = query(colRef, orderBy("count", "desc"), limit(15));
     const querySnapshot = await getDocs(q);
 
-    console.log(querySnapshot.docs);
+    //console.log(querySnapshot.docs);
 
     return querySnapshot.docs.map((doc) => {
       const data = doc.data();

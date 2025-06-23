@@ -1,14 +1,13 @@
 import { useNavigate } from "react-router-dom";
 
-const MovieCard = ({
-  movie: {
+const MovieCard = ({movie: {
     id,
     title,
     vote_average,
     poster_path,
     release_date,
     original_language,
-  },
+  }, className = ""
 }) => {
   const navigate = useNavigate();
 
@@ -27,7 +26,7 @@ const MovieCard = ({
   };
 
   return (
-    <div className="movie-card" onClick={handleClick}>
+    <div className={className} onClick={handleClick}>
       <img
         src={
           poster_path
@@ -37,10 +36,12 @@ const MovieCard = ({
         alt={title}
       />
       <div className="mt-4">
-        <h3>{title}</h3>
+        <h3 className="h3title1">{title}</h3>
       </div>
       <div className="content">
-        <div className="rating">
+        <h3 className="h3title2">{title}</h3>
+        <div className="content2">
+          <div className="rating">
           <img src="star.svg" alt="Star Icon" />
           <p>{vote_average ? vote_average.toFixed(1) : "N/A"}</p>
         </div>
@@ -53,6 +54,7 @@ const MovieCard = ({
           <p style={{ cursor: "pointer" }}>
             Watch Now →
           </p>
+        </div>
         </div>
       </div>
     </div>
