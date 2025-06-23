@@ -141,7 +141,7 @@ const App = () => {
             <h2 className="mb-5">Popular Movies</h2>
             <ul className="animate-slide-up">
               {popularMovies.map((movie) => (
-                <MovieCard key={movie.id} movie={movie} className="movie-card h-[350px]"/>
+                <MovieCard key={movie.id} movie={movie} className="movie-card animate-slide-up h-[350px]"/>
               ))}
             </ul>
           </section>

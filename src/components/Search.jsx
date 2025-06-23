@@ -1,6 +1,4 @@
-import React from "react";
-
-const Search = ({ searchTerm, setSearchTerm, className = "" }) => {
+const Search = ({ searchTerm, setSearchTerm, className = "", onFocus }) => {
   return (
     <div className={className}>
       <div className="flex flex-row">
@@ -9,7 +7,9 @@ const Search = ({ searchTerm, setSearchTerm, className = "" }) => {
           type="text"
           placeholder="Search Movies"
           value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}/>
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onFocus={onFocus} // triggers dropdown open
+        />
       </div>
     </div>
   );

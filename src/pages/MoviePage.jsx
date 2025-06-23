@@ -133,7 +133,7 @@ const MoviePage = () => {
               className="search-nav"
             />
             {debouncedSearchTerm && (
-                <section className="fade-in absolute top-[72px] right-0 z-20 w- sm:w-70 mx-auto h-120 overflow-y-scroll rounded-lg">
+                <section className="fade-in absolute top-[72px] right-0 z-20 w-65 sm:w-70 mx-auto h-120 overflow-y-scroll rounded-lg">
                   {isLoading ? (
                     <p className="text-gray-100 text-center">Loading...</p>
                   ) : errorMessage ? (

@@ -100,7 +100,7 @@
     @apply h-auto;
 
       & input {
-        @apply text-gray-200 placeholder-light-200/50 outline-0 focus:w-60 w-30 sm:w-50 transition3s ml-2 pl-1;
+        @apply text-gray-200 placeholder-light-200/50 outline-0 focus:w-55 w-30 sm:w-50 transition3s ml-2 pl-1;
       }
     }
 
