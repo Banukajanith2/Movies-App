@@ -25,6 +25,7 @@ const MoviePage = () => {
   const [pageloading, setPageLoading] = useState(true);
   const errornavigate = useNavigate();
   const homenavigate = useNavigate();
+
   const [showPlayer, setShowPlayer] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -106,9 +107,9 @@ const MoviePage = () => {
         <Spinner />
       </div>
     );
-  if (!movie) return errornavigate(`/404-Error`);
+  if (!movie) return errornavigate(`/404-Error`); //setup 404 for this
 
-  const handleClick = () => homenavigate("/");
+  const homeClick = () => homenavigate("/");
 
   return (
     <div className="relative">
@@ -116,7 +117,7 @@ const MoviePage = () => {
       <div className="movie fade-in">
         <nav className="nav">
           <div className="nav-bar">
-            <h1 className="nav-text" onClick={handleClick}>EZ Movies</h1>
+            <h1 className="nav-text" onClick={homeClick}>EZ Movies</h1>
             <div className="relative" ref={wrapperRef}>
               <Search
                 searchTerm={searchTerm}
@@ -125,20 +126,26 @@ const MoviePage = () => {
                 onFocus={() => setIsDropdownOpen(true)}
               />
               {debouncedSearchTerm && isDropdownOpen && (
-                <section className="fade-in absolute top-12 right-0 z-20 w-60 sm:w-md transition3s mx-auto h-120 overflow-y-scroll rounded-lg bg-dark-100">
+                <section  onClick={() => setIsDropdownOpen(false)} className="fade-in absolute top-12 right-0 z-20 w-60 sm:w-md transition3s mx-auto max-h-120 overflow-y-scroll rounded-lg bg-dark-100">
                   {isLoading ? (
                     <p className="text-gray-100 text-center">Loading...</p>
                   ) : errorMessage ? (
                     <p className="text-red-500">{errorMessage}</p>
                   ) : (
+                    <>
                     <ul className="animate-slide-up grid grid-cols-1">
                       {movieList.map((movie) => (
-                        <MovieCard key={movie.id} movie={movie} className="search-card-nav" />
+                        <MovieCard key={movie.id} movie={movie} className="search-card-nav"/>
                       ))}
                     </ul>
+                    <div className="bg-dark-200 flex justify-center items-center h-10">
+                      <p className="text-white hover:underline">Show All Results</p>
+                    </div>
+                    </>
                   )}
                 </section>
               )}
+              
             </div>
           </div>
         </nav>
@@ -186,7 +193,7 @@ const MoviePage = () => {
           </div>
           <div className="movie-info">
             <h2 className="mb-3">{movie.title}</h2>
-            <p className="mb-3 overflow-y-scroll"><strong>Overview :</strong> {movie.overview}</p>
+            <p className="mb-3 overflow-y-scroll">{movie.overview}</p>
             <p><strong>Release Date :</strong> {movie.release_date}</p>
             <p><strong>Rating :</strong> {movie.vote_average?.toFixed(1) || "N/A"}/10</p>
             <p><strong>Language :</strong> {movie.original_language === "en" ? "English" : movie.spoken_languages?.[0]?.english_name || movie.original_language}</p>

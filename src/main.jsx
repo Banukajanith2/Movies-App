@@ -11,6 +11,8 @@ createRoot(document.getElementById('root')).render(
       <Route path='/' element={<App />}/>
       <Route path="/movie/:slug" element={<MoviePage />} />
       <Route path="*" element={<ErrorPage/>}/>
+      <Route path="/404-Error" element={<ErrorPage/>}/>
+
     </Routes>
   </HashRouter>
 )

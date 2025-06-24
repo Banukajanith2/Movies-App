@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDebounce } from "./hooks/useDebounce.js";
-import Spinner from "./components/Spinner.jsx";
 import Search from "./components/Search.jsx";
 import MovieCard from "./components/MovieCard.jsx";
 import { updateSearchCount } from "./FirestoreService.js"; //using Firestore as Backend
@@ -38,6 +37,9 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const [popularMovies, setPopularMovies] = useState([]);
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const wrapperRef = useRef(null);
 
   //making request via async function
   const fetchSearchMovies = async (query, pageNumber = 1) => {
@@ -99,6 +101,16 @@ const App = () => {
     }
   }, [debouncedSearchTerm]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <>
       <main className="select-none fade-in">
@@ -110,24 +122,30 @@ const App = () => {
             <p className="text-desciption">
               Discover Your Favourite Movies Online
             </p>
-            <div className="relative sm:w-3xl mx-auto ">
+            <div ref={wrapperRef} className="relative sm:w-3xl mx-auto">
               <Search
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
                 className="search"
+                onFocus={() => setIsDropdownOpen(true)}
               />
-              {debouncedSearchTerm && (
-                <section className="fade-in absolute z-20 w-auto sm:w-3xl mx-auto h-120 overflow-y-scroll rounded-lg">
+              {debouncedSearchTerm && isDropdownOpen && (
+                <section className="fade-in absolute z-20 w-auto sm:w-3xl mx-auto max-h-125 overflow-y-scroll rounded-lg bg-dark-100">
                   {isLoading ? (
                     <p className="text-gray-100 text-center">Loading...</p>
                   ) : errorMessage ? (
                     <p className="text-red-500">{errorMessage}</p>
                   ) : (
+                    <>
                     <ul className="animate-slide-up grid grid-cols-1">
                       {movieList.map((movie) => (
                         <MovieCard key={movie.id} movie={movie} className="search-card"/>
                       ))}
                     </ul>
+                    <div className="bg-dark-200 flex justify-center items-center h-10">
+                      <p className="text-white hover:underline">Show All Results</p>
+                    </div>
+                    </>
                   )}
                 </section>
               )}
