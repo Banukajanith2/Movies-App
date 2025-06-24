@@ -126,22 +126,22 @@ const MoviePage = () => {
                 onFocus={() => setIsDropdownOpen(true)}
               />
               {debouncedSearchTerm && isDropdownOpen && (
-                <section  onClick={() => setIsDropdownOpen(false)} className="fade-in absolute top-12 right-0 z-20 w-60 sm:w-md transition3s mx-auto max-h-120 overflow-y-scroll rounded-lg bg-dark-100">
+                <section  onClick={() => setIsDropdownOpen(false)} className="fade-in absolute top-12 right-0 z-20 w-[100vw] sm:w-md transition3s mx-auto rounded-lg bg-dark-100">
                   {isLoading ? (
                     <p className="text-gray-100 text-center">Loading...</p>
                   ) : errorMessage ? (
                     <p className="text-red-500">{errorMessage}</p>
                   ) : (
-                    <>
-                    <ul className="animate-slide-up grid grid-cols-1">
+                    <div className="relative">
+                    <ul className="animate-slide-up grid grid-cols-1 max-h-120 overflow-y-scroll pb-10">
                       {movieList.map((movie) => (
                         <MovieCard key={movie.id} movie={movie} className="search-card-nav"/>
                       ))}
                     </ul>
-                    <div className="bg-dark-200 flex justify-center items-center h-10">
-                      <p className="text-white hover:underline">Show All Results</p>
+                    <div className=" bg-dark-200 flex absolute bottom-0 left-0 right-0 justify-center items-center h-10 rounded-lg">
+                      <p className=" text-white hover:underline">Show All Results</p>
                     </div>
-                    </>
+                    </div>
                   )}
                 </section>
               )}

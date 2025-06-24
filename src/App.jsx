@@ -130,22 +130,22 @@ const App = () => {
                 onFocus={() => setIsDropdownOpen(true)}
               />
               {debouncedSearchTerm && isDropdownOpen && (
-                <section className="fade-in absolute z-20 w-auto sm:w-3xl mx-auto max-h-125 overflow-y-scroll rounded-lg bg-dark-100">
+                <section className="fade-in absolute z-20 w-full sm:w-3xl mx-auto rounded-lg">
                   {isLoading ? (
                     <p className="text-gray-100 text-center">Loading...</p>
                   ) : errorMessage ? (
                     <p className="text-red-500">{errorMessage}</p>
                   ) : (
-                    <>
-                    <ul className="animate-slide-up grid grid-cols-1">
+                    <div className="relative">
+                    <ul className="animate-slide-up grid grid-cols-1 max-h-125 overflow-y-scroll pb-10 bg-dark-100">
                       {movieList.map((movie) => (
                         <MovieCard key={movie.id} movie={movie} className="search-card"/>
                       ))}
                     </ul>
-                    <div className="bg-dark-200 flex justify-center items-center h-10">
+                    <div className="bg-dark-200 flex absolute bottom-0 left-0 right-0 justify-center items-center h-10 rounded-lg">
                       <p className="text-white hover:underline">Show All Results</p>
                     </div>
-                    </>
+                    </div>
                   )}
                 </section>
               )}
