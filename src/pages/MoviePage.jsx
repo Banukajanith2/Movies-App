@@ -155,7 +155,7 @@ const MoviePage = () => {
             <div className="player">
               <iframe
                 className="iframe"
-                src={`https://vidsrc.me/embed/movie?tmdb=${movie.id}`}
+                src={`https://vidsrcme.ru/embed/movie?tmdb=${movie.id}`}
                 referrerPolicy="origin"
                 allowFullScreen
               ></iframe>
