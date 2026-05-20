@@ -63,7 +63,7 @@ const Footer = () => {
           </a>
         </div>
         <p className="text-gray-100 font-light text-xs">
-          © 2025 EZ Movies - By{" "}
+          © 2026 EZ Movies - By{" "}
           <a
             href="https://banukajanith2.github.io/Portfolio/"
             target="_blank"

@@ -27,6 +27,7 @@ const MovieCard = ({movie: {
 
   return (
     <div className={className} onClick={handleClick}>
+      <div className="type-badge">Movie</div>
       <img
         src={
           poster_path

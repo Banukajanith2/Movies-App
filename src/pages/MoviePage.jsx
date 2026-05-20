@@ -1,30 +1,18 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { useDebounce } from "../hooks/useDebounce";
-import { updateSearchCount } from "../FirestoreService";
+import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall"; // Using your central constants
 import MovieCard from "../components/MovieCard";
 import Spinner from "../components/Spinner";
 import Search from "../components/Search";
 import TrendingMovies from "../components/TrendingMovies";
 import Footer from "../components/Footer";
 
-const API_BASE_URL = "https://api.themoviedb.org/3";
-const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
-
-const API_OPTIONS = {
-  method: "GET",
-  headers: {
-    accept: "application/json",
-    Authorization: `Bearer ${API_KEY}`,
-  },
-};
-
 const MoviePage = () => {
   const { slug } = useParams();
   const [movie, setMovie] = useState(null);
   const [pageloading, setPageLoading] = useState(true);
-  const errornavigate = useNavigate();
-  const homenavigate = useNavigate();
+  const navigate = useNavigate();
 
   const [showPlayer, setShowPlayer] = useState(false);
 
@@ -42,6 +30,7 @@ const MoviePage = () => {
     setErrorMessage("");
 
     try {
+      // Updated to utilize clean global setup constants
       const endpoint = `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}&page=${pageNumber}`;
       const response = await fetch(endpoint, API_OPTIONS);
       if (!response.ok) throw new Error("Failed to fetch search results");
@@ -54,11 +43,8 @@ const MoviePage = () => {
       }
 
       setMovieList(data.results || []);
-      if (query && data.results.length > 0) {
-        await updateSearchCount(query, data.results[0]);
-      }
     } catch (error) {
-      setErrorMessage("Error Fetching Search Results: " + error);
+      setErrorMessage("Error Fetching Search Results: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -82,24 +68,29 @@ const MoviePage = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const movieId = slug.split("-").pop();
+  const movieId = slug?.split("-").pop();
 
   useEffect(() => {
+    if (!movieId) return;
+    
     const fetchMovieDetails = async () => {
       try {
-        const endpoint = `${API_BASE_URL}/movie/${movieId}?`;
+        // Consolidated parsing structure to consume API_BASE_URL
+        const endpoint = `${API_BASE_URL}/movie/${movieId}`;
         const response = await fetch(endpoint, API_OPTIONS);
+        if (!response.ok) throw new Error("Movie fetch failed");
+        
         const data = await response.json();
         setMovie(data);
       } catch (error) {
         console.error("Error fetching movie details:", error);
-        errornavigate(`/404-Error`);
+        navigate(`/404-Error`);
       } finally {
         setPageLoading(false);
       }
     };
     fetchMovieDetails();
-  }, [movieId]);
+  }, [movieId, navigate]);
 
   if (pageloading)
     return (
@@ -107,9 +98,13 @@ const MoviePage = () => {
         <Spinner />
       </div>
     );
-  if (!movie) return errornavigate(`/404-Error`); //setup 404 for this
 
-  const homeClick = () => homenavigate("/");
+  if (!movie) {
+    navigate(`/404-Error`);
+    return null;
+  }
+
+  const homeClick = () => navigate("/");
 
   return (
     <div className="relative">
@@ -126,26 +121,25 @@ const MoviePage = () => {
                 onFocus={() => setIsDropdownOpen(true)}
               />
               {debouncedSearchTerm && isDropdownOpen && (
-                <section  onClick={() => setIsDropdownOpen(false)} className="fade-in absolute top-12 right-0 z-20 w-[100vw] sm:w-md transition3s mx-auto rounded-lg bg-dark-100">
+                <section onClick={() => setIsDropdownOpen(false)} className="fade-in absolute top-12 right-0 z-20 w-[100vw] sm:w-md transition3s mx-auto rounded-lg bg-dark-100">
                   {isLoading ? (
                     <p className="text-gray-100 text-center">Loading...</p>
                   ) : errorMessage ? (
                     <p className="text-red-500">{errorMessage}</p>
                   ) : (
                     <div className="relative">
-                    <ul className="animate-slide-up grid grid-cols-1 max-h-120 overflow-y-scroll pb-10">
-                      {movieList.map((movie) => (
-                        <MovieCard key={movie.id} movie={movie} className="search-card-nav"/>
-                      ))}
-                    </ul>
-                    <div className=" bg-dark-200 flex absolute bottom-0 left-0 right-0 justify-center items-center h-10 rounded-lg">
-                      <p className=" text-white hover:underline">Show All Results</p>
-                    </div>
+                      <ul className="animate-slide-up grid grid-cols-1 max-h-120 overflow-y-scroll pb-10">
+                        {movieList.map((movie) => (
+                          <MovieCard key={movie.id} movie={movie} className="search-card-nav" />
+                        ))}
+                      </ul>
+                      <div className="bg-dark-200 flex absolute bottom-0 left-0 right-0 justify-center items-center h-10 rounded-lg">
+                        <p className="text-white hover:underline">Show All Results</p>
+                      </div>
                     </div>
                   )}
                 </section>
               )}
-              
             </div>
           </div>
         </nav>
@@ -197,7 +191,7 @@ const MoviePage = () => {
             <p><strong>Release Date :</strong> {movie.release_date}</p>
             <p><strong>Rating :</strong> {movie.vote_average?.toFixed(1) || "N/A"}/10</p>
             <p><strong>Language :</strong> {movie.original_language === "en" ? "English" : movie.spoken_languages?.[0]?.english_name || movie.original_language}</p>
-            <p><strong>Genre :</strong> {movie.genres.map((genre, key) => (<span key={key}>{genre.name}{key < movie.genres.length - 1 ? ", " : ""}</span>))}</p>
+            <p><strong>Genre :</strong> {movie.genres?.map((genre, key) => (<span key={key}>{genre.name}{key < movie.genres.length - 1 ? ", " : ""}</span>))}</p>
           </div>
         </div>
 
