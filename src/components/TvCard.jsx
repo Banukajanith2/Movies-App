@@ -29,6 +29,7 @@ const TvCard = ({
 
   return (
     <div className={className} onClick={handleClick}>
+      <div className="type-badge">TV Show</div>
       <img
         src={
           poster_path

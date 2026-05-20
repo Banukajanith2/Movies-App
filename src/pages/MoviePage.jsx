@@ -1,8 +1,9 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { useDebounce } from "../hooks/useDebounce";
-import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall"; // Using your central constants
+import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
 import MovieCard from "../components/MovieCard";
+import TvCard from "../components/TvCard";
 import Spinner from "../components/Spinner";
 import Search from "../components/Search";
 import TrendingMovies from "../components/TrendingMovies";
@@ -17,7 +18,7 @@ const MoviePage = () => {
   const [showPlayer, setShowPlayer] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [movieList, setMovieList] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -25,26 +26,24 @@ const MoviePage = () => {
 
   const debouncedSearchTerm = useDebounce(searchTerm, 1000);
 
-  const fetchSearchMovies = async (query, pageNumber = 1) => {
+  const fetchUnifiedSearch = async (query, pageNumber = 1) => {
     setIsLoading(true);
     setErrorMessage("");
-
     try {
-      // Updated to utilize clean global setup constants
-      const endpoint = `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}&page=${pageNumber}`;
+      const endpoint = `${API_BASE_URL}/search/multi?query=${encodeURIComponent(query)}&page=${pageNumber}&language=en-US`;
       const response = await fetch(endpoint, API_OPTIONS);
       if (!response.ok) throw new Error("Failed to fetch search results");
 
       const data = await response.json();
-      if (data.Response === "False") {
-        setErrorMessage(data.Error || "No results found");
-        setMovieList([]);
-        return;
-      }
+      const filteredMedia = (data.results || []).filter(
+        (item) => item.media_type === "movie" || item.media_type === "tv"
+      );
 
-      setMovieList(data.results || []);
+      setSearchResults(filteredMedia);
+
+      if (filteredMedia.length === 0) setErrorMessage("No results found");
     } catch (error) {
-      setErrorMessage("Error Fetching Search Results: " + error.message);
+      setErrorMessage("Error fetching results: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -52,9 +51,9 @@ const MoviePage = () => {
 
   useEffect(() => {
     if (debouncedSearchTerm) {
-      fetchSearchMovies(debouncedSearchTerm);
+      fetchUnifiedSearch(debouncedSearchTerm);
     } else {
-      setMovieList([]);
+      setSearchResults([]);
     }
   }, [debouncedSearchTerm]);
 
@@ -72,14 +71,13 @@ const MoviePage = () => {
 
   useEffect(() => {
     if (!movieId) return;
-    
+
     const fetchMovieDetails = async () => {
       try {
-        // Consolidated parsing structure to consume API_BASE_URL
         const endpoint = `${API_BASE_URL}/movie/${movieId}`;
         const response = await fetch(endpoint, API_OPTIONS);
         if (!response.ok) throw new Error("Movie fetch failed");
-        
+
         const data = await response.json();
         setMovie(data);
       } catch (error) {
@@ -129,8 +127,14 @@ const MoviePage = () => {
                   ) : (
                     <div className="relative">
                       <ul className="animate-slide-up grid grid-cols-1 max-h-120 overflow-y-scroll pb-10">
-                        {movieList.map((movie) => (
-                          <MovieCard key={movie.id} movie={movie} className="search-card-nav" />
+                        {searchResults.map((item) => (
+                          <li key={item.id}>
+                            {item.media_type === "movie" ? (
+                              <MovieCard movie={item} className="moviesearch-card-nav" />
+                            ) : (
+                              <TvCard tvShow={item} className="tvsearch-card-nav" />
+                            )}
+                          </li>
                         ))}
                       </ul>
                       <div className="bg-dark-200 flex absolute bottom-0 left-0 right-0 justify-center items-center h-10 rounded-lg">

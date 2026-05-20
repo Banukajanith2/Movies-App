@@ -2,7 +2,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { useDebounce } from "../hooks/useDebounce";
 import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
-import MovieCard from "../components/MovieCard"; // Assuming this handles TV search results cleanly as well
+import MovieCard from "../components/MovieCard";
+import TvCard from "../components/TvCard";
 import Spinner from "../components/Spinner";
 import Search from "../components/Search";
 import TrendingMovies from "../components/TrendingMovies";
@@ -16,15 +17,13 @@ const TVPage = () => {
   const [pageLoading, setPageLoading] = useState(true);
   const [showPlayer, setShowPlayer] = useState(false);
 
-  // Season and Episode Navigation State
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [episodesList, setEpisodesList] = useState([]);
   const [episodesLoading, setEpisodesLoading] = useState(false);
 
-  // Search and UI State
   const [searchTerm, setSearchTerm] = useState("");
-  const [resultsList, setResultsList] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -32,20 +31,23 @@ const TVPage = () => {
 
   const debouncedSearchTerm = useDebounce(searchTerm, 1000);
 
-  // Handle Search for TV Shows
-  const fetchSearchTV = async (query, pageNumber = 1) => {
+  const fetchUnifiedSearch = async (query, pageNumber = 1) => {
     setIsLoading(true);
     setErrorMessage("");
-
     try {
-      const endpoint = `${API_BASE_URL}/search/tv?query=${encodeURIComponent(query)}&page=${pageNumber}`;
+      const endpoint = `${API_BASE_URL}/search/multi?query=${encodeURIComponent(query)}&page=${pageNumber}&language=en-US`;
       const response = await fetch(endpoint, API_OPTIONS);
       if (!response.ok) throw new Error("Failed to fetch search results");
 
       const data = await response.json();
-      setResultsList(data.results || []);
+      const filteredMedia = (data.results || []).filter(
+        (item) => item.media_type === "movie" || item.media_type === "tv"
+      );
+
+      setSearchResults(filteredMedia);
+      if (filteredMedia.length === 0) setErrorMessage("No results found");
     } catch (error) {
-      setErrorMessage("Error Fetching Search Results: " + error.message);
+      setErrorMessage("Error fetching results: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -53,9 +55,9 @@ const TVPage = () => {
 
   useEffect(() => {
     if (debouncedSearchTerm) {
-      fetchSearchTV(debouncedSearchTerm);
+      fetchUnifiedSearch(debouncedSearchTerm);
     } else {
-      setResultsList([]);
+      setSearchResults([]);
     }
   }, [debouncedSearchTerm]);
 
@@ -71,7 +73,6 @@ const TVPage = () => {
 
   const tvId = slug?.split("-").pop();
 
-  // Fetch Core TV Show Details
   useEffect(() => {
     if (!tvId) return;
 
@@ -83,8 +84,6 @@ const TVPage = () => {
 
         const data = await response.json();
         setTvShow(data);
-        
-        // Reset selections on show change
         setSelectedSeason(1);
         setSelectedEpisode(1);
       } catch (error) {
@@ -97,7 +96,6 @@ const TVPage = () => {
     fetchTVDetails();
   }, [tvId, navigate]);
 
-  // Dynamically Fetch Episode Count for Selected Season
   useEffect(() => {
     if (!tvId || !tvShow) return;
 
@@ -109,7 +107,6 @@ const TVPage = () => {
         if (!response.ok) throw new Error("Season details fetch failed");
 
         const data = await response.json();
-        // Generate an array of episodes based on the returned details
         setEpisodesList(data.episodes || []);
       } catch (error) {
         console.error("Error fetching season episodes:", error);
@@ -135,8 +132,6 @@ const TVPage = () => {
   }
 
   const homeClick = () => navigate("/");
-
-  // Filter out specials (Season 0) from the main drop-down menu if desired
   const standardSeasons = tvShow.seasons?.filter((s) => s.season_number > 0) || [];
 
   return (
@@ -162,8 +157,14 @@ const TVPage = () => {
                   ) : (
                     <div className="relative">
                       <ul className="animate-slide-up grid grid-cols-1 max-h-120 overflow-y-scroll pb-10">
-                        {resultsList.map((show) => (
-                          <MovieCard key={show.id} movie={show} className="search-card-nav" />
+                        {searchResults.map((item) => (
+                          <li key={item.id}>
+                            {item.media_type === "movie" ? (
+                              <MovieCard movie={item} className="moviesearch-card-nav" />
+                            ) : (
+                              <TvCard tvShow={item} className="tvsearch-card-nav" />
+                            )}
+                          </li>
                         ))}
                       </ul>
                       <div className="bg-dark-200 flex absolute bottom-0 left-0 right-0 justify-center items-center h-10 rounded-lg">
@@ -177,7 +178,6 @@ const TVPage = () => {
           </div>
         </nav>
 
-        {/* Media Container */}
         <div className="backdrop animate-slide-up" onClick={() => !showPlayer && setShowPlayer(true)}>
           {showPlayer ? (
             <div className="player">
@@ -211,17 +211,14 @@ const TVPage = () => {
           )}
         </div>
 
-        {/* Season & Episode Selector Controls */}
         <div className="animate-slide-up w-full my-6 flex flex-col items-center justify-center sm:flex-row sm:flex-wrap sm:items-center gap-4 bg-dark-100/60 p-4 rounded-xl border border-light-100/10 backdrop-blur-md">
-          
-          {/* Season Dropdown */}
           <div className="flex flex-col w-full sm:w-auto sm:min-w-[140px]">
             <label className="text-xs lg:text-sm font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Season</label>
             <select
               value={selectedSeason}
               onChange={(e) => {
                 setSelectedSeason(Number(e.target.value));
-                setSelectedEpisode(1); // Safely reset episode back to 1 on season modification
+                setSelectedEpisode(1);
               }}
               className="bg-dark-200 text-white rounded-lg px-3 py-2 border border-light-100/20 focus:outline-none focus:border-indigo-500 cursor-pointer text-sm font-medium transition w-full"
             >
@@ -237,7 +234,6 @@ const TVPage = () => {
             </select>
           </div>
 
-          {/* Episode Dropdown */}
           <div className="flex flex-col w-full sm:w-auto sm:min-w-[140px]">
             <label className="text-xs lg:text-sm font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Episode</label>
             <select
@@ -264,7 +260,6 @@ const TVPage = () => {
             </select>
           </div>
 
-          {/* Status Text Display */}
           {showPlayer && (
             <div className="w-full items-center justify-center text-center text-xs sm:text-sm text-gray-400 italic pt-2 self-center">
               Playing Season {selectedSeason}, Episode {selectedEpisode}
@@ -272,7 +267,6 @@ const TVPage = () => {
           )}
         </div>
 
-        {/* TV Show Metadata Info Panels */}
         <div className="poster-and-info animate-slide-up">
           <div className="poster">
             <img
@@ -281,7 +275,6 @@ const TVPage = () => {
               alt={tvShow.name}
             />
           </div>
-
           <div className="movie-info">
             <h2 className="mb-3">{tvShow.name}</h2>
             <p className="mb-3 overflow-y-scroll max-h-40">{tvShow.overview || "No overview available."}</p>

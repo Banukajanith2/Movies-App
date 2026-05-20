@@ -104,11 +104,25 @@
       }
     }
 
-    .search-card-nav {
+    .moviesearch-card-nav {
     @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:bg-dark-200 transition3s relative overflow-hidden flex flex-row h-[150px];
 
+    & .type-badge {
+      @apply bg-indigo-800 text-white text-xs font-semibold py-3 w-6 rounded-b-md mr-1 flex items-center justify-center opacity-100 translate-x-0 transition3s;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+
+    &:hover .type-badge {
+      @apply opacity-70 -translate-x-0.5 bg-indigo-900;
+    }
+
     & img {
-      @apply rounded-lg object-cover transition3s;
+      @apply rounded-lg object-cover w-[120px] transition3s;
+    }
+
+    &:hover img {
+      @apply w-[150px];
     }
 
     & .h3title2 {
@@ -152,7 +166,90 @@
     }
 
     & .watch {
+      @apply absolute right-5 bottom-5 text-white opacity-0 translate-x-0 transition3s;
+    }
+
+    &:hover .watch {
+      @apply opacity-100 -translate-x-0.5;
+    }
+
+    & .watch :hover {
+      @apply text-indigo-500;
+    }
+
+  } 
+
+    .tvsearch-card-nav {
+    @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:bg-dark-200 transition3s relative overflow-hidden flex flex-row h-[150px];
+
+    & .type-badge {
+      @apply bg-amber-950 text-white text-xs font-semibold py-3 w-6 rounded-b-md mr-1 flex items-center justify-center opacity-100 translate-x-0 transition3s;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+
+    &:hover .type-badge {
+      @apply opacity-70 -translate-x-0.5 bg-amber-900;
+    }
+
+    & img {
+      @apply rounded-lg object-cover w-[120px] transition3s;
+    }
+
+    &:hover img {
+      @apply w-[150px];
+    }
+
+    & .h3title2 {
+      @apply text-white font-bold text-base line-clamp-1 ;
+    }
+
+    & .h3title1 {
       @apply hidden;
+    }
+
+    & .content {
+      @apply w-full flex flex-col justify-start p-2 gap-3;
+    }
+
+    & .content2 {
+      @apply w-full flex flex-row gap-2 justify-start;
+    }
+
+    & .rating {
+      @apply flex flex-row gap-1 items-center;
+    }
+
+    & .rating img {
+      @apply size-4 object-contain;
+    }
+
+    & .rating p {
+      @apply font-bold text-base text-white;
+    }
+
+    & .content span {
+      @apply text-sm text-gray-100;
+    }
+
+    & .content .lang {
+      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
+    }
+
+    & .content .year {
+      @apply text-gray-100 font-medium text-base;
+    }
+
+    & .watch {
+      @apply absolute right-5 bottom-5 text-white opacity-0 translate-x-0 transition3s;
+    }
+
+    &:hover .watch {
+      @apply opacity-100 -translate-x-0.5;
+    }
+
+    & .watch :hover {
+      @apply text-amber-500;
     }
 
   }
@@ -194,8 +291,22 @@
   .moviesearch-card {
     @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:bg-dark-200 transition3s relative overflow-hidden flex flex-row h-[150px];
 
+    & .type-badge {
+      @apply bg-indigo-800 text-white text-xs font-semibold py-3 w-6 rounded-b-md mr-1 flex items-center justify-center opacity-100 translate-x-0 transition3s;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+
+    &:hover .type-badge {
+      @apply opacity-70 -translate-x-0.5 bg-indigo-900;
+    }
+
     & img {
       @apply rounded-lg object-cover transition3s;
+    }
+
+    &:hover img {
+      @apply w-[150px];
     }
 
     & .h3title2 {
@@ -239,7 +350,15 @@
     }
 
     & .watch {
-      @apply hidden;
+      @apply absolute right-5 bottom-5 text-white opacity-0 translate-x-0 transition3s;
+    }
+
+    &:hover .watch {
+      @apply opacity-100 -translate-x-0.5;
+    }
+
+    & .watch :hover {
+      @apply text-indigo-500;
     }
 
   }
@@ -247,8 +366,22 @@
   .tvsearch-card {
     @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:bg-dark-200 transition3s relative overflow-hidden flex flex-row h-[150px];
 
+    & .type-badge {
+      @apply bg-amber-950 text-white text-xs font-semibold py-3 w-6 rounded-b-md mr-1 flex items-center justify-center opacity-100 translate-x-0 transition3s;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+
+    &:hover .type-badge {
+      @apply opacity-70 -translate-x-0.5 bg-amber-900;
+    }
+
     & img {
       @apply rounded-lg object-cover transition3s;
+    }
+
+    &:hover img {
+      @apply w-[150px];
     }
 
     & .h3title2 {
@@ -292,7 +425,15 @@
     }
 
     & .watch {
-      @apply hidden;
+      @apply absolute right-5 bottom-5 text-white opacity-0 translate-x-0 transition3s;
+    }
+
+    &:hover .watch {
+      @apply opacity-100 -translate-x-0.5;
+    }
+
+    & .watch :hover {
+      @apply text-amber-500;
     }
 
   }
@@ -381,6 +522,14 @@
 
   .tv-card {
     @apply bg-amber-950 cursor-pointer pb-5 p-2 rounded-2xl hover:border-b-10 border-amber-800 shadow-lg hover:shadow-indigo-500/30 transition3s relative overflow-hidden;
+
+    & .type-badge {
+    @apply absolute top-3 left-3 bg-slate-300 text-dark-200 text-sm font-semibold px-2 py-1 rounded-md opacity-0 translate-y-2 transition3s z-10;
+    }
+
+    &:hover .type-badge {
+    @apply opacity-100 translate-y-0;
+    }
 
     & img {
       @apply rounded-lg w-full h-[250px] object-cover transition3s;
@@ -517,6 +666,14 @@
 
   .trendingtv-card {
     @apply bg-amber-950 cursor-pointer pb-5 p-2 rounded-2xl hover:border-b-10 border-amber-700 shadow-lg hover:shadow-amber-500/30 transition3s relative overflow-hidden;
+
+    & .type-badge {
+    @apply absolute top-3 left-3 bg-amber-800 text-white text-sm font-semibold px-2 py-1 rounded-md opacity-0 translate-y-2 transition3s z-10;
+    }
+
+    &:hover .type-badge {
+    @apply opacity-100 translate-y-0;
+    }
 
     & img {
       @apply rounded-lg w-full h-[250px] object-cover transition3s;
