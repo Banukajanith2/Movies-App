@@ -95,7 +95,7 @@ const ErrorPage = () => {
               </a>
             </div>
             <p className="text-gray-100 font-light text-xs sm:text-base">
-              © 2025 EZ Movies - By{" "}
+              © 2026 EZ Movies v2 - By{" "}
               <a
                 href="https://github.com/Banukajanith2"
                 target="_blank"

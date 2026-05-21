@@ -42,8 +42,7 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
     if (debouncedSearchTerm) {
       fetchSearch(debouncedSearchTerm);
     } else {
-      /* ── CHANGED THIS LINE BELOW ── */
-      setSearchResults([]); 
+      setSearchResults([]);
       setErrorMessage("");
     }
   }, [debouncedSearchTerm, fetchSearch]);
@@ -83,7 +82,6 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
 
   return (
     <nav className="main-navbar">
-      {/* 3-column grid: logo | center links | search */}
       <div className="main-navbar-inner">
 
         {/* LEFT — Logo */}
@@ -95,7 +93,7 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
           <span className="navbar-logo-sub">Discover Your Favourite Movies &amp; Tv Shows Online</span>
         </div>
 
-        {/* CENTER — Nav links (absolutely centred in the bar) */}
+        {/* CENTER — Nav links */}
         <div className="navbar-links">
           <button className="navbar-link" onClick={() => { navigate("/"); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
             Home
@@ -106,24 +104,27 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
           <button className="navbar-link" onClick={() => scrollToRef(tvSectionRef)}>
             TV Shows
           </button>
-          {/* Changed scroll behavior to router navigation */}
           <button className="navbar-link" onClick={() => { navigate("/search"); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
             Browse
           </button>
+          <button className="navbar-link" onClick={() => scrollToRef(tvSectionRef)}>
+            Login
+          </button>
         </div>
 
-        {/* RIGHT — Search (right-anchored, expands leftward) */}
+        {/* RIGHT — Search */}
         <div className="navbar-search-area" ref={wrapperRef}>
+
+          {/* Toggle between collapsed button and expanded input — both use fade-in on mount */}
           {!searchOpen ? (
-            <button className="navbar-search-btn" onClick={() => setSearchOpen(true)}>
+            <button className="navbar-search-btn fade-in" onClick={() => setSearchOpen(true)}>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0Z" />
               </svg>
               <span className="hidden sm:inline">Search</span>
             </button>
           ) : (
-            /* expanded: right edge is fixed, grows left */
-            <div className="navbar-search-expanded">
+            <div className="navbar-search-expanded fade-in">
               <div className="navbar-search-input-row">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0 text-gray-400">
                   <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0Z" />
@@ -143,9 +144,9 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
                 </button>
               </div>
 
+              {/* Dropdown — conditionally rendered, animate-slide-up on mount exactly like v1 */}
               {debouncedSearchTerm && (
-                /* dropdown anchored to right:0, grows leftward */
-                <div className="navbar-search-dropdown">
+                <div className="navbar-search-dropdown animate-slide-up fade-in">
                   {isLoading ? (
                     <p className="text-center py-5 text-gray-400 text-sm">Searching...</p>
                   ) : errorMessage ? (
@@ -181,9 +182,9 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
             </div>
           )}
 
-          {/* Mobile hamburger — inside search-area col so it stays on the right */}
+          {/* Mobile hamburger */}
           <button
-            className="sm:hidden text-white p-2 ml-2"
+            className="sm:hidden text-white ml-2"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
@@ -203,8 +204,8 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
           <button className="mobile-menu-link" onClick={() => { navigate("/"); window.scrollTo({ top: 0, behavior: "smooth" }); setMobileMenuOpen(false); }}>Home</button>
           <button className="mobile-menu-link" onClick={() => scrollToRef(movieSectionRef)}>Movies</button>
           <button className="mobile-menu-link" onClick={() => scrollToRef(tvSectionRef)}>TV Shows</button>
-          {/* Changed mobile menu scroll behavior to router navigation & menu close trigger */}
           <button className="mobile-menu-link" onClick={() => { navigate("/search"); window.scrollTo({ top: 0, behavior: "smooth" }); setMobileMenuOpen(false); }}>Browse</button>
+          <button className="mobile-menu-link" onClick={() => scrollToRef(tvSectionRef)}>Login</button>
         </div>
       )}
     </nav>

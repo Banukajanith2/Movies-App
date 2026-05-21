@@ -293,7 +293,7 @@
   /* ── Poster wrap ── */
   .mcn-img-wrap {
     @apply relative overflow-hidden rounded-xl;
-    aspect-ratio: 2 / 3;
+    aspect-ratio: 3/4;
   }
 
   .mcn-img-wrap img {
@@ -552,7 +552,7 @@
   align-items: center;
   max-width: 100%;          /* max-w-7xl */
   margin: 0 auto;
-  padding: 0 1.5rem;         /* px-6 */
+  padding: 0px 25px 0px 25px;         /* px-6 */
   height: 80px;
 }
 
@@ -581,7 +581,7 @@
 }
 
 .navbar-link {
-  @apply text-sm text-gray-300 hover:text-white px-3 py-1.5 rounded-lg
+  @apply lg:text-base text-gray-300 hover:text-indigo-400 px-3 py-1.5 rounded-lg
          transition-all duration-200 hover:bg-white/5 cursor-pointer font-medium;
 }
 
@@ -589,7 +589,7 @@
 
 .navbar-search-area {
   /* flex so hamburger and search button sit side-by-side */
-  @apply flex items-center gap-2 justify-end lg:min-w-[250px] lg:max-w-[250px] max-w-[150px];
+  @apply flex gap-2 justify-end lg:min-w-[250px] lg:max-w-[250px] max-w-[150px];
   position: relative;   /* dropdown anchors to this */
 }
 
@@ -602,8 +602,7 @@
 
 /* expanded search container — right edge is fixed, grows left */
 .navbar-search-expanded {
-  position: relative;
-  width: 250px;
+  @apply min-w-[250px] lg:min-w-[350px] relative
 }
 
 .navbar-search-input-row {
@@ -621,13 +620,24 @@
 /* dropdown — right:0 keeps right edge pinned; grows leftward */
 .navbar-search-dropdown {
   position: absolute;
-  top: calc(100% + 8px);
-  right: 0;               /* ← right-anchored */
-  left: auto;
-  width: min(90vw, 480px);
+  top: calc(100% + 20px);
+  width: min(90vw, 400px);
   @apply bg-dark-100 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50;
   max-height: 70vh;
   overflow-y: auto;
+
+  /* Desktop: pin to right edge */
+  right: 0;
+  left: auto;
+}
+
+@media (max-width: 640px) {
+  .navbar-search-dropdown {
+    /* Mobile: center it in the viewport */
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+  }
 }
 
 /* ── Mobile menu ────────────────────────────────────────── */
@@ -861,7 +871,7 @@
 }
 
 .hero-badge-type {
-  @apply text-xs font-semibold px-2 py-0.5 rounded-md;
+  @apply text-xs font-semibold px-2 py-0.5 h-[25px] flex items-center rounded-md;
 }
 
 .hero-badge-movie {
@@ -1021,7 +1031,7 @@
 }
 
 .genre-tab-toggle {
-  @apply flex bg-white/5 border border-white/10 rounded-xl p-1 gap-1;
+  @apply flex lg:bg-white/5 border lg:border-white/10 rounded-xl p-1 gap-1;
 }
 
 .genre-tab-btn {
@@ -1043,6 +1053,7 @@
 
 .genre-pill {
   @apply flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer border;
+  max-height: 45px;
 }
 
 .genre-pill:hover {

@@ -34,7 +34,7 @@ const MovieCard = ({
       {/* ── Poster image wrap ── */}
       <div className="mcn-img-wrap">
         <img
-          src={poster_path ? `https://image.tmdb.org/t/p/w342${poster_path}` : "/no-movie.png"}
+          src={poster_path ? `https://image.tmdb.org/t/p/w500/${poster_path}` : "no-movie.png"}
           alt={title}
           loading="lazy"
         />
