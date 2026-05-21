@@ -72,9 +72,9 @@ const HeroCarousel = () => {
           loop={true}
           speed={900}
           autoplay={{
-            delay: 5500,
+            delay: 2500,
             disableOnInteraction: false,
-            pauseOnMouseEnter: true,
+            pauseOnMouseEnter: false,
           }}
           navigation={{
             nextEl: ".hero-nav-next",
