@@ -1,0 +1,1 @@
+import{j as e}from"./index-f6UjqTyd.js";const o=({searchTerm:s,setSearchTerm:r,className:a="",onFocus:t})=>e.jsx("div",{className:a,children:e.jsxs("div",{className:"flex flex-row",children:[e.jsx("img",{src:"search.svg",alt:"search"}),e.jsx("input",{type:"text",placeholder:"Search Movies & TV Shows",value:s,onChange:c=>r(c.target.value),onFocus:t})]})});export{o as S};
