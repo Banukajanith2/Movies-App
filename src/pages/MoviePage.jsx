@@ -5,7 +5,6 @@ import Spinner from "../components/Spinner";
 import Navbar from "../components/Navbar";
 import TrailerButton from "../components/TrailerButton";
 import ImdbButton from "../components/ImdbButton";
-import TrendingMovies from "../components/TrendingMovies";
 import Footer from "../components/Footer";
 
 const MoviePage = () => {
@@ -114,7 +113,6 @@ const MoviePage = () => {
           </div>
         </div>
 
-        <TrendingMovies scrollOnClick={true} />
         <Footer />
       </div>
     </div>

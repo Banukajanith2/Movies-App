@@ -46,7 +46,7 @@ const HeroCarousel = () => {
               item.backdrop_path &&
               (item.media_type === "movie" || item.media_type === "tv")
           )
-          .slice(0, 8);
+          .slice(0, 10);
         setItems(withBackdrop);
       } catch (error) {
         console.error("Hero carousel fetch error:", error);

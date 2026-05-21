@@ -89,177 +89,6 @@
       @apply bg-footer-pattern w-full h-screen bg-center bg-cover absolute bottom-0 z-0;
   }
 
-  .nav {
-    @apply fixed top-0 left-0 right-0 z-50 bg-dark-100/90 backdrop-blur-md;
-  } 
-
-  .nav-bar {
-    @apply flex flex-row justify-between items-center h-18 pl-3 pr-0 sm:pl-3 sm:pr-3; /* Matched horizontal padding */
-
-    .nav-text {
-    @apply  bg-linear-to-r from-[#D6C7FF] to-indigo-500 bg-clip-text text-transparent text-xl sm:text-2xl lg:ml-2 ml-0 cursor-pointer max-w-30 min-w-20;
-    }
-
-    .search-nav {
-    @apply h-auto;
-
-      & input {
-        @apply text-gray-200 placeholder-light-200/50 outline-0 focus:w-55 focus:sm:w-100 w-55 sm:w-55 transition3s ml-2 pl-1;
-      }
-    }
-
-    .moviesearch-card-nav {
-    @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:bg-dark-200 transition3s relative overflow-hidden flex flex-row h-[150px];
-
-    & .type-badge {
-      @apply bg-indigo-800 text-white text-xs font-semibold py-3 w-6 rounded-b-md mr-1 flex items-center justify-center opacity-100 translate-x-0 transition3s;
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
-    }
-
-    &:hover .type-badge {
-      @apply opacity-70 -translate-x-0.5 bg-indigo-900;
-    }
-
-    & img {
-      @apply rounded-lg object-cover w-[120px] transition3s;
-    }
-
-    &:hover img {
-      @apply w-[150px];
-    }
-
-    & .h3title2 {
-      @apply text-white font-bold text-base line-clamp-1 ;
-    }
-
-    & .h3title1 {
-      @apply hidden;
-    }
-
-    & .content {
-      @apply w-full flex flex-col justify-start p-2 gap-3;
-    }
-
-    & .content2 {
-      @apply w-full flex flex-row gap-2 justify-start;
-    }
-
-    & .rating {
-      @apply flex flex-row gap-1 items-center;
-    }
-
-    & .rating img {
-      @apply size-4 object-contain;
-    }
-
-    & .rating p {
-      @apply font-bold text-base text-white;
-    }
-
-    & .content span {
-      @apply text-sm text-gray-100;
-    }
-
-    & .content .lang {
-      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
-    }
-
-    & .content .year {
-      @apply text-gray-100 font-medium text-base;
-    }
-
-    & .watch {
-      @apply absolute right-5 bottom-5 text-white opacity-0 translate-x-0 transition3s;
-    }
-
-    &:hover .watch {
-      @apply opacity-100 -translate-x-0.5;
-    }
-
-    & .watch :hover {
-      @apply text-indigo-500;
-    }
-
-  } 
-
-    .tvsearch-card-nav {
-    @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:bg-dark-200 transition3s relative overflow-hidden flex flex-row h-[150px];
-
-    & .type-badge {
-      @apply bg-amber-950 text-white text-xs font-semibold py-3 w-6 rounded-b-md mr-1 flex items-center justify-center opacity-100 translate-x-0 transition3s;
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
-    }
-
-    &:hover .type-badge {
-      @apply opacity-70 -translate-x-0.5 bg-amber-900;
-    }
-
-    & img {
-      @apply rounded-lg object-cover w-[120px] transition3s;
-    }
-
-    &:hover img {
-      @apply w-[150px];
-    }
-
-    & .h3title2 {
-      @apply text-white font-bold text-base line-clamp-1 ;
-    }
-
-    & .h3title1 {
-      @apply hidden;
-    }
-
-    & .content {
-      @apply w-full flex flex-col justify-start p-2 gap-3;
-    }
-
-    & .content2 {
-      @apply w-full flex flex-row gap-2 justify-start;
-    }
-
-    & .rating {
-      @apply flex flex-row gap-1 items-center;
-    }
-
-    & .rating img {
-      @apply size-4 object-contain;
-    }
-
-    & .rating p {
-      @apply font-bold text-base text-white;
-    }
-
-    & .content span {
-      @apply text-sm text-gray-100;
-    }
-
-    & .content .lang {
-      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
-    }
-
-    & .content .year {
-      @apply text-gray-100 font-medium text-base;
-    }
-
-    & .watch {
-      @apply absolute right-5 bottom-5 text-white opacity-0 translate-x-0 transition3s;
-    }
-
-    &:hover .watch {
-      @apply opacity-100 -translate-x-0.5;
-    }
-
-    & .watch :hover {
-      @apply text-amber-500;
-    }
-
-  }
-    
-  }
-
   .error-page {
     @apply max-w-5xl mx-auto p-5;
 
@@ -450,294 +279,98 @@
     }
   }
 
+  /* ============================================================
+   NEW MOVIE CARD  — replaces .movie-card internals
+   Add to index.css (or replace the old .movie-card block)
+   ============================================================ */
+
+  /* Outer shell — className prop sets sizing/context (e.g. h-[350px]) */
+  .movie-card-new {
+    @apply cursor-pointer select-none;
+    /* No overflow:hidden here — only the img-wrap clips, not the whole card */
+  }
+
+  /* ── Poster wrap ── */
+  .mcn-img-wrap {
+    @apply relative overflow-hidden rounded-xl;
+    aspect-ratio: 2 / 3;
+  }
+
+  .mcn-img-wrap img {
+    @apply w-full h-full object-cover transition-transform duration-300 ease-in-out;
+  }
+
+  .movie-card-new:hover .mcn-img-wrap img {
+    @apply scale-120;
+  }
+
+  /* ── Hover overlay ── */
+  .mcn-overlay {
+    @apply absolute inset-0 flex items-end
+          bg-gradient-to-t from-black/80 via-black/20 to-transparent
+          opacity-0 transition-opacity duration-300;
+  }
+
+  .movie-card-new:hover .mcn-overlay {
+    @apply opacity-100;
+  }
+
+  .mcn-overlay-inner {
+    @apply w-full flex items-center justify-between px-2.5 pb-2.5;
+  }
+
+  .mcn-rating {
+    @apply flex items-center gap-1 text-white text-[11px] sm:text-[15px] font-bold;
+  }
+
+  .mcn-play-btn {
+    @apply bg-indigo-600 hover:bg-indigo-500 text-white p-1.5 rounded-full
+          transition-colors duration-200 cursor-pointer;
+  }
+
+  /* ── Type badge (top-right) ── */
+  .mcn-type-badge {
+    @apply absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded-md
+          bg-indigo-600/90 text-white;
+  }
+
+  /* ── Info below poster ── */
+  .mcn-info {
+    @apply mt-2 px-0.5;
+  }
+
+  .mcn-title {
+    @apply text-white text-[11px] sm:text-[15px] font-semibold line-clamp-1 leading-snug;
+  }
+
+  .mcn-meta {
+    @apply flex items-center gap-1.5 mt-0.5 text-gray-400 text-[11px] sm:text-[15px];
+  }
+
+  /* ── Keep .movie-card as a bare sizing shell (used in grid/search) ──
+    The old inner selectors (img, .h3title1, .rating, etc.) are no longer
+    needed — all visuals live in .mcn-* classes above.               */
   .movie-card {
-    @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:border-b-10 border-indigo-500 shadow-lg hover:shadow-indigo-500/30 transition3s relative overflow-hidden;
-
-    & .type-badge {
-    @apply absolute top-3 left-3 bg-indigo-500 text-white text-sm font-semibold px-2 py-1 rounded-md opacity-0 translate-y-2 transition3s z-10;
-    }
-
-    &:hover .type-badge {
-    @apply opacity-100 translate-y-0;
-    }
-
-    & img {
-      @apply rounded-lg w-full h-[250px] object-cover transition3s;
-    }
-
-    &:hover img {
-      @apply h-[200px];
-    }
-
-    & .h3title1 {
-      @apply text-white font-bold text-base line-clamp-1 ;
-    }
-
-    & .h3title2 {
-      @apply hidden;
-    }
-
-    & .content2 {
-      @apply mt-2 flex flex-row items-center flex-wrap gap-1;
-    }
-
-    & .rating {
-      @apply flex flex-row items-center gap-1;
-    }
-
-    & .rating img {
-      @apply size-4 object-contain;
-    }
-
-    & .rating p {
-      @apply font-bold text-base text-white;
-    }
-
-    & .content span {
-      @apply text-sm text-gray-100;
-    }
-
-    & .content .lang {
-      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
-    }
-
-    & .content .year {
-      @apply text-gray-100 font-medium text-base;
-    }
-
-    & .watch {
-      @apply absolute bottom-0 pb-5 text-white font-semibold opacity-0 translate-y-full transition3s;
-
-        p {
-        @apply transition3s;
-
-        &:hover {
-          @apply text-indigo-500;
-        }
-      }
-    }
-    
-    &:hover .watch {
-      @apply opacity-100 translate-y-0;
-    }
-
-    
+    @apply cursor-pointer;  /* sizing/grid handled by parent */
   }
 
+  /* ── Trending card variant — indigo tint on the wrap ── */
+  .trendingmovie-card .mcn-img-wrap {
+    @apply ring-1 ring-indigo-800/40;
+  }
+
+  .trendingmovie-card:hover .mcn-img-wrap {
+    @apply ring-indigo-500/60;
+  }
+
+    /* ── TV Specific Badge Modifier ── */
+  .mcn-type-badge-tv {
+    @apply bg-amber-700/90 text-white;
+  }
+
+  /* ── Keep .tv-card as a bare sizing shell (matching .movie-card cleanup) ── */
   .tv-card {
-    @apply bg-amber-950 cursor-pointer pb-5 p-2 rounded-2xl hover:border-b-10 border-amber-800 shadow-lg hover:shadow-indigo-500/30 transition3s relative overflow-hidden;
-
-    & .type-badge {
-    @apply absolute top-3 left-3 bg-slate-300 text-dark-200 text-sm font-semibold px-2 py-1 rounded-md opacity-0 translate-y-2 transition3s z-10;
-    }
-
-    &:hover .type-badge {
-    @apply opacity-100 translate-y-0;
-    }
-
-    & img {
-      @apply rounded-lg w-full h-[250px] object-cover transition3s;
-    }
-
-    &:hover img {
-      @apply h-[200px];
-    }
-
-    & .h3title1 {
-      @apply text-white font-bold text-base line-clamp-1 ;
-    }
-
-    & .h3title2 {
-      @apply hidden;
-    }
-
-    & .content2 {
-      @apply mt-2 flex flex-row items-center flex-wrap gap-1;
-    }
-
-    & .rating {
-      @apply flex flex-row items-center gap-1;
-    }
-
-    & .rating img {
-      @apply size-4 object-contain;
-    }
-
-    & .rating p {
-      @apply font-bold text-base text-white;
-    }
-
-    & .content span {
-      @apply text-sm text-gray-100;
-    }
-
-    & .content .lang {
-      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
-    }
-
-    & .content .year {
-      @apply text-gray-100 font-medium text-base;
-    }
-
-    & .watch {
-      @apply absolute bottom-0 pb-5 text-white font-semibold opacity-0 translate-y-full transition3s;
-
-        p {
-        @apply transition3s;
-
-        &:hover {
-          @apply text-indigo-500;
-        }
-      }
-    }
-    
-    &:hover .watch {
-      @apply opacity-100 translate-y-0;
-    }
-  }
-
-  .trendingmovie-card {
-    @apply bg-indigo-950 cursor-pointer pb-5 p-2 rounded-2xl hover:border-b-10 border-indigo-800 shadow-lg hover:shadow-indigo-500/30 transition3s relative overflow-hidden;
-
-    & .type-badge {
-    @apply absolute top-3 left-3 bg-slate-300 text-dark-200 text-sm font-semibold px-2 py-1 rounded-md opacity-0 translate-y-2 transition3s z-10;
-    }
-
-    &:hover .type-badge {
-    @apply opacity-100 translate-y-0;
-    }
-
-    & img {
-      @apply rounded-lg w-full h-[250px] object-cover transition3s;
-    }
-
-    &:hover img {
-      @apply h-[200px];
-    }
-
-    & .h3title1 {
-      @apply text-white font-bold text-base line-clamp-1 ;
-    }
-
-    & .h3title2 {
-      @apply hidden;
-    }
-
-    & .content2 {
-      @apply mt-2 flex flex-row items-center flex-wrap gap-1;
-    }
-
-    & .rating {
-      @apply flex flex-row items-center gap-1;
-    }
-
-    & .rating img {
-      @apply size-4 object-contain;
-    }
-
-    & .rating p {
-      @apply font-bold text-base text-white;
-    }
-
-    & .content span {
-      @apply text-sm text-gray-100;
-    }
-
-    & .content .lang {
-      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
-    }
-
-    & .content .year {
-      @apply text-gray-100 font-medium text-base;
-    }
-
-    & .watch {
-      @apply absolute bottom-0 pb-5 text-white font-semibold opacity-0 translate-y-full transition3s;
-
-        p {
-        @apply transition3s;
-
-        &:hover {
-          @apply text-indigo-500;
-        }
-      }
-    }
-    
-    &:hover .watch {
-      @apply opacity-100 translate-y-0;
-    }
-  }
-
-  .trendingtv-card {
-    @apply bg-amber-950 cursor-pointer pb-5 p-2 rounded-2xl hover:border-b-10 border-amber-700 shadow-lg hover:shadow-amber-500/30 transition3s relative overflow-hidden;
-
-    & .type-badge {
-    @apply absolute top-3 left-3 bg-amber-800 text-white text-sm font-semibold px-2 py-1 rounded-md opacity-0 translate-y-2 transition3s z-10;
-    }
-
-    &:hover .type-badge {
-    @apply opacity-100 translate-y-0;
-    }
-
-    & img {
-      @apply rounded-lg w-full h-[250px] object-cover transition3s;
-    }
-
-    &:hover img {
-      @apply h-[200px];
-    }
-
-    & .h3title1 {
-      @apply text-white font-bold text-base line-clamp-1 ;
-    }
-
-    & .h3title2 {
-      @apply hidden;
-    }
-
-    & .content2 {
-      @apply mt-2 flex flex-row items-center flex-wrap gap-1;
-    }
-
-    & .rating {
-      @apply flex flex-row items-center gap-1;
-    }
-
-    & .rating img {
-      @apply size-4 object-contain;
-    }
-
-    & .rating p {
-      @apply font-bold text-base text-white;
-    }
-
-    & .content span {
-      @apply text-sm text-gray-100;
-    }
-
-    & .content .lang {
-      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
-    }
-
-    & .content .year {
-      @apply text-gray-100 font-medium text-base;
-    }
-
-    & .watch {
-      @apply absolute bottom-0 pb-5 text-white font-semibold opacity-0 translate-y-full transition3s;
-
-        p {
-        @apply transition3s;
-
-        &:hover {
-          @apply text-yellow-500;
-        }
-      }
-    }
-    
-    &:hover .watch {
-      @apply opacity-100 translate-y-0;
-    }
+    @apply cursor-pointer; /* layout sizing handled cleanly by parent containers */
   }
 
   .movie {
@@ -899,8 +532,6 @@
    REPLACE the entire NAVBAR section in index.css with this
    ============================================================ */
 
-/* ── Layout ─────────────────────────────────────────────── */
-
 .main-navbar {
   @apply fixed top-0 left-0 right-0 z-50;
   background: rgba(3, 0, 20, 0.72);
@@ -924,8 +555,6 @@
   padding: 0 1.5rem;         /* px-6 */
   height: 80px;
 }
-
-/* ── Logo (col 1) ───────────────────────────────────────── */
 
 .navbar-logo {
   @apply flex flex-col cursor-pointer;
@@ -1013,7 +642,6 @@
          rounded-lg hover:bg-white/5 transition-all duration-200 cursor-pointer;
 }
 
-/* ── Search result cards (MUST be outside .nav-bar nesting) ─ */
 /*    These are used inside .navbar-search-dropdown           */
 
 .moviesearch-card-nav {
@@ -1333,7 +961,7 @@
 }
 
 .media-slider-card:hover .media-slider-card-img-wrap img {
-  @apply scale-105;
+  @apply scale-120;
 }
 
 .media-slider-card-overlay {
@@ -1349,7 +977,7 @@
 }
 
 .media-card-rating {
-  @apply flex items-center gap-1 text-white text-xs font-bold;
+  @apply flex items-center gap-1 text-white text-[12px] sm:text-[15px] font-bold;
 }
 
 .media-card-play-btn {
@@ -1373,11 +1001,11 @@
 }
 
 .media-slider-card-title {
-  @apply text-white text-xs sm:text-sm font-semibold line-clamp-2 leading-snug;
+  @apply text-white text-[11px] sm:text-[15px] font-semibold line-clamp-1 leading-snug;
 }
 
 .media-slider-card-meta {
-  @apply flex items-center gap-1.5 mt-0.5 text-gray-400 text-[11px];
+  @apply flex items-center gap-1.5 mt-0.5 text-gray-400 text-[11px] sm:text-[12px];
 }
 
 /* ============================================================
@@ -1437,4 +1065,69 @@
 
 .genre-pill-violet {
   @apply bg-violet-600/20 border-violet-500/30 text-violet-200 hover:bg-violet-600/35 hover:border-violet-400/50;
+}
+
+/* ============================================================
+   SEARCH PAGE — append to index.css
+   ============================================================ */
+
+.search-page-wrapper {
+  @apply max-w-7xl mx-auto px-3 sm:px-6 pt-24 pb-10 relative z-10;
+}
+
+/* Filter card */
+.search-filter-card {
+  @apply bg-dark-100/70 border border-white/8 rounded-2xl p-5 sm:p-6 backdrop-blur-md;
+}
+
+.search-filter-title {
+  @apply text-white font-bold text-xl sm:text-2xl mb-4;
+}
+
+/* Input row */
+.search-filter-input-row {
+  @apply flex gap-3 items-stretch;
+}
+
+.search-filter-input-wrap {
+  @apply flex-1 flex items-center gap-2 bg-dark-200 border border-white/10
+         rounded-xl px-3 py-2.5 focus-within:border-indigo-500 transition3s;
+}
+
+.search-filter-input {
+  @apply flex-1 bg-transparent text-sm text-gray-200 placeholder-gray-500 outline-none;
+}
+
+.search-filter-btn {
+  @apply bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold
+         px-5 py-2.5 rounded-xl transition3s cursor-pointer shrink-0;
+}
+
+/* Filter selects row */
+.search-filter-row {
+  @apply flex flex-wrap gap-3 items-end;
+}
+
+/* Results grid — 5 cols desktop, responsive */
+.search-results-grid {
+  @apply mt-6 grid gap-4;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 480px) {
+  .search-results-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .search-results-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .search-results-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
 }

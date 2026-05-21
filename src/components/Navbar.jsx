@@ -42,7 +42,8 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
     if (debouncedSearchTerm) {
       fetchSearch(debouncedSearchTerm);
     } else {
-      setSearchResults([]);
+      /* ── CHANGED THIS LINE BELOW ── */
+      setSearchResults([]); 
       setErrorMessage("");
     }
   }, [debouncedSearchTerm, fetchSearch]);
@@ -105,7 +106,8 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
           <button className="navbar-link" onClick={() => scrollToRef(tvSectionRef)}>
             TV Shows
           </button>
-          <button className="navbar-link" onClick={() => scrollToRef(browseRef)}>
+          {/* Changed scroll behavior to router navigation */}
+          <button className="navbar-link" onClick={() => { navigate("/search"); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
             Browse
           </button>
         </div>
@@ -161,9 +163,15 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
                           </li>
                         ))}
                       </ul>
-                      <div className="bg-dark-200 flex justify-center items-center h-9 rounded-b-xl sticky bottom-0">
-                        <p className="text-white text-sm hover:underline cursor-pointer">
-                          Show All Results
+                      <div
+                        className="bg-dark-200 flex justify-center items-center h-9 rounded-b-xl sticky bottom-0 cursor-pointer hover:bg-indigo-600 transition3s"
+                        onClick={() => {
+                          navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
+                          closeSearch();
+                        }}
+                      >
+                        <p className="text-white text-sm font-medium">
+                          Show All Results →
                         </p>
                       </div>
                     </div>
@@ -195,7 +203,8 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
           <button className="mobile-menu-link" onClick={() => { navigate("/"); window.scrollTo({ top: 0, behavior: "smooth" }); setMobileMenuOpen(false); }}>Home</button>
           <button className="mobile-menu-link" onClick={() => scrollToRef(movieSectionRef)}>Movies</button>
           <button className="mobile-menu-link" onClick={() => scrollToRef(tvSectionRef)}>TV Shows</button>
-          <button className="mobile-menu-link" onClick={() => scrollToRef(browseRef)}>Browse</button>
+          {/* Changed mobile menu scroll behavior to router navigation & menu close trigger */}
+          <button className="mobile-menu-link" onClick={() => { navigate("/search"); window.scrollTo({ top: 0, behavior: "smooth" }); setMobileMenuOpen(false); }}>Browse</button>
         </div>
       )}
     </nav>

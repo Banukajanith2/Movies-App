@@ -32,7 +32,7 @@ const App = () => {
 
         {/* Popular TV Shows */}
         <MediaSlider
-          title="Popular TV Shows"
+          title="Latest Popular TV Shows"
           endpoint={ENDPOINTS.popularTV}
           accentColor="amber"
           sectionRef={tvSectionRef}
@@ -48,7 +48,7 @@ const App = () => {
 
         {/* Upcoming Movies */}
         <MediaSlider
-          title="Upcoming Movies & Shows"
+          title="Latest Movies"
           endpoint={ENDPOINTS.upcoming}
           accentColor="cyan"
           sectionRef={upcomingRef}

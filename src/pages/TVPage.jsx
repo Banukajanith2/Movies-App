@@ -5,7 +5,6 @@ import Spinner from "../components/Spinner";
 import Navbar from "../components/Navbar"; // 1. Imported the clean Navbar component
 import TrailerButton from "../components/TrailerButton";
 import ImdbButton from "../components/ImdbButton";
-import TrendingTVShows from "../components/TrendingTVShows";
 import Footer from "../components/Footer";
 
 const TVPage = () => {
@@ -211,7 +210,7 @@ const TVPage = () => {
           </div>
         </div>
 
-        <TrendingTVShows scrollOnClick={true} />
+        
         <Footer />
       </div>
     </div>

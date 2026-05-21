@@ -50,7 +50,7 @@ const SliderCard = ({ item }) => {
           <div className="media-slider-card-overlay-inner">
             {rating > 0 && (
               <span className="media-card-rating">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#facc15" className="w-3 h-3">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#facc15" className="w-5 h-5">
                   <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clipRule="evenodd" />
                 </svg>
                 {rating.toFixed(1)}
@@ -64,7 +64,7 @@ const SliderCard = ({ item }) => {
           </div>
         </div>
         <div className={`media-type-tag ${isTV ? "media-type-tag-tv" : "media-type-tag-movie"}`}>
-          {isTV ? "TV" : "Movie"}
+          {isTV ? "TV Show" : "Movie"}
         </div>
       </div>
 
@@ -83,7 +83,6 @@ const ENDPOINTS = {
   popularTV: `${API_BASE_URL}/tv/popular?language=en-US&page=1`,
   popularMovies: `${API_BASE_URL}/movie/popular?language=en-US&vote_count.gte=500&page=1`,
   upcoming: `${API_BASE_URL}/movie/upcoming?language=en-US&page=1`,
-  topRatedTV: `${API_BASE_URL}/tv/top_rated?language=en-US&page=1`,
 };
 
 const MediaSlider = ({ title, endpoint, accentColor = "indigo", sectionRef }) => {
@@ -107,16 +106,10 @@ const MediaSlider = ({ title, endpoint, accentColor = "indigo", sectionRef }) =>
       dot: "bg-amber-500",
     },
     cyan: {
-      title: "text-cyan-400",
+      title: "text-cyan-500",
       btn: "hover:bg-cyan-700",
       border: "border-cyan-600",
       dot: "bg-cyan-500",
-    },
-    violet: {
-      title: "text-violet-400",
-      btn: "hover:bg-violet-700",
-      border: "border-violet-600",
-      dot: "bg-violet-500",
     },
   };
 
