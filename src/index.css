@@ -792,6 +792,22 @@
   & .watch :hover { @apply text-amber-500; }
 }
 
+@keyframes popcornShake {
+  0%, 100%, 30% { transform: rotate(0deg); } /* Idle state */
+  35% { transform: rotate(-12deg); }
+  40% { transform: rotate(10deg); }
+  45% { transform: rotate(-10deg); }
+  50% { transform: rotate(8deg); }
+  55% { transform: rotate(-6deg); }
+  60% { transform: rotate(4deg); }
+  65% { transform: rotate(0deg); }
+}
+
+.animate-popcorn-shake {
+  animation: popcornShake 3s ease-in-out infinite;
+  transform-origin: bottom center; /* Rotates from the base of the bucket */
+}
+
 
 /* ============================================================
    HOME PAGE LAYOUT
@@ -896,7 +912,7 @@
 }
 
 .hero-watch-btn {
-  @apply flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all duration-200 cursor-pointer shadow-lg shadow-indigo-500/25;
+  @apply flex items-center gap-2 bg-indigo-600 hover:bg-indigo-900 text-white text-sm font-semibold px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl transition-all duration-200 cursor-pointer shadow-lg shadow-indigo-500/25;
 }
 
 /* Hero nav arrows */

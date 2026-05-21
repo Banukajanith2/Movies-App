@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDebounce } from "../hooks/useDebounce";
+import { useAuth } from "../context/AuthContext"; // 1. Import Auth Context
 import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
 import MovieCard from "./MovieCard";
 import TvCard from "./TvCard";
 
 const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
   const navigate = useNavigate();
+  const { currentUser, logout } = useAuth(); // 2. Destructure Auth state & methods
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -16,6 +18,15 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
   const wrapperRef = useRef(null);
   const inputRef = useRef(null);
   const debouncedSearchTerm = useDebounce(searchTerm, 700);
+
+  // Helper to extract ONLY the first word/name safely
+  const getFirstName = () => {
+    if (!currentUser) return "";
+    const rawName = currentUser.displayName || currentUser.email.split("@")[0];
+    
+    // Splits by spaces, periods, underscores, or hyphens, then takes the first chunk
+    return rawName.trim().split(/[\s._-]+/)[0];
+  };
 
   const fetchSearch = useCallback(async (query) => {
     setIsLoading(true);
@@ -107,15 +118,30 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
           <button className="navbar-link" onClick={() => { navigate("/search"); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
             Browse
           </button>
-          <button className="navbar-link" onClick={() => scrollToRef(tvSectionRef)}>
-            Login
+
+          <button 
+            className={`navbar-link ${currentUser ? "text-red-400 hover:text-red-300 hover:bg-red-500/5" : ""}`} 
+            onClick={currentUser ? logout : () => navigate("/login")}
+          >
+            {currentUser ? "Logout" : "Login"}
           </button>
+
+          {/* 3. Conditional Auth Layout: Appears next to Login/Logout button inside Column 2 */}
+          {currentUser && (
+            <span className="flex items-center gap-1.5 text-xs lg:text-sm font-semibold bg-white/5 border border-white/5 px-2.5 py-1 rounded-md text-indigo-300 tracking-wider select-none group">
+              Binge on, {getFirstName().toUpperCase()}..
+              <span className="text-base inline-block animate-popcorn-shake">
+                🍿🎬
+              </span>
+            </span>
+          )}
+          
         </div>
 
         {/* RIGHT — Search */}
         <div className="navbar-search-area" ref={wrapperRef}>
 
-          {/* Toggle between collapsed button and expanded input — both use fade-in on mount */}
+          {/* Toggle between collapsed button and expanded input */}
           {!searchOpen ? (
             <button className="navbar-search-btn fade-in" onClick={() => setSearchOpen(true)}>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0">
@@ -144,7 +170,7 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
                 </button>
               </div>
 
-              {/* Dropdown — conditionally rendered, animate-slide-up on mount exactly like v1 */}
+              {/* Dropdown */}
               {debouncedSearchTerm && (
                 <div className="navbar-search-dropdown animate-slide-up fade-in">
                   {isLoading ? (
@@ -184,7 +210,7 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
 
           {/* Mobile hamburger */}
           <button
-            className="sm:hidden text-white ml-2"
+            className="sm:hidden text-white ml-2 cursor-pointer"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
@@ -201,11 +227,30 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
       {/* Mobile dropdown menu */}
       {mobileMenuOpen && (
         <div className="mobile-menu fade-in sm:hidden">
+          {/* 4. Mobile Context Header */}
+          {currentUser && (
+            <div className="lg:px-6 px-3 py-3 border-b border-white/5 text-xs font-bold text-indigo-400 uppercase tracking-wider">
+              Logged in as: {getFirstName()}
+            </div>
+          )}
           <button className="mobile-menu-link" onClick={() => { navigate("/"); window.scrollTo({ top: 0, behavior: "smooth" }); setMobileMenuOpen(false); }}>Home</button>
           <button className="mobile-menu-link" onClick={() => scrollToRef(movieSectionRef)}>Movies</button>
           <button className="mobile-menu-link" onClick={() => scrollToRef(tvSectionRef)}>TV Shows</button>
           <button className="mobile-menu-link" onClick={() => { navigate("/search"); window.scrollTo({ top: 0, behavior: "smooth" }); setMobileMenuOpen(false); }}>Browse</button>
-          <button className="mobile-menu-link" onClick={() => scrollToRef(tvSectionRef)}>Login</button>
+          
+          <button 
+            className={`mobile-menu-link ${currentUser ? "text-red-400 font-semibold" : ""}`} 
+            onClick={() => {
+              if (currentUser) {
+                logout();
+              } else {
+                navigate("/login");
+              }
+              setMobileMenuOpen(false);
+            }}
+          >
+            {currentUser ? "Logout" : "Login"}
+          </button>
         </div>
       )}
     </nav>
