@@ -941,7 +941,7 @@
 }
 
 .navbar-logo-sub {
-  @apply text-[10px] text-gray-500 leading-tight min-w-[250px] max-w-[250px];
+  @apply text-[10px] text-gray-500 leading-tight lg:min-w-[250px] lg:max-w-[250px] max-w-[200px];
 }
 
 /* ── Center links (col 2) ───────────────────────────────── */
@@ -960,7 +960,7 @@
 
 .navbar-search-area {
   /* flex so hamburger and search button sit side-by-side */
-  @apply flex items-center gap-2 justify-end min-w-[250px] max-w-[250px];
+  @apply flex items-center gap-2 justify-end lg:min-w-[250px] lg:max-w-[250px] max-w-[150px];
   position: relative;   /* dropdown anchors to this */
 }
 

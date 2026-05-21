@@ -1,11 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
-import { useDebounce } from "../hooks/useDebounce";
+import { useEffect, useState } from "react";
 import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
-import MovieCard from "../components/MovieCard";
-import TvCard from "../components/TvCard";
 import Spinner from "../components/Spinner";
-import Search from "../components/Search";
+import Navbar from "../components/Navbar"; // 1. Imported the clean Navbar component
 import TrailerButton from "../components/TrailerButton";
 import ImdbButton from "../components/ImdbButton";
 import TrendingTVShows from "../components/TrendingTVShows";
@@ -24,57 +21,9 @@ const TVPage = () => {
   const [episodesList, setEpisodesList] = useState([]);
   const [episodesLoading, setEpisodesLoading] = useState(false);
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const wrapperRef = useRef(null);
-
-  const debouncedSearchTerm = useDebounce(searchTerm, 1000);
-
-  const fetchUnifiedSearch = async (query, pageNumber = 1) => {
-    setIsLoading(true);
-    setErrorMessage("");
-    try {
-      const endpoint = `${API_BASE_URL}/search/multi?query=${encodeURIComponent(query)}&page=${pageNumber}&language=en-US`;
-      const response = await fetch(endpoint, API_OPTIONS);
-      if (!response.ok) throw new Error("Failed to fetch search results");
-
-      const data = await response.json();
-      const filteredMedia = (data.results || []).filter(
-        (item) => item.media_type === "movie" || item.media_type === "tv"
-      );
-
-      setSearchResults(filteredMedia);
-      if (filteredMedia.length === 0) setErrorMessage("No results found");
-    } catch (error) {
-      setErrorMessage("Error fetching results: " + error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (debouncedSearchTerm) {
-      fetchUnifiedSearch(debouncedSearchTerm);
-    } else {
-      setSearchResults([]);
-    }
-  }, [debouncedSearchTerm]);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   const tvId = slug?.split("-").pop();
 
+  // Fetch Core TV Show details
   useEffect(() => {
     if (!tvId) return;
 
@@ -98,6 +47,7 @@ const TVPage = () => {
     fetchTVDetails();
   }, [tvId, navigate]);
 
+  // Fetch Episode lists when Season changes
   useEffect(() => {
     if (!tvId || !tvShow) return;
 
@@ -122,7 +72,7 @@ const TVPage = () => {
 
   if (pageLoading) {
     return (
-      <div className="fixed inset-0 bg-dark-100 flex items-center justify-center z-99">
+      <div className="fixed inset-0 bg-dark-100 flex items-center justify-center z-[9999]">
         <Spinner />
       </div>
     );
@@ -133,53 +83,19 @@ const TVPage = () => {
     return null;
   }
 
-  const homeClick = () => navigate("/");
   const standardSeasons = tvShow.seasons?.filter((s) => s.season_number > 0) || [];
 
   return (
     <div className="relative">
       <img src="footer.png" alt="" className="z-0 hidden sm:block absolute bottom-0 w-full" />
-      <div className="tv fade-in pt-18">
-        <nav className="nav fixed top-0 left-0 right-0 z-50 bg-[#06040d]/80 backdrop-blur-md">
-          <div className="nav-bar">
-            <h1 className="nav-text" onClick={homeClick}>EZ Movies</h1>
-            <div className="relative" ref={wrapperRef}>
-              <Search
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                className="search-nav"
-                onFocus={() => setIsDropdownOpen(true)}
-              />
-              {debouncedSearchTerm && isDropdownOpen && (
-                <section onClick={() => setIsDropdownOpen(false)} className="fade-in absolute top-12 right-0 z-20 w-[100vw] sm:w-md transition3s mx-auto rounded-lg bg-dark-100">
-                  {isLoading ? (
-                    <p className="text-gray-100 text-center py-4">Loading...</p>
-                  ) : errorMessage ? (
-                    <p className="text-red-500 p-4">{errorMessage}</p>
-                  ) : (
-                    <div className="relative">
-                      <ul className="animate-slide-up grid grid-cols-1 max-h-120 overflow-y-scroll pb-10">
-                        {searchResults.map((item) => (
-                          <li key={item.id}>
-                            {item.media_type === "movie" ? (
-                              <MovieCard movie={item} className="moviesearch-card-nav" />
-                            ) : (
-                              <TvCard tvShow={item} className="tvsearch-card-nav" />
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                      <div className="bg-dark-200 flex absolute bottom-0 left-0 right-0 justify-center items-center h-10 rounded-lg">
-                        <p className="text-white hover:underline cursor-pointer">Show All Results</p>
-                      </div>
-                    </div>
-                  )}
-                </section>
-              )}
-            </div>
-          </div>
-        </nav>
+      
+      {/* 2. Swapped old nav structure with your clean Navbar */}
+      <Navbar />
 
+      {/* 3. Changed padding-top from pt-18 to pt-20 to perfectly match MoviePage sizing */}
+      <div className="tv fade-in pt-20">
+        
+        {/* Backdrop / Main Player Window */}
         <div className="backdrop animate-slide-up" onClick={() => !showPlayer && setShowPlayer(true)}>
           {showPlayer ? (
             <div className="player">
@@ -188,7 +104,7 @@ const TVPage = () => {
                 src={`https://vidsrcme.ru/embed/tv?tmdb=${tvShow.id}&season=${selectedSeason}&episode=${selectedEpisode}`}
                 referrerPolicy="origin"
                 allowFullScreen
-              ></iframe>
+              />
             </div>
           ) : (
             <>
@@ -213,6 +129,7 @@ const TVPage = () => {
           )}
         </div>
 
+        {/* Season & Episode Selector Bar */}
         <div className="animate-slide-up w-full my-6 flex flex-col items-center justify-center sm:flex-row sm:flex-wrap sm:items-center gap-4 bg-dark-100/60 p-4 rounded-xl border border-light-100/10 backdrop-blur-md">
           <div className="flex flex-col w-full sm:w-auto sm:min-w-[140px]">
             <label className="text-xs lg:text-sm font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Season</label>
@@ -269,6 +186,7 @@ const TVPage = () => {
           )}
         </div>
 
+        {/* Poster + Info Section */}
         <div className="poster-and-info animate-slide-up">
           <div className="poster">
             <img
@@ -284,14 +202,16 @@ const TVPage = () => {
             <p><strong>IMDb :</strong> {tvShow.vote_average?.toFixed(1) || "N/A"}/10</p>
             <p><strong>Language :</strong> {tvShow.original_language === "en" ? "English" : tvShow.spoken_languages?.[0]?.english_name || tvShow.original_language}</p>
             <p><strong>Genre :</strong> {tvShow.genres?.map((genre, key) => (<span key={key}>{genre.name}{key < tvShow.genres.length - 1 ? ", " : ""}</span>))}</p>
+            
+            {/* Perfectly aligned action row */}
             <div className="flex items-center gap-3">
-              <TrailerButton id={tvShow.id} mediaType="tvshow" />
-              <ImdbButton id={tvShow.id} mediaType="tvshow" />
+              <TrailerButton id={tvShow.id} mediaType="tv" />
+              <ImdbButton id={tvShow.id} mediaType="tv" />
             </div>
           </div>
         </div>
+
         <TrendingTVShows scrollOnClick={true} />
-        
         <Footer />
       </div>
     </div>
