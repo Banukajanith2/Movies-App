@@ -6,6 +6,8 @@ import MovieCard from "../components/MovieCard";
 import TvCard from "../components/TvCard";
 import Spinner from "../components/Spinner";
 import Search from "../components/Search";
+import TrailerButton from "../components/TrailerButton";
+import ImdbButton from "../components/ImdbButton";
 import TrendingMovies from "../components/TrendingMovies";
 import Footer from "../components/Footer";
 
@@ -107,8 +109,12 @@ const MoviePage = () => {
   return (
     <div className="relative">
       <img src="footer.png" alt="" className="z-0 hidden sm:block absolute bottom-0 w-full" />
-      <div className="movie fade-in">
-        <nav className="nav">
+      
+      {/* Added pt-18 to prevent content from slipping under the fixed nav bar */}
+      <div className="movie fade-in pt-18">
+        
+        {/* Updated nav with fixed positioning, glassmorphism blur, background, and high z-index */}
+        <nav className="nav fixed top-0 left-0 right-0 z-50 bg-[#06040d]/80 backdrop-blur-md">
           <div className="nav-bar">
             <h1 className="nav-text" onClick={homeClick}>EZ Movies</h1>
             <div className="relative" ref={wrapperRef}>
@@ -191,11 +197,15 @@ const MoviePage = () => {
           </div>
           <div className="movie-info">
             <h2 className="mb-3">{movie.title}</h2>
-            <p className="mb-3 overflow-y-scroll">{movie.overview}</p>
+            <p className="mb-4 overflow-y-scroll">{movie.overview}</p>
             <p><strong>Release Date :</strong> {movie.release_date}</p>
-            <p><strong>Rating :</strong> {movie.vote_average?.toFixed(1) || "N/A"}/10</p>
+            <p><strong>IMDb :</strong> {movie.vote_average?.toFixed(1) || "N/A"}/10</p>
             <p><strong>Language :</strong> {movie.original_language === "en" ? "English" : movie.spoken_languages?.[0]?.english_name || movie.original_language}</p>
             <p><strong>Genre :</strong> {movie.genres?.map((genre, key) => (<span key={key}>{genre.name}{key < movie.genres.length - 1 ? ", " : ""}</span>))}</p>
+            <div className="flex items-center gap-3">
+              <TrailerButton id={movie.id} mediaType="movie" />
+              <ImdbButton id={movie.id} mediaType="movie" />
+            </div>
           </div>
         </div>
 

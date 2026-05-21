@@ -6,7 +6,9 @@ import MovieCard from "../components/MovieCard";
 import TvCard from "../components/TvCard";
 import Spinner from "../components/Spinner";
 import Search from "../components/Search";
-import TrendingMovies from "../components/TrendingMovies";
+import TrailerButton from "../components/TrailerButton";
+import ImdbButton from "../components/ImdbButton";
+import TrendingTVShows from "../components/TrendingTVShows";
 import Footer from "../components/Footer";
 
 const TVPage = () => {
@@ -137,8 +139,8 @@ const TVPage = () => {
   return (
     <div className="relative">
       <img src="footer.png" alt="" className="z-0 hidden sm:block absolute bottom-0 w-full" />
-      <div className="movie fade-in">
-        <nav className="nav">
+      <div className="tv fade-in pt-18">
+        <nav className="nav fixed top-0 left-0 right-0 z-50 bg-[#06040d]/80 backdrop-blur-md">
           <div className="nav-bar">
             <h1 className="nav-text" onClick={homeClick}>EZ Movies</h1>
             <div className="relative" ref={wrapperRef}>
@@ -277,15 +279,19 @@ const TVPage = () => {
           </div>
           <div className="movie-info">
             <h2 className="mb-3">{tvShow.name}</h2>
-            <p className="mb-3 overflow-y-scroll max-h-40">{tvShow.overview || "No overview available."}</p>
+            <p className="mb-4 overflow-y-scroll max-h-40">{tvShow.overview || "No overview available."}</p>
             <p><strong>First Air Date :</strong> {tvShow.first_air_date || "N/A"}</p>
-            <p><strong>Rating :</strong> {tvShow.vote_average?.toFixed(1) || "N/A"}/10</p>
+            <p><strong>IMDb :</strong> {tvShow.vote_average?.toFixed(1) || "N/A"}/10</p>
             <p><strong>Language :</strong> {tvShow.original_language === "en" ? "English" : tvShow.spoken_languages?.[0]?.english_name || tvShow.original_language}</p>
             <p><strong>Genre :</strong> {tvShow.genres?.map((genre, key) => (<span key={key}>{genre.name}{key < tvShow.genres.length - 1 ? ", " : ""}</span>))}</p>
+            <div className="flex items-center gap-3">
+              <TrailerButton id={tvShow.id} mediaType="tvshow" />
+              <ImdbButton id={tvShow.id} mediaType="tvshow" />
+            </div>
           </div>
         </div>
-
-        <TrendingMovies scrollOnClick={true} />
+        <TrendingTVShows scrollOnClick={true} />
+        
         <Footer />
       </div>
     </div>
