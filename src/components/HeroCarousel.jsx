@@ -4,6 +4,8 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
 import Spinner from "./Spinner";
+import TrailerButton from "./TrailerButton";
+import ImdbButton from "./ImdbButton";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -70,9 +72,9 @@ const HeroCarousel = () => {
           loop={true}
           speed={900}
           autoplay={{
-            delay: 2500,
+            delay: 5500,
             disableOnInteraction: false,
-            pauseOnMouseEnter: false,
+            pauseOnMouseEnter: true,
           }}
           navigation={{
             nextEl: ".hero-nav-next",
@@ -114,14 +116,6 @@ const HeroCarousel = () => {
                       {year && (
                         <span className="hero-badge-year">{year}</span>
                       )}
-                      {item.vote_average > 0 && (
-                        <span className="hero-badge-imdb">
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#facc15" className="w-3.5 h-3.5 inline mr-1">
-                            <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clipRule="evenodd" />
-                          </svg>
-                          IMDb {item.vote_average.toFixed(1)}
-                        </span>
-                      )}
                       <span className={`hero-badge-type ${item.media_type === "tv" ? "hero-badge-tv" : "hero-badge-movie"}`}>
                         {item.media_type === "tv" ? "TV Show" : "Movie"}
                       </span>
@@ -144,12 +138,8 @@ const HeroCarousel = () => {
                         </svg>
                         Watch Now
                       </button>
-                      <button className="hero-trailer-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
-                        </svg>
-                        Trailer
-                      </button>
+                      <TrailerButton id={item.id} mediaType={item.media_type} />
+                      <ImdbButton id={item.id} mediaType={item.media_type} />
                     </div>
                   </div>
                 </div>
