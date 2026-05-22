@@ -2,6 +2,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap");
 
 @import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
 
 .fade-in {
   opacity: 0;
@@ -47,9 +48,9 @@
 
   --breakpoint-xs: 480px;
 
-  --background-image-hero-pattern: url("/background.png");
+  --background-image-hero-pattern: url("");
 
-  --background-image-footer-pattern: url("/footer.png");
+  --background-image-footer-pattern: url("");
 }
 
 @layer base {
@@ -546,15 +547,40 @@
     col 2 (links)  — fills remaining space, items centred
     col 3 (search) — auto width, right-aligned
 */
+/* ==========================================================================
+   MAIN NAVBAR CONTAINERS
+   ========================================================================== */
+
+.main-navbar {
+  @apply fixed top-0 left-0 right-0 z-50;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  
+  /* Light Mode (Default) */
+  background: rgba(255, 255, 255, 0.82);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* Dark Mode Overrides */
+.dark .main-navbar {
+  background: rgba(3, 0, 20, 0.72);
+  border-bottom: 1px solid rgba(206, 206, 251, 0.07);
+}
+
 .main-navbar-inner {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  max-width: 100%;          /* max-w-7xl */
+  max-width: 100%;
   margin: 0 auto;
-  padding: 0px 25px 0px 25px;         /* px-6 */
+  padding: 0px 25px 0px 25px;
   height: 80px;
 }
+
+/* ==========================================================================
+   LOGO STYLES
+   ========================================================================== */
 
 .navbar-logo {
   @apply flex flex-col cursor-pointer;
@@ -563,77 +589,137 @@
 .navbar-logo-text {
   @apply font-bold leading-tight;
   font-size: clamp(18px, 2vw, 28px);
+  
+  /* 1. Always declare the background gradient FIRST */
+  background: linear-gradient(90deg, #4f46e5, #7c3aed);
+  
+  /* 2. Apply the text clips AFTER so the background shorthand doesn't wipe them out */
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dark .navbar-logo-text {
+  /* Dark mode just changes the gradient track; the text-clip remains intact */
   background: linear-gradient(90deg, #D6C7FF, #6366f1);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .navbar-logo-sub {
-  @apply text-[10px] text-gray-500 leading-tight lg:min-w-[250px] lg:max-w-[250px] max-w-[200px];
+  @apply text-[10px] leading-tight lg:min-w-[250px] lg:max-w-[250px] max-w-[200px];
+  @apply text-dark-100 dark:text-gray-400; /* Uses Tailwind's built-in dark modifier */
 }
 
-/* ── Center links (col 2) ───────────────────────────────── */
+/* ==========================================================================
+   CENTER NAV LINKS
+   ========================================================================== */
 
 .navbar-links {
-  /* hidden on mobile, centred on desktop */
   @apply hidden sm:flex items-center justify-center gap-1;
 }
 
 .navbar-link {
-  @apply lg:text-base text-gray-300 hover:text-indigo-400 px-3 py-1.5 rounded-lg
-         transition-all duration-200 hover:bg-white/5 cursor-pointer font-medium;
+  @apply lg:text-base px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer font-medium;
+  
+  /* Light Mode */
+  @apply text-dark-100 hover:text-indigo-600 hover:bg-black/5;
 }
 
-/* ── Search area (col 3) ────────────────────────────────── */
+.dark .navbar-link {
+  /* Dark Mode */
+  @apply text-gray-300 hover:text-indigo-400 hover:bg-white/5;
+}
+
+/* ==========================================================================
+   SEARCH AREA & BUTTONS
+   ========================================================================== */
 
 .navbar-search-area {
-  /* flex so hamburger and search button sit side-by-side */
   @apply flex gap-2 justify-end lg:min-w-[250px] lg:max-w-[250px] max-w-[150px];
-  position: relative;   /* dropdown anchors to this */
+  position: relative;
 }
 
-/* collapsed search button */
+/* Collapsed Search Button */
 .navbar-search-btn {
-  @apply flex items-center gap-2 text-sm text-gray-300 hover:text-white
-         bg-white/5 hover:bg-white/10 border border-white/10
-         px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer;
+  @apply flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer;
+  
+  /* Light Mode */
+  @apply text-gray-600 hover:text-black bg-black/5 hover:bg-black/10 border border-black/10;
 }
 
-/* expanded search container — right edge is fixed, grows left */
+.dark .navbar-search-btn {
+  /* Dark Mode */
+  @apply text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10;
+}
+
+/* Expanded Search Container */
 .navbar-search-expanded {
-  @apply min-w-[250px] lg:min-w-[350px] relative
+  @apply min-w-[250px] lg:min-w-[350px] relative;
 }
 
 .navbar-search-input-row {
-  @apply flex items-center gap-2 bg-dark-100 border border-white/15 rounded-xl px-3 py-2;
+  @apply flex items-center gap-2 rounded-xl px-3 py-2 border;
+  
+  /* Light Mode */
+  @apply bg-gray-100 border-gray-300/70;
+}
+
+.dark .navbar-search-input-row {
+  /* Dark Mode */
+  @apply bg-dark-100 border-white/15;
 }
 
 .navbar-search-input {
-  @apply flex-1 bg-transparent text-sm text-gray-200 placeholder-gray-500 outline-none;
+  @apply flex-1 bg-transparent text-sm outline-none;
+  
+  /* Light Mode */
+  @apply text-gray-800 placeholder-gray-400;
+}
+
+.dark .navbar-search-input {
+  /* Dark Mode */
+  @apply text-gray-200 placeholder-gray-500;
 }
 
 .navbar-search-close {
-  @apply text-gray-500 hover:text-white transition-colors cursor-pointer shrink-0;
+  @apply transition-colors cursor-pointer shrink-0;
+  
+  /* Light Mode */
+  @apply text-dark-100 hover:text-black;
 }
 
-/* dropdown — right:0 keeps right edge pinned; grows leftward */
+.dark .navbar-search-close {
+  /* Dark Mode */
+  @apply text-gray-500 hover:text-white;
+}
+
+/* ==========================================================================
+   SEARCH RESULTS DROPDOWN
+   ========================================================================== */
+
 .navbar-search-dropdown {
   position: absolute;
   top: calc(100% + 20px);
   width: min(90vw, 400px);
-  @apply bg-dark-100 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50;
   max-height: 70vh;
   overflow-y: auto;
-
-  /* Desktop: pin to right edge */
   right: 0;
   left: auto;
+  @apply rounded-xl shadow-2xl overflow-hidden z-50 border;
+  
+  /* Light Mode */
+  @apply bg-white border-gray-200;
+}
+
+.dark .navbar-search-dropdown {
+  /* Dark Mode */
+  @apply bg-dark-100 border-white/10;
 }
 
 @media (max-width: 640px) {
   .navbar-search-dropdown {
-    /* Mobile: center it in the viewport */
     right: auto;
     left: 50%;
     transform: translateX(-50%);

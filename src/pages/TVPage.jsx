@@ -86,8 +86,6 @@ const TVPage = () => {
 
   return (
     <div className="relative">
-      <img src="footer.png" alt="" className="z-0 hidden sm:block absolute bottom-0 w-full" />
-      
       {/* 2. Swapped old nav structure with your clean Navbar */}
       <Navbar />
 

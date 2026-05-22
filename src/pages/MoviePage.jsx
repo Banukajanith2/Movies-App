@@ -48,8 +48,6 @@ const MoviePage = () => {
 
   return (
     <div className="relative">
-      <img src="footer.png" alt="" className="z-0 hidden sm:block absolute bottom-0 w-full" />
-
       {/* Shared Navbar — no section refs needed on detail pages */}
       <Navbar />
 
