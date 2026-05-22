@@ -7,8 +7,58 @@ import Spinner from "./Spinner";
 import "swiper/css";
 import "swiper/css/navigation";
 
+// Firebase Context & Firestore Modules
+import { useAuth } from "../context/AuthContext";
+import { db } from "../firebase/config";
+import { doc, onSnapshot } from "firebase/firestore";
+import { 
+  addMovieToFavorites, removeMovieFromFavorites, 
+  addTvToFavorites, removeTvFromFavorites 
+} from "../firebase/useFirestore";
+
 const SliderCard = ({ item }) => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  // Determine media classification dynamically
+  const isMovie = item.media_type === "movie" || item.release_date !== undefined;
+  const title = item.title || item.name;
+  const year = (item.release_date || item.first_air_date || "").split("-")[0];
+  const isTV = !item.title && item.name;
+  const rating = item.vote_average;
+  const episodeInfo = item.episode_count ? `${item.episode_count} eps` : null;
+
+  // Real-time isolated favorite syncing block
+  useEffect(() => {
+    if (!currentUser) {
+      setIsFavorite(false);
+      return;
+    }
+
+    const userRef = doc(db, "users", currentUser.uid);
+    const unsubscribe = onSnapshot(userRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        // Route dynamically to separate arrays depending on target item properties
+        if (isMovie) {
+          const favs = userData.favoriteMovies || [];
+          setIsFavorite(favs.includes(Number(item.id)));
+        } else {
+          const favs = userData.favoriteTvShows || [];
+          setIsFavorite(favs.includes(Number(item.id)));
+        }
+      } else {
+        // Fallback catch to clear memory leak on user session swapping
+        setIsFavorite(false);
+      }
+    }, (error) => {
+      console.error("Firestore slider listener mismatch:", error);
+      setIsFavorite(false);
+    });
+
+    return () => unsubscribe();
+  }, [currentUser, item.id, isMovie]);
 
   const createSlug = (title, id) => {
     const slug = (title || "unknown")
@@ -19,20 +69,48 @@ const SliderCard = ({ item }) => {
   };
 
   const handleClick = () => {
-    const title = item.title || item.name;
     const slug = createSlug(title, item.id);
-    if (item.media_type === "movie" || item.release_date !== undefined) {
+    if (isMovie) {
       navigate(`/movie/${slug}`);
     } else {
       navigate(`/tv/${slug}`);
     }
   };
 
-  const title = item.title || item.name;
-  const year = (item.release_date || item.first_air_date || "").split("-")[0];
-  const isTV = !item.title && item.name;
-  const rating = item.vote_average;
-  const episodeInfo = item.episode_count ? `${item.episode_count} eps` : null;
+  const handleFavoriteClick = async (e) => {
+    e.stopPropagation(); // Block Swiper / card route navigation
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      if (isMovie) {
+        if (isFavorite) {
+          await removeMovieFromFavorites(currentUser.uid, item.id);
+        } else {
+          await addMovieToFavorites(currentUser.uid, item.id);
+        }
+      } else {
+        if (isFavorite) {
+          await removeTvFromFavorites(currentUser.uid, item.id);
+        } else {
+          await addTvToFavorites(currentUser.uid, item.id);
+        }
+      }
+    } catch (error) {
+      console.error("Slider runtime error updating favorite state:", error);
+    }
+  };
+
+  const handlePlaylistClick = (e) => {
+    e.stopPropagation(); // Block component card bubble clicks
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
+    console.log(`Add content item ${item.id} to user custom collection array`);
+  };
 
   return (
     <div className="media-slider-card" onClick={handleClick}>
@@ -56,11 +134,49 @@ const SliderCard = ({ item }) => {
                 {rating.toFixed(1)}
               </span>
             )}
-            <button className="media-card-play-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                <path fillRule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clipRule="evenodd" />
-              </svg>
-            </button>
+            
+            {/* Added Control Action Layout Cluster */}
+            <div className="flex items-center gap-1.5 matches-card-action-cluster">
+              {/* Playlist Addition Plus Button */}
+              <button 
+                onClick={handlePlaylistClick}
+                className="w-8 h-8 rounded-full bg-zinc-900/80 hover:bg-indigo-600 text-gray-300 hover:text-white border border-white/10 flex items-center justify-center transition-all cursor-pointer backdrop-blur-sm"
+                aria-label="Add to Playlist"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+              </button>
+
+              {/* Heart Favorite Toggle Button */}
+              <button 
+                onClick={handleFavoriteClick}
+                className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all cursor-pointer backdrop-blur-sm ${
+                  isFavorite 
+                    ? "bg-rose-600/90 border-rose-500 text-white" 
+                    : "bg-zinc-900/80 border-white/10 text-gray-300 hover:text-rose-400"
+                }`}
+                aria-label="Favorite Media Item"
+              >
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  viewBox="0 0 24 24" 
+                  fill={isFavorite ? "currentColor" : "none"} 
+                  stroke="currentColor" 
+                  strokeWidth={2} 
+                  className="w-4 h-4"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                </svg>
+              </button>
+
+              {/* Native Play Overlay Button Trigger */}
+              <button className="media-card-play-btn" aria-label="Watch Details">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                  <path fillRule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
         <div className={`media-type-tag ${isTV ? "media-type-tag-tv" : "media-type-tag-movie"}`}>
@@ -88,29 +204,16 @@ const ENDPOINTS = {
 const MediaSlider = ({ title, endpoint, accentColor = "indigo", sectionRef }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { currentUser } = useAuth(); // Track account variables directly in Swiper wrapper
+  
   const safeId = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
   const nextId = `slider-next-${safeId}`;
   const prevId = `slider-prev-${safeId}`;
 
   const accentMap = {
-    indigo: {
-      title: "text-indigo-400",
-      btn: "hover:bg-indigo-600",
-      border: "border-indigo-500",
-      dot: "bg-indigo-500",
-    },
-    amber: {
-      title: "text-amber-400",
-      btn: "hover:bg-amber-700",
-      border: "border-amber-600",
-      dot: "bg-amber-500",
-    },
-    cyan: {
-      title: "text-cyan-500",
-      btn: "hover:bg-cyan-700",
-      border: "border-cyan-600",
-      dot: "bg-cyan-500",
-    },
+    indigo: { title: "text-indigo-400", btn: "hover:bg-indigo-600", border: "border-indigo-500", dot: "bg-indigo-500" },
+    amber: { title: "text-amber-400", btn: "hover:bg-amber-700", border: "border-amber-600", dot: "bg-amber-500" },
+    cyan: { title: "text-cyan-500", btn: "hover:bg-cyan-700", border: "border-cyan-600", dot: "bg-cyan-500" },
   };
 
   const accent = accentMap[accentColor] || accentMap.indigo;
@@ -169,7 +272,9 @@ const MediaSlider = ({ title, endpoint, accentColor = "indigo", sectionRef }) =>
             className="w-full py-3"
           >
             {items.map((item) => (
-              <SwiperSlide key={item.id}>
+              // Inject the active uid to key mapping down inside your loop grid container
+              // This cleanly unmounts layout states when logging out or switching accounts
+              <SwiperSlide key={`${currentUser?.uid || "guest"}-${item.id}`}>
                 <SliderCard item={item} />
               </SwiperSlide>
             ))}

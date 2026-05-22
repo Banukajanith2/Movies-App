@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, googleProvider } from "../config/firebase"; // Added googleProvider
+import { auth, googleProvider } from "../firebase/config"; // Added googleProvider
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth"; // Added signInWithPopup
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
