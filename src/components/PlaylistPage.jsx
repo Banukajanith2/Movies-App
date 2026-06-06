@@ -131,7 +131,7 @@ const PlaylistPage = ({ playlist, userId, onBack, onPlaylistDeleted }) => {
                 
                 <button
                   onClick={() => handleRemoveItem(item)}
-                  className="w-full bg-[#ff5a5a] hover:bg-[#e04444] text-white text-xs font-semibold py-2 rounded-xl transition-colors duration-200 shadow-md shadow-red-500/5 cursor-pointer mt-1"
+                  className="w-full bg-dark-200 hover:bg-[#e04444] text-white text-xs font-semibold py-2 rounded-xl transition-colors duration-200 shadow-md shadow-red-500/5 cursor-pointer mt-1"
                 >
                   Remove
                 </button>
