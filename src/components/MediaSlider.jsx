@@ -138,7 +138,10 @@ const SliderCard = ({ item }) => {
     id: Number(item.id),
     type: isMovie ? "movie" : "tv",
     title: title,
-    poster_path: item.poster_path
+    poster_path: item.poster_path,
+    year: year,                        // already derived above
+    rating: Number(rating) || 0,       // already derived above
+    language: item.original_language === "en" ? "EN" : item.original_language?.toUpperCase() || null,
   };
 
   const handleSelectExistingPlaylist = async (e, playlistId) => {

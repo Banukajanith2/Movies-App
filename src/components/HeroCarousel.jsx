@@ -97,6 +97,9 @@ const HeroSlideItem = ({ item, handleWatch, onPause, onResume }) => {
     type: isMovie ? "movie" : "tv",
     title: title,
     poster_path: item.poster_path,
+    year: year,
+    rating: Number(item.vote_average) || 0,   // ← fix: item.vote_average not rating
+    language: item.original_language === "en" ? "EN" : item.original_language?.toUpperCase() || null,
   };
 
   const handlePlaylistClick = async () => {

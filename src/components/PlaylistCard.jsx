@@ -4,21 +4,17 @@ const PlaylistCard = ({
   playlist: {
     id,
     name,
-    items = [], // Array of saved movies/TV shows
+    items = [],
   },
   className = "",
-  onClick, // 1. Accepted the custom click callback from parent components
+  onClick,
 }) => {
   const navigate = useNavigate();
 
-  // Extract the poster from the first item in the playlist array (if it exists)
   const firstItem = items.length > 0 ? items[0] : null;
   const posterPath = firstItem?.poster_path;
-
-  // Count total items inside the collection
   const itemCount = items.length;
 
-  // Convert playlist name + id to a clean URL slug structure
   const createSlug = (text, uid) => {
     const slug = (text || "unnamed-playlist")
       .toLowerCase()
@@ -29,10 +25,8 @@ const PlaylistCard = ({
 
   const handleClick = (e) => {
     if (onClick) {
-      // 2. Intercept navigation and use parent inline layout toggler instead
       onClick(e);
     } else {
-      // Fallback: Navigates to your standalone PlaylistPage route
       navigate(`/playlist/${createSlug(name, id)}`);
     }
   };
@@ -48,16 +42,19 @@ const PlaylistCard = ({
           loading="lazy"
         />
 
-        {/* Top-right identity badge */}
-        <span className="mcn-type-badge bg-indigo-600/90 text-white border-none">
+        {/* Updated: Uses theme-aware brand colors */}
+        <span className="mcn-type-badge bg-brand-primary/90 text-white border-none">
           Playlist
         </span>
       </div>
 
-      {/* ── Info below poster (Matches title and year layout) ── */}
+      {/* ── Info below poster ── */}
       <div className="mcn-info">
-        <p className="mcn-title truncate text-white font-medium">{name}</p>
-        <div className="mcn-meta text-zinc-400 text-xs mt-1">
+        {/* Updated: Uses theme-aware brand-text */}
+        <p className="mcn-title truncate text-brand-text font-medium">{name}</p>
+        
+        {/* Updated: Uses theme-aware muted text */}
+        <div className="mcn-meta text-muted text-xs mt-1">
           <span>
             {itemCount} {itemCount === 1 ? "item" : "items"}
           </span>
