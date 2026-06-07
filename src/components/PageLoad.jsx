@@ -34,9 +34,9 @@ export default function PageLoad({ children }) {
       {/* App — always mounted in background */}
       <div
         style={{
-          opacity:    isDone ? 1 : isSplatting ? 1 : 0,
-          filter:     isDone ? "none" : isSplatting ? "blur(0px)" : "blur(12px)",
-          transform:  isDone ? "none" : isSplatting ? "scale(1)"  : "scale(0.97)",
+          opacity:     isDone ? 1 : isSplatting ? 1 : 0,
+          filter:      isDone ? "none" : isSplatting ? "blur(0px)" : "blur(12px)",
+          transform:   isDone ? "none" : isSplatting ? "scale(1)"  : "scale(0.97)",
           transition: isSplatting
             ? "opacity 0.5s ease-out, filter 0.6s ease-out, transform 0.6s ease-out"
             : "none",
@@ -51,9 +51,10 @@ export default function PageLoad({ children }) {
         <div
           className="fixed inset-0 z-[9999]"
           style={{
-            backgroundColor: "#0f0d23",
+            // Updated: Dynamically targets your root/dark background token
+            backgroundColor: "var(--brand-bg)",
             // Whole background fades after splat starts
-            opacity:    isSplatting ? 0 : 1,
+            opacity:     isSplatting ? 0 : 1,
             transition: isSplatting ? "opacity 0.6s ease-in 0.1s" : "none",
             pointerEvents: "none",
           }}
@@ -63,7 +64,7 @@ export default function PageLoad({ children }) {
             className="absolute inset-0 flex items-center justify-center"
             style={{
               transform: "translateY(-90px)",
-              opacity:    showSpinner ? 1 : 0,
+              opacity:     showSpinner ? 1 : 0,
               transition: "opacity 0.4s ease-in-out",
             }}
           >
@@ -76,7 +77,8 @@ export default function PageLoad({ children }) {
               className="font-bold select-none text-center"
               style={{
                 fontSize: "clamp(2rem, 6vw, 3.5rem)",
-                background: "linear-gradient(90deg, #D6C7FF, #6366f1)",
+                // Updated: Smoothly transitions your text gradient profile across modes
+                background: "linear-gradient(90deg, var(--brand-text), var(--accent))",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
