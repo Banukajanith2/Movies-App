@@ -4,6 +4,51 @@
 @import "tailwindcss";
 @variant dark (&:where(.dark, .dark *));
 
+/* ==========================================================================
+   DYNAMIC COLOR THEME TOKENS (Light Mode Default / Dark Mode Overrides)
+   ========================================================================== */
+:root {
+  --brand-bg: #f8fafc;
+  --brand-text: #0f172a;
+  --surface: #ffffff;
+  --accent: #4f46e5;
+  --accent-hover: #4338ca;
+  --muted: #6b7280;
+}
+
+.dark {
+  --brand-bg: #030014;
+  --brand-text: #ffffff;
+  --surface: #0f0d23;
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --muted: #9ca4ab;
+}
+
+@theme {
+  /* Dynamic Semantic Colors mapped to Tailwind tokens */
+  --color-brand-bg: var(--brand-bg);
+  --color-brand-text: var(--brand-text);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-muted: var(--muted);
+
+  /* Original Legacy Tokens */
+  --color-primary: #030014;
+  --color-light-100: #cecefb;
+  --color-light-200: #a8b5db;
+  --color-purple-100: #AB8BFF;
+  --color-gray-100: #9ca4ab;
+  --color-dark-100: #0f0d23;
+  --color-dark-200: #1d1a36;
+
+  --font-dm-sans: DM Sans, sans-serif;
+  --breakpoint-xs: 480px;
+  --background-image-hero-pattern: url("");
+  --background-image-footer-pattern: url("");
+}
+
 .fade-in {
   opacity: 0;
   animation: fadeIn 0.5s ease-in-out forwards;
@@ -14,6 +59,7 @@
     opacity: 1;
   }
 }
+
 @layer utilities {
   @keyframes slideUp {
     0% {
@@ -31,45 +77,35 @@
   }
 }
 
-@theme {
-  --color-primary: #030014;
-
-  --color-light-100: #cecefb;
-  --color-light-200: #a8b5db;
-
-  --color-purple-100: #AB8BFF;
-
-  --color-gray-100: #9ca4ab;
-
-  --color-dark-100: #0f0d23;
-  --color-dark-200: #1d1a36;
-
-  --font-dm-sans: DM Sans, sans-serif;
-
-  --breakpoint-xs: 480px;
-
-  --background-image-hero-pattern: url("");
-
-  --background-image-footer-pattern: url("");
-}
-
+/* ==========================================================================
+   BASE LAYOUT STYLES
+   ========================================================================== */
 @layer base {
   body {
     font-family: "DM Sans", serif;
     font-optical-sizing: auto;
-    background: #030014;
+    background: var(--brand-bg);
+    color: var(--brand-text);
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  ::view-transition-group(root) {
+  animation-duration: 0.4s;
   }
 
   h1 {
-    @apply mx-auto max-w-4xl text-center text-6xl font-bold leading-tight tracking-[-1%] text-white sm:text-[64px] sm:leading-[76px];
+    @apply mx-auto max-w-4xl text-center text-6xl font-bold leading-tight tracking-[-1%] text-brand-text sm:text-[64px] sm:leading-[76px];
+    transition: color 0.3s ease;
   }
 
   h2 {
-    @apply text-2xl font-bold text-white sm:text-3xl;
+    @apply text-2xl font-bold text-brand-text sm:text-3xl;
+    transition: color 0.3s ease;
   }
 
   main {
-    @apply min-h-screen relative bg-primary;
+    @apply min-h-screen relative bg-brand-bg;
+    transition: background 0.3s ease;
   }
 
   header {
@@ -81,20 +117,23 @@
   }
 }
 
+/* ==========================================================================
+   COMPONENTS & UTILITIES
+   ========================================================================== */
 @layer components {
   .pattern {
     @apply bg-hero-pattern w-full h-screen bg-center bg-cover absolute z-0;
   }
 
   .footer-img {
-      @apply bg-footer-pattern w-full h-screen bg-center bg-cover absolute bottom-0 z-0;
+    @apply bg-footer-pattern w-full h-screen bg-center bg-cover absolute bottom-0 z-0;
   }
 
   .error-page {
     @apply max-w-5xl mx-auto p-5;
 
     .error-page-nav {
-      @apply  flex flex-col justify-center items-start mb-16 sm:mb-5;
+      @apply flex flex-col justify-center items-start mb-16 sm:mb-5;
 
       .error-text {
         @apply bg-linear-to-r from-[#D6C7FF] to-indigo-500 bg-clip-text text-transparent text-xl sm:text-2xl m-0 cursor-pointer;
@@ -102,196 +141,11 @@
     }
   }
 
-  .wrapper {
-    @apply sm:px-5 px-2 xs:p-2 pt-5 max-w-7xl mx-auto flex flex-col relative z-10;
-  }
-
-  .search {
-    @apply w-full py-3 mt-10 max-w-3xl mx-auto;
-
-    & div {
-      @apply relative flex items-center ;
-    }
-
-    & img {
-      @apply absolute left-5 h-5 w-5;
-    }
-
-    & input {
-      @apply w-full  bg-light-100/5 py-5 sm:pr-10 pl-14 text-base text-gray-200 placeholder-light-200 outline-0  rounded-md  transition3s shadow-lg focus:shadow-indigo-500/30;
-    }
-  }
-
-  .moviesearch-card {
-    @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:bg-dark-200 transition3s relative overflow-hidden flex flex-row h-[150px];
-
-    & .type-badge {
-      @apply bg-indigo-800 text-white text-xs font-semibold py-3 w-6 rounded-b-md mr-1 flex items-center justify-center opacity-100 translate-x-0 transition3s;
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
-    }
-
-    &:hover .type-badge {
-      @apply opacity-70 -translate-x-0.5 bg-indigo-900;
-    }
-
-    & img {
-      @apply rounded-lg object-cover transition3s;
-    }
-
-    &:hover img {
-      @apply w-[150px];
-    }
-
-    & .h3title2 {
-      @apply text-white font-bold text-base line-clamp-1 ;
-    }
-
-    & .h3title1 {
-      @apply hidden;
-    }
-
-    & .content {
-      @apply w-full flex flex-col justify-start p-2 gap-3;
-    }
-
-    & .content2 {
-      @apply w-full flex flex-row gap-2 justify-start;
-    }
-
-    & .rating {
-      @apply flex flex-row gap-1 items-center;
-    }
-
-    & .rating img {
-      @apply size-4 object-contain;
-    }
-
-    & .rating p {
-      @apply font-bold text-base text-white;
-    }
-
-    & .content span {
-      @apply text-sm text-gray-100;
-    }
-
-    & .content .lang {
-      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
-    }
-
-    & .content .year {
-      @apply text-gray-100 font-medium text-base;
-    }
-
-    & .watch {
-      @apply absolute right-5 bottom-5 text-white opacity-0 translate-x-0 transition3s;
-    }
-
-    &:hover .watch {
-      @apply opacity-100 -translate-x-0.5;
-    }
-
-    & .watch :hover {
-      @apply text-indigo-500;
-    }
-
-  }
-
-  .tvsearch-card {
-    @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:bg-dark-200 transition3s relative overflow-hidden flex flex-row h-[150px];
-
-    & .type-badge {
-      @apply bg-amber-950 text-white text-xs font-semibold py-3 w-6 rounded-b-md mr-1 flex items-center justify-center opacity-100 translate-x-0 transition3s;
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
-    }
-
-    &:hover .type-badge {
-      @apply opacity-70 -translate-x-0.5 bg-amber-900;
-    }
-
-    & img {
-      @apply rounded-lg object-cover transition3s;
-    }
-
-    &:hover img {
-      @apply w-[150px];
-    }
-
-    & .h3title2 {
-      @apply text-white font-bold text-base line-clamp-1 ;
-    }
-
-    & .h3title1 {
-      @apply hidden;
-    }
-
-    & .content {
-      @apply w-full flex flex-col justify-start p-2 gap-3;
-    }
-
-    & .content2 {
-      @apply w-full flex flex-row gap-2 justify-start;
-    }
-
-    & .rating {
-      @apply flex flex-row gap-1 items-center;
-    }
-
-    & .rating img {
-      @apply size-4 object-contain;
-    }
-
-    & .rating p {
-      @apply font-bold text-base text-white;
-    }
-
-    & .content span {
-      @apply text-sm text-gray-100;
-    }
-
-    & .content .lang {
-      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
-    }
-
-    & .content .year {
-      @apply text-gray-100 font-medium text-base;
-    }
-
-    & .watch {
-      @apply absolute right-5 bottom-5 text-white opacity-0 translate-x-0 transition3s;
-    }
-
-    &:hover .watch {
-      @apply opacity-100 -translate-x-0.5;
-    }
-
-    & .watch :hover {
-      @apply text-amber-500;
-    }
-
-  }
-
-  .all-movies {
-    @apply mt-10;
-
-    & ul {
-      @apply grid gap-5 grid-cols-2 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-5;
-    }
-  }
-
-  /* ============================================================
-   NEW MOVIE CARD  — replaces .movie-card internals
-   Add to index.css (or replace the old .movie-card block)
-   ============================================================ */
-
-  /* Outer shell — className prop sets sizing/context (e.g. h-[350px]) */
+  /* ── New Movie Card ── */
   .movie-card-new {
     @apply cursor-pointer select-none;
-    /* No overflow:hidden here — only the img-wrap clips, not the whole card */
   }
 
-  /* ── Poster wrap ── */
   .mcn-img-wrap {
     @apply relative overflow-hidden rounded-xl;
     aspect-ratio: 3/4;
@@ -305,11 +159,8 @@
     @apply scale-120;
   }
 
-  /* ── Hover overlay ── */
   .mcn-overlay {
-    @apply absolute inset-0 flex items-end
-          bg-gradient-to-t from-black/80 via-black/20 to-transparent
-          opacity-0 transition-opacity duration-300;
+    @apply absolute inset-0 flex items-end bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 transition-opacity duration-300;
   }
 
   .movie-card-new:hover .mcn-overlay {
@@ -324,58 +175,41 @@
     @apply flex items-center gap-1 text-white text-[11px] sm:text-[15px] font-bold;
   }
 
+  .movie-controls, .tv-controls {
+    @apply flex items-center gap-2 ml-auto;
+  }
+
   .mcn-play-btn {
-    @apply bg-indigo-600 hover:bg-indigo-500 text-white p-1.5 rounded-full
-          transition-colors duration-200 cursor-pointer;
+    @apply bg-indigo-600 hover:bg-indigo-500 text-white p-1.5 rounded-full transition-colors duration-200 cursor-pointer;
   }
 
-  /* ── Type badge (top-right) ── */
   .mcn-type-badge {
-    @apply absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded-md
-          bg-indigo-600/90 text-white;
+    @apply absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-indigo-600/90 text-white;
   }
 
-  /* ── Info below poster ── */
   .mcn-info {
-    @apply mt-2 px-0.5;
+    @apply mt-2 ml-2 px-0.5;
   }
 
   .mcn-title {
-    @apply text-white text-[11px] sm:text-[15px] font-semibold line-clamp-1 leading-snug;
+    @apply text-brand-text text-[11px] sm:text-[15px] font-semibold line-clamp-1 leading-snug transition-colors duration-300;
   }
 
   .mcn-meta {
-    @apply flex items-center gap-1.5 mt-0.5 text-gray-400 text-[11px] sm:text-[15px];
+    @apply flex items-center gap-1.5 mt-0.5 text-muted text-[11px] sm:text-[15px] transition-colors duration-300;
   }
 
-  /* ── Keep .movie-card as a bare sizing shell (used in grid/search) ──
-    The old inner selectors (img, .h3title1, .rating, etc.) are no longer
-    needed — all visuals live in .mcn-* classes above.               */
-  .movie-card {
-    @apply cursor-pointer;  /* sizing/grid handled by parent */
+  .movie-card, .tv-card {
+    @apply cursor-pointer;
   }
 
-  /* ── Trending card variant — indigo tint on the wrap ── */
-  .trendingmovie-card .mcn-img-wrap {
-    @apply ring-1 ring-indigo-800/40;
-  }
-
-  .trendingmovie-card:hover .mcn-img-wrap {
-    @apply ring-indigo-500/60;
-  }
-
-    /* ── TV Specific Badge Modifier ── */
   .mcn-type-badge-tv {
     @apply bg-amber-700/90 text-white;
   }
 
-  /* ── Keep .tv-card as a bare sizing shell (matching .movie-card cleanup) ── */
-  .tv-card {
-    @apply cursor-pointer; /* layout sizing handled cleanly by parent containers */
-  }
-
-  .movie {
-    @apply max-w-5xl flex flex-col mx-auto ;
+  /* ── Interactive Viewports (Movie/TV Detailed Sections) ── */
+  .movie, .tv {
+    @apply max-w-5xl flex flex-col mx-auto;
 
     & .backdrop {
       @apply flex h-[250px] sm:h-[55vh] overflow-hidden relative cursor-pointer;
@@ -386,11 +220,7 @@
     }
 
     & .play-icon {
-      @apply h-[100px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 fill-gray-300 hover:h-[115px] hover:fill-indigo-500 transition3s;
-    }
-
-    & .poster-and-info {
-      @apply sm:h-[300px] rounded-br-lg rounded-bl-xl flex mt-5 bg-linear-to-b from-transparent to-indigo-500/50;
+      @apply h-[100px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 fill-gray-300 hover:h-[115px] transition3s;
     }
 
     & .poster {
@@ -408,72 +238,33 @@
     & .iframe {
       @apply absolute inset-0 w-full h-full rounded-xl;
     }
-
+    
+    & .controls {
+      @apply flex items-center gap-2 ml-auto;
+    }
   }
 
-  .tv {
-    @apply max-w-5xl flex flex-col mx-auto ;
+  .movie .play-icon { @apply hover:fill-indigo-500; }
+  .movie .poster-and-info { @apply sm:h-[300px] rounded-br-lg rounded-bl-xl flex mt-5 bg-linear-to-b from-transparent to-indigo-500/50; }
 
-    & .backdrop {
-      @apply flex h-[250px] sm:h-[55vh] overflow-hidden relative cursor-pointer;
-    }
+  .tv .play-icon { @apply hover:fill-amber-500; }
+  .tv .poster-and-info { @apply sm:h-[300px] rounded-br-lg rounded-bl-xl flex mt-5 bg-linear-to-b from-transparent to-amber-800/50; }
 
-    & .backdrop-img {
-      @apply rounded-lg w-[100%] object-cover object-center hover:w-[120%] hover:opacity-50 transition3s;
-    }
-
-    & .play-icon {
-      @apply h-[100px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 fill-gray-300 hover:h-[115px] hover:fill-amber-500 transition3s;
-    }
-
-    & .poster-and-info {
-      @apply sm:h-[300px] rounded-br-lg rounded-bl-xl flex mt-5 bg-linear-to-b from-transparent to-amber-800/50;
-    }
-
-    & .poster {
-      @apply hidden sm:block relative;
-    }
-
-    & .poster-img {
-      @apply h-[100%] w-[100%] object-cover rounded-tl-lg rounded-tr-lg rounded-bl-lg;
-    }
-
-    & .movie-info {
-      @apply flex-1/2 flex flex-col justify-center items-start ml-5 mr-5 text-white pb-3 sm:pb-3;
-    }
-
-    & .iframe {
-      @apply absolute inset-0 w-full h-full rounded-xl;
-    }
-
-  }
-
+  /* ── Social Footers ── */
   .social-icons {
-    @apply flex justify-center gap-5 text-white;
+    @apply flex justify-center gap-5 text-brand-text transition-colors duration-300;
 
-    & a {
-      @apply hover:text-blue-500 transition-colors;
-    }
-
-    & a:nth-child(2) {
-      @apply hover:text-sky-400;
-    }
-
-    & a:nth-child(3) {
-      @apply hover:text-pink-500;
-    }
-
-    & a:nth-child(4) {
-      @apply hover:text-blue-700;
-    }
-
-    & svg {
-      @apply w-6 h-6;
-    }
+    & a { @apply hover:text-blue-500 transition-colors; }
+    & a:nth-child(2) { @apply hover:text-sky-400; }
+    & a:nth-child(3) { @apply hover:text-pink-500; }
+    & a:nth-child(4) { @apply hover:text-blue-700; }
+    & svg { @apply w-6 h-6; }
   }
-  
 }
 
+/* ==========================================================================
+   TAILWIND UTILITY VARIATIONS
+   ========================================================================== */
 @utility text-gradient {
   @apply bg-linear-to-r from-[#D6C7FF] to-indigo-500 bg-clip-text text-transparent text-5xl sm:text-7xl;
 }
@@ -483,27 +274,31 @@
 }
 
 @utility text-desciption {
-  @apply  text-center bg-gray-300 bg-clip-text text-transparent;
+  @apply text-center bg-gray-600 dark:bg-gray-300 bg-clip-text text-transparent;
 }
 
 @utility fancy-text {
-  -webkit-text-stroke: 5px rgba(206, 206, 251, 0.5);
+  -webkit-text-stroke: 5px rgba(15, 13, 35, 0.15);
   font-size: 190px;
   font-family: "Bebas Neue", sans-serif;
+  
+  .dark & {
+    -webkit-text-stroke: 5px rgba(206, 206, 251, 0.5);
+  }
 }
 
 @utility hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  &::-webkit-scrollbar { display: none; }
 }
 
+/* ==========================================================================
+   GLOBAL SCROLLBAR INTEGRATION
+   ========================================================================== */
 ::-webkit-scrollbar {
-  height: 7px; /* horizontal scrollbar height */
-  width: 5px; /* vertical scrollbar width */
+  height: 7px;
+  width: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -511,16 +306,25 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #ffffff; /* custom color */
+  background-color: #cbd5e1;
   border-radius: 6px;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+  transition: background-color 0.3s;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: #ffffff;
   box-shadow: inset 0 2px 4px 0 rgba(156, 164, 171, 0.1);
 }
 
 ::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
   background-color: #030014;
 }
 
-/*TrendingMovies swiper buttons*/
 .swiper-pagination-bullet {
   @apply sm:w-2 sm:h-2 w-1 h-1 sm:opacity-70 opacity-0 transition-all duration-300;
 }
@@ -529,40 +333,18 @@
   @apply w-3 h-3 sm:opacity-100 opacity-0;
 }
 
-/* ============================================================
-   REPLACE the entire NAVBAR section in index.css with this
-   ============================================================ */
-
-.main-navbar {
-  @apply fixed top-0 left-0 right-0 z-50;
-  background: rgba(3, 0, 20, 0.72);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(206, 206, 251, 0.07);
-}
-
-/*
-  3-column grid:
-    col 1 (logo)   — auto width, left-aligned
-    col 2 (links)  — fills remaining space, items centred
-    col 3 (search) — auto width, right-aligned
-*/
 /* ==========================================================================
-   MAIN NAVBAR CONTAINERS
+   NAVBAR COMPONENT ENGINE
    ========================================================================== */
-
 .main-navbar {
   @apply fixed top-0 left-0 right-0 z-50;
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  
-  /* Light Mode (Default) */
   background: rgba(255, 255, 255, 0.82);
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   transition: background 0.3s ease, border-color 0.3s ease;
 }
 
-/* Dark Mode Overrides */
 .dark .main-navbar {
   background: rgba(3, 0, 20, 0.72);
   border-bottom: 1px solid rgba(206, 206, 251, 0.07);
@@ -574,13 +356,9 @@
   align-items: center;
   max-width: 100%;
   margin: 0 auto;
-  padding: 0px 25px 0px 25px;
+  padding: 0px 25px;
   height: 80px;
 }
-
-/* ==========================================================================
-   LOGO STYLES
-   ========================================================================== */
 
 .navbar-logo {
   @apply flex flex-col cursor-pointer;
@@ -589,18 +367,13 @@
 .navbar-logo-text {
   @apply font-bold leading-tight;
   font-size: clamp(18px, 2vw, 28px);
-  
-  /* 1. Always declare the background gradient FIRST */
   background: linear-gradient(90deg, #4f46e5, #7c3aed);
-  
-  /* 2. Apply the text clips AFTER so the background shorthand doesn't wipe them out */
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .dark .navbar-logo-text {
-  /* Dark mode just changes the gradient track; the text-clip remains intact */
   background: linear-gradient(90deg, #D6C7FF, #6366f1);
   -webkit-background-clip: text;
   background-clip: text;
@@ -608,96 +381,48 @@
 }
 
 .navbar-logo-sub {
-  @apply text-[10px] leading-tight lg:min-w-[250px] lg:max-w-[250px] max-w-[200px];
-  @apply text-dark-100 dark:text-gray-400; /* Uses Tailwind's built-in dark modifier */
+  @apply text-[10px] leading-tight lg:min-w-[250px] lg:max-w-[250px] max-w-[200px] text-muted transition-colors duration-300;
 }
-
-/* ==========================================================================
-   CENTER NAV LINKS
-   ========================================================================== */
 
 .navbar-links {
   @apply hidden sm:flex items-center justify-center gap-1;
 }
 
 .navbar-link {
-  @apply lg:text-base px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer font-medium;
+  @apply lg:text-base px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer font-medium text-brand-text hover:text-accent hover:bg-brand-text/5;
   
-  /* Light Mode */
-  @apply text-dark-100 hover:text-indigo-600 hover:bg-black/5;
+  .dark & {
+    @apply hover:text-indigo-400 hover:bg-brand-text/10;
+  }
 }
-
-.dark .navbar-link {
-  /* Dark Mode */
-  @apply text-gray-300 hover:text-indigo-400 hover:bg-white/5;
-}
-
-/* ==========================================================================
-   SEARCH AREA & BUTTONS
-   ========================================================================== */
 
 .navbar-search-area {
-  @apply flex gap-2 justify-end lg:min-w-[250px] lg:max-w-[250px] max-w-[150px];
-  position: relative;
+  @apply flex gap-2 justify-end lg:min-w-[250px] lg:max-w-[250px] max-w-[150px] relative;
 }
 
-/* Collapsed Search Button */
 .navbar-search-btn {
-  @apply flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer;
+  @apply flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer text-muted hover:text-brand-text bg-black/5 hover:bg-black/10 border border-black/10;
   
-  /* Light Mode */
-  @apply text-gray-600 hover:text-black bg-black/5 hover:bg-black/10 border border-black/10;
+  .dark & {
+    @apply border-white/10 hover:bg-white/10;
+  }
 }
 
-.dark .navbar-search-btn {
-  /* Dark Mode */
-  @apply text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10;
-}
-
-/* Expanded Search Container */
 .navbar-search-expanded {
   @apply min-w-[250px] lg:min-w-[350px] relative;
 }
 
 .navbar-search-input-row {
-  @apply flex items-center gap-2 rounded-xl px-3 py-2 border;
-  
-  /* Light Mode */
-  @apply bg-gray-100 border-gray-300/70;
-}
-
-.dark .navbar-search-input-row {
-  /* Dark Mode */
-  @apply bg-dark-100 border-white/15;
+  @apply flex items-center gap-2 rounded-xl px-3 py-2 border bg-surface border-muted/30;
 }
 
 .navbar-search-input {
-  @apply flex-1 bg-transparent text-sm outline-none;
-  
-  /* Light Mode */
-  @apply text-gray-800 placeholder-gray-400;
-}
-
-.dark .navbar-search-input {
-  /* Dark Mode */
-  @apply text-gray-200 placeholder-gray-500;
+  @apply flex-1 bg-transparent text-sm outline-none text-brand-text placeholder-muted;
 }
 
 .navbar-search-close {
-  @apply transition-colors cursor-pointer shrink-0;
-  
-  /* Light Mode */
-  @apply text-dark-100 hover:text-black;
+  @apply transition-colors cursor-pointer shrink-0 text-brand-text hover:text-accent;
 }
-
-.dark .navbar-search-close {
-  /* Dark Mode */
-  @apply text-gray-500 hover:text-white;
-}
-
-/* ==========================================================================
-   SEARCH RESULTS DROPDOWN
-   ========================================================================== */
 
 .navbar-search-dropdown {
   position: absolute;
@@ -707,15 +432,7 @@
   overflow-y: auto;
   right: 0;
   left: auto;
-  @apply rounded-xl shadow-2xl overflow-hidden z-50 border;
-  
-  /* Light Mode */
-  @apply bg-white border-gray-200;
-}
-
-.dark .navbar-search-dropdown {
-  /* Dark Mode */
-  @apply bg-dark-100 border-white/10;
+  @apply rounded-xl shadow-2xl overflow-hidden z-50 border bg-surface border-muted/10;
 }
 
 @media (max-width: 640px) {
@@ -726,160 +443,60 @@
   }
 }
 
-/* ── Mobile menu ────────────────────────────────────────── */
-
+/* ── Mobile menu Overhauls ── */
 .mobile-menu {
-  @apply bg-dark-100/95 border-t border-white/10 px-4 py-3 flex flex-col gap-1;
+  @apply bg-surface/95 border-t border-muted/10 px-4 py-3 flex flex-col gap-1;
   backdrop-filter: blur(12px);
 }
 
 .mobile-menu-link {
-  @apply text-sm text-gray-300 hover:text-white text-left py-2.5 px-3
-         rounded-lg hover:bg-white/5 transition-all duration-200 cursor-pointer;
+  @apply text-sm text-brand-text hover:text-accent text-left py-2.5 px-3 rounded-lg hover:bg-brand-text/5 transition-all duration-200 cursor-pointer;
 }
 
-/*    These are used inside .navbar-search-dropdown           */
-
-.moviesearch-card-nav {
-  @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:bg-dark-200
-         transition3s relative overflow-hidden flex flex-row h-[150px];
-
-  & .type-badge {
-    @apply bg-indigo-800 text-white text-xs font-semibold py-3 w-6
-           rounded-b-md mr-1 flex items-center justify-center
-           opacity-100 translate-x-0 transition3s;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-  }
-
-  &:hover .type-badge {
-    @apply opacity-70 -translate-x-0.5 bg-indigo-900;
-  }
-
-  & img {
-    @apply rounded-lg object-cover w-[120px] transition3s;
-  }
-
-  &:hover img {
-    @apply w-[150px];
-  }
-
-  & .h3title2 {
-    @apply text-white font-bold text-base line-clamp-1;
-  }
-
+/* ── Embedded Cards inside Dropdown ── */
+.moviesearch-card-nav, .tvsearch-card-nav {
+  @apply bg-surface cursor-pointer pb-5 p-2 rounded-2xl hover:bg-brand-bg transition3s relative overflow-hidden flex flex-row h-[150px];
+  
+  & .h3title2 { @apply text-brand-text font-bold text-base line-clamp-1; }
+  & .rating p { @apply font-bold text-base text-brand-text; }
+  & .content span { @apply text-sm text-muted; }
+  & .content .lang, & .content .year { @apply text-brand-text font-medium text-base; }
+  & .content .lang { @apply hidden sm:block capitalize; }
+  & img { @apply rounded-lg object-cover w-[120px] transition3s; }
+  &:hover img { @apply w-[150px]; }
   & .h3title1 { @apply hidden; }
-
-  & .content {
-    @apply w-full flex flex-col justify-start p-2 gap-3;
-  }
-
-  & .content2 {
-    @apply w-full flex flex-row gap-2 justify-start;
-  }
-
-  & .rating {
-    @apply flex flex-row gap-1 items-center;
-  }
-
+  & .content { @apply w-full flex flex-col justify-start p-2 gap-3; }
+  & .content2 { @apply w-full flex flex-row gap-2 justify-start; }
+  & .rating { @apply flex flex-row gap-1 items-center; }
   & .rating img { @apply size-4 object-contain; }
-
-  & .rating p {
-    @apply font-bold text-base text-white;
-  }
-
-  & .content span { @apply text-sm text-gray-100; }
-
-  & .content .lang {
-    @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
-  }
-
-  & .content .year {
-    @apply text-gray-100 font-medium text-base;
-  }
-
-  & .watch {
-    @apply absolute right-5 bottom-5 text-white opacity-0 translate-x-0 transition3s;
-  }
-
-  &:hover .watch {
-    @apply opacity-100 -translate-x-0.5;
-  }
-
-  & .watch :hover { @apply text-indigo-500; }
+  & .watch { @apply absolute right-5 bottom-5 text-brand-text opacity-0 translate-x-0 transition3s; }
+  &:hover .watch { @apply opacity-100 -translate-x-0.5; }
+  & .movie-controls, & .tv-controls { @apply hidden; }
 }
 
-.tvsearch-card-nav {
-  @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:bg-dark-200
-         transition3s relative overflow-hidden flex flex-row h-[150px];
-
-  & .type-badge {
-    @apply bg-amber-950 text-white text-xs font-semibold py-3 w-6
-           rounded-b-md mr-1 flex items-center justify-center
-           opacity-100 translate-x-0 transition3s;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-  }
-
-  &:hover .type-badge {
-    @apply opacity-70 -translate-x-0.5 bg-amber-900;
-  }
-
-  & img {
-    @apply rounded-lg object-cover w-[120px] transition3s;
-  }
-
-  &:hover img {
-    @apply w-[150px];
-  }
-
-  & .h3title2 {
-    @apply text-white font-bold text-base line-clamp-1;
-  }
-
-  & .h3title1 { @apply hidden; }
-
-  & .content {
-    @apply w-full flex flex-col justify-start p-2 gap-3;
-  }
-
-  & .content2 {
-    @apply w-full flex flex-row gap-2 justify-start;
-  }
-
-  & .rating {
-    @apply flex flex-row gap-1 items-center;
-  }
-
-  & .rating img { @apply size-4 object-contain; }
-
-  & .rating p {
-    @apply font-bold text-base text-white;
-  }
-
-  & .content span { @apply text-sm text-gray-100; }
-
-  & .content .lang {
-    @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
-  }
-
-  & .content .year {
-    @apply text-gray-100 font-medium text-base;
-  }
-
-  & .watch {
-    @apply absolute right-5 bottom-5 text-white opacity-0 translate-x-0 transition3s;
-  }
-
-  &:hover .watch {
-    @apply opacity-100 -translate-x-0.5;
-  }
-
-  & .watch :hover { @apply text-amber-500; }
+.moviesearch-card-nav .type-badge {
+  @apply bg-indigo-100 text-indigo-700 text-xs font-semibold py-3 w-6 rounded-b-md mr-1 flex items-center justify-center opacity-100 translate-x-0 transition3s;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  
+  .dark & { @apply bg-indigo-800 text-white; }
 }
+.moviesearch-card-nav:hover .type-badge { @apply opacity-70 -translate-x-0.5; }
+
+.tvsearch-card-nav .type-badge {
+  @apply bg-amber-100 text-amber-800 text-xs font-semibold py-3 w-6 rounded-b-md mr-1 flex items-center justify-center opacity-100 translate-x-0 transition3s;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  
+  .dark & { @apply bg-amber-950 text-white; }
+}
+.tvsearch-card-nav:hover .type-badge { @apply opacity-70 -translate-x-0.5; }
+
+.moviesearch-card-nav .watch :hover { @apply text-indigo-500; }
+.tvsearch-card-nav .watch :hover { @apply text-amber-500; }
 
 @keyframes popcornShake {
-  0%, 100%, 30% { transform: rotate(0deg); } /* Idle state */
+  0%, 100%, 30% { transform: rotate(0deg); }
   35% { transform: rotate(-12deg); }
   40% { transform: rotate(10deg); }
   45% { transform: rotate(-10deg); }
@@ -891,29 +508,26 @@
 
 .animate-popcorn-shake {
   animation: popcornShake 3s ease-in-out infinite;
-  transform-origin: bottom center; /* Rotates from the base of the bucket */
+  transform-origin: bottom center;
 }
 
-
-/* ============================================================
-   HOME PAGE LAYOUT
-   ============================================================ */
-
+/* ==========================================================================
+   HOME VIEWPORT WRAPPERS
+   ========================================================================== */
 .home-page {
-  @apply min-h-screen bg-primary relative;
+  @apply min-h-screen bg-brand-bg relative transition-colors duration-300;
 }
 
 .home-content-wrapper {
   @apply max-w-7xl mx-auto px-3 sm:px-6 relative z-10 pb-10;
 }
 
-/* ============================================================
-   HERO CAROUSEL
-   ============================================================ */
-
+/* ==========================================================================
+   THEATRICAL HERO SWIPER
+   ========================================================================== */
 .hero-section {
   @apply w-full relative z-10;
-  margin-top: 80px; /* navbar height */
+  margin-top: 80px;
 }
 
 .hero-loading {
@@ -938,10 +552,10 @@
 .hero-overlay-bottom {
   @apply absolute inset-0;
   background: linear-gradient(
-    to top,
-    rgba(3, 0, 20, 1) 0%,
-    rgba(3, 0, 20, 0.65) 30%,
-    rgba(3, 0, 20, 0.1) 65%,
+    to top, 
+    var(--brand-bg) 0%, 
+    color-mix(in srgb, var(--brand-bg) 60%, transparent) 30%, 
+    color-mix(in srgb, var(--brand-bg) 0%, transparent) 60%, 
     transparent 100%
   );
 }
@@ -949,9 +563,9 @@
 .hero-overlay-left {
   @apply absolute inset-0;
   background: linear-gradient(
-    to right,
-    rgba(3, 0, 20, 0.85) 0%,
-    rgba(3, 0, 20, 0.4) 40%,
+    to right, 
+    color-mix(in srgb, var(--brand-bg) 85%, transparent) 0%, 
+    color-mix(in srgb, var(--brand-bg) 40%, transparent) 20%, 
     transparent 50%
   );
 }
@@ -965,32 +579,27 @@
 }
 
 .hero-badge-year {
-  @apply text-sm text-gray-300 bg-white/10 border border-white/15 px-2 py-0.5 rounded-md font-medium;
+  @apply text-sm text-brand-text bg-brand-text/5 border border-brand-text/10 px-2 py-0.5 rounded-md font-medium;
 }
 
 .hero-badge-imdb {
-  @apply text-xs font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-2 py-0.5 rounded-md flex items-center;
+  @apply text-xs font-bold text-amber-600 dark:text-yellow-400 bg-amber-500/10 dark:bg-yellow-400/10 border border-amber-500/20 dark:border-yellow-400/20 px-2 py-0.5 rounded-md flex items-center;
 }
 
 .hero-badge-type {
   @apply text-xs font-semibold px-2 py-0.5 h-[25px] flex items-center rounded-md;
 }
 
-.hero-badge-movie {
-  @apply text-indigo-300 bg-indigo-500/15 border border-indigo-400/25;
-}
-
-.hero-badge-tv {
-  @apply text-amber-300 bg-amber-500/15 border border-amber-400/25;
-}
+.hero-badge-movie { @apply text-indigo-600 dark:text-indigo-300 bg-indigo-500/15 border border-indigo-400/25; }
+.hero-badge-tv { @apply text-amber-700 dark:text-amber-300 bg-amber-500/15 border border-amber-400/25; }
 
 .hero-title {
-  @apply text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight mb-3;
-  text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+  @apply text-2xl sm:text-4xl lg:text-5xl font-extrabold text-brand-text leading-tight mb-3;
+  text-shadow: 0 2px 10px rgba(var(--brand-bg), 0.4);
 }
 
 .hero-overview {
-  @apply text-xs sm:text-sm text-gray-300 leading-relaxed mb-5 line-clamp-3 sm:line-clamp-4 max-w-lg;
+  @apply text-xs sm:text-sm text-brand-text/80 leading-relaxed mb-5 line-clamp-3 sm:line-clamp-4 max-w-lg;
 }
 
 .hero-actions {
@@ -998,28 +607,19 @@
 }
 
 .hero-watch-btn {
-  @apply flex items-center gap-2 bg-indigo-600 hover:bg-indigo-900 text-white text-sm font-semibold px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl transition-all duration-200 cursor-pointer shadow-lg shadow-indigo-500/25;
+  @apply flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl transition-all duration-200 cursor-pointer shadow-lg shadow-indigo-500/25;
 }
 
-/* Hero nav arrows */
-.hero-nav-prev,
-.hero-nav-next {
-  @apply absolute top-1/2 -translate-y-1/2 z-20 text-white bg-black/30 hover:bg-indigo-600 border border-white/10 p-2 rounded-full transition-all duration-200 cursor-pointer;
+.hero-nav-prev, .hero-nav-next {
+  @apply absolute top-1/2 -translate-y-1/2 z-20 text-brand-text bg-surface/40 hover:bg-accent border border-brand-text/10 p-2 rounded-full transition-all duration-200 cursor-pointer;
   backdrop-filter: blur(6px);
 }
+.hero-nav-prev { @apply left-2 sm:left-4; }
+.hero-nav-next { @apply right-2 sm:right-4; }
 
-.hero-nav-prev {
-  @apply left-2 sm:left-4;
-}
-
-.hero-nav-next {
-  @apply right-2 sm:right-4;
-}
-
-/* ============================================================
-   MEDIA SLIDER
-   ============================================================ */
-
+/* ==========================================================================
+   MEDIA GRID SLIDERS
+   ========================================================================== */
 .media-slider-section {
   @apply mt-10 sm:mt-14;
 }
@@ -1037,210 +637,106 @@
 }
 
 .media-slider-title {
-  @apply text-xl sm:text-2xl font-bold;
+  @apply text-xl sm:text-2xl font-bold text-brand-text;
 }
 
 .media-slider-wrap {
   @apply overflow-visible;
 }
 
-/* Slider nav buttons */
 .slider-nav-btn {
-  @apply absolute top-1/2 -translate-y-1/2 z-10 text-white bg-dark-100/80 border border-white/10 p-1.5 sm:p-2 rounded-full transition-all duration-200 cursor-pointer hidden sm:flex items-center justify-center;
+  @apply absolute top-1/2 -translate-y-1/2 z-10 text-brand-text bg-surface/80 border border-brand-text/10 p-1.5 sm:p-2 rounded-full transition-all duration-200 cursor-pointer hidden sm:flex items-center justify-center shadow-md;
   backdrop-filter: blur(6px);
 }
+.slider-nav-prev { @apply -left-4; }
+.slider-nav-next { @apply -right-4; }
 
-.slider-nav-prev {
-  @apply -left-4;
-}
-
-.slider-nav-next {
-  @apply -right-4;
-}
-
-/* Individual slider card */
-.media-slider-card {
-  @apply cursor-pointer select-none;
-}
-
-.media-slider-card-img-wrap {
-  @apply relative overflow-hidden rounded-xl;
-  aspect-ratio: 2/3;
-}
-
-.media-slider-card-img-wrap img {
-  @apply w-full h-full object-cover transition-transform duration-400;
-}
-
-.media-slider-card:hover .media-slider-card-img-wrap img {
-  @apply scale-120;
-}
-
-.media-slider-card-overlay {
-  @apply absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 transition-opacity duration-300 flex items-end;
-}
-
-.media-slider-card:hover .media-slider-card-overlay {
-  @apply opacity-100;
-}
-
-.media-slider-card-overlay-inner {
-  @apply w-full flex items-center justify-between px-2.5 pb-2.5;
-}
-
-.media-card-rating {
-  @apply flex items-center gap-1 text-white text-[12px] sm:text-[15px] font-bold;
-}
-
-.media-card-play-btn {
-  @apply bg-indigo-600 hover:bg-indigo-500 text-white p-1.5 rounded-full transition-colors duration-200;
-}
-
-.media-type-tag {
-  @apply absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded-md;
-}
-
-.media-type-tag-movie {
-  @apply bg-indigo-600/90 text-white;
-}
-
-.media-type-tag-tv {
-  @apply bg-amber-700/90 text-white;
-}
-
-.media-slider-card-info {
-  @apply mt-2 px-0.5;
-}
+.media-slider-card { @apply cursor-pointer select-none; }
+.media-slider-card-img-wrap { @apply relative overflow-hidden rounded-xl; aspect-ratio: 2/3; }
+.media-slider-card-img-wrap img { @apply w-full h-full object-cover transition-transform duration-400; }
+.media-slider-card:hover .media-slider-card-img-wrap img { @apply scale-120; }
+.media-slider-card-overlay { @apply absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 transition-opacity duration-300 flex items-end; }
+.media-slider-card:hover .media-slider-card-overlay { @apply opacity-100; }
+.media-slider-card-overlay-inner { @apply w-full flex items-center justify-between px-2.5 pb-2.5; }
+.media-card-rating { @apply flex items-center gap-1 text-white text-[12px] sm:text-[15px] font-bold; }
+.media-card-play-btn { @apply bg-indigo-600 hover:bg-indigo-500 text-white p-1.5 rounded-full transition-colors duration-200; }
+.media-type-tag { @apply absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded-md; }
+.media-type-tag-movie { @apply bg-indigo-600/90 text-white; }
+.media-type-tag-tv { @apply bg-amber-700/90 text-white; }
+.media-slider-card-info { @apply mt-2 px-0.5; }
 
 .media-slider-card-title {
-  @apply text-white text-[11px] sm:text-[15px] font-semibold line-clamp-1 leading-snug;
+  @apply text-brand-text text-[11px] sm:text-[15px] font-semibold line-clamp-1 leading-snug;
 }
 
 .media-slider-card-meta {
-  @apply flex items-center gap-1.5 mt-0.5 text-gray-400 text-[11px] sm:text-[12px];
+  @apply flex items-center gap-1.5 mt-0.5 text-muted text-[11px] sm:text-[12px];
 }
 
-/* ============================================================
-   GENRE BROWSER
-   ============================================================ */
-
-.genre-section {
-  @apply mt-12 sm:mt-16;
-}
-
-.genre-header {
-  @apply flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6;
-}
+/* ==========================================================================
+   GENRE CATEGORY DESK
+   ========================================================================== */
+.genre-section { @apply mt-12 sm:mt-16; }
+.genre-header { @apply flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6; }
 
 .genre-tab-toggle {
-  @apply flex lg:bg-white/5 border lg:border-white/10 rounded-xl p-1 gap-1;
+  @apply flex bg-brand-text/5 border border-brand-text/10 rounded-xl p-1 gap-1;
 }
 
 .genre-tab-btn {
-  @apply text-xs sm:text-sm font-medium text-gray-400 hover:text-white px-4 py-1.5 rounded-lg transition-all duration-200 cursor-pointer;
+  @apply text-xs sm:text-sm font-medium text-muted hover:text-brand-text px-4 py-1.5 rounded-lg transition-all duration-200 cursor-pointer;
 }
 
-.genre-tab-active {
-  @apply bg-indigo-600 text-white shadow-lg shadow-indigo-500/20;
-}
-
-.genre-tab-active-tv {
-  @apply bg-amber-700 text-white shadow-lg shadow-amber-500/20;
-}
-
-.genre-grid {
-  @apply grid gap-2 sm:gap-3;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-}
+.genre-tab-active { @apply bg-indigo-600 text-white shadow-lg shadow-indigo-500/20; }
+.genre-tab-active-tv { @apply bg-amber-700 text-white shadow-lg shadow-amber-500/20; }
+.genre-grid { @apply grid gap-2 sm:gap-3; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
 
 .genre-pill {
-  @apply flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer border;
+  @apply flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer border bg-surface;
   max-height: 45px;
 }
-
 .genre-pill:hover {
-  @apply scale-[1.04] shadow-lg;
+  @apply scale-[1.04] shadow-md;
   transform: translateY(-2px) scale(1.02);
 }
 
-/* Pill color variants */
-.genre-pill-indigo {
-  @apply bg-indigo-600/20 border-indigo-500/30 text-indigo-200 hover:bg-indigo-600/35 hover:border-indigo-400/50;
-}
+.genre-pill-indigo { @apply border-indigo-300 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-200 hover:bg-indigo-50 dark:hover:bg-indigo-600/35; }
+.genre-pill-amber { @apply border-amber-300 dark:border-amber-600/30 text-amber-700 dark:text-amber-200 hover:bg-amber-50 dark:hover:bg-amber-700/35; }
+.genre-pill-slate { @apply border-slate-300 dark:border-slate-500/30 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600/35; }
+.genre-pill-violet { @apply border-violet-300 dark:border-violet-500/30 text-violet-600 dark:text-violet-200 hover:bg-violet-50 dark:hover:bg-violet-600/35; }
 
-.genre-pill-amber {
-  @apply bg-amber-700/20 border-amber-600/30 text-amber-200 hover:bg-amber-700/35 hover:border-amber-500/50;
-}
-
-.genre-pill-slate {
-  @apply bg-slate-600/20 border-slate-500/30 text-slate-200 hover:bg-slate-600/35 hover:border-slate-400/50;
-}
-
-.genre-pill-violet {
-  @apply bg-violet-600/20 border-violet-500/30 text-violet-200 hover:bg-violet-600/35 hover:border-violet-400/50;
-}
-
-/* ============================================================
-   SEARCH PAGE — append to index.css
-   ============================================================ */
-
+/* ==========================================================================
+   ADVANCED SEARCH HUB PAGE
+   ========================================================================== */
 .search-page-wrapper {
   @apply max-w-7xl mx-auto px-3 sm:px-6 pt-24 pb-10 relative z-10;
 }
 
-/* Filter card */
 .search-filter-card {
-  @apply bg-dark-100/70 border border-white/8 rounded-2xl p-5 sm:p-6 backdrop-blur-md;
+  @apply bg-surface border border-brand-text/10 rounded-2xl p-5 sm:p-6 shadow-xs backdrop-blur-md;
 }
 
 .search-filter-title {
-  @apply text-white font-bold text-xl sm:text-2xl mb-4;
+  @apply text-brand-text font-bold text-xl sm:text-2xl mb-4;
 }
 
-/* Input row */
-.search-filter-input-row {
-  @apply flex gap-3 items-stretch;
-}
+.search-filter-input-row { @apply flex gap-3 items-stretch; }
 
 .search-filter-input-wrap {
-  @apply flex-1 flex items-center gap-2 bg-dark-200 border border-white/10
-         rounded-xl px-3 py-2.5 focus-within:border-indigo-500 transition3s;
+  @apply flex-1 flex items-center gap-2 bg-brand-bg border border-brand-text/10 rounded-xl px-3 py-2.5 focus-within:border-accent transition3s;
 }
 
 .search-filter-input {
-  @apply flex-1 bg-transparent text-sm text-gray-200 placeholder-gray-500 outline-none;
+  @apply flex-1 bg-transparent text-sm text-brand-text placeholder-muted outline-none;
 }
 
 .search-filter-btn {
-  @apply bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold
-         px-5 py-2.5 rounded-xl transition3s cursor-pointer shrink-0;
+  @apply bg-accent hover:bg-accent-hover text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition3s cursor-pointer shrink-0;
 }
 
-/* Filter selects row */
-.search-filter-row {
-  @apply flex flex-wrap gap-3 items-end;
-}
+.search-filter-row { @apply flex flex-wrap gap-3 items-end; }
+.search-results-grid { @apply mt-6 grid gap-4; grid-template-columns: repeat(2, 1fr); }
 
-/* Results grid — 5 cols desktop, responsive */
-.search-results-grid {
-  @apply mt-6 grid gap-4;
-  grid-template-columns: repeat(2, 1fr);
-}
-
-@media (min-width: 480px) {
-  .search-results-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 768px) {
-  .search-results-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .search-results-grid {
-    grid-template-columns: repeat(5, 1fr);
-  }
-}
+@media (min-width: 480px) { .search-results-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 768px) { .search-results-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 1024px) { .search-results-grid { grid-template-columns: repeat(5, 1fr); } }

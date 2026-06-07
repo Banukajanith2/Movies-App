@@ -7,7 +7,7 @@ import TvCard from "../components/TvCard";
 import Spinner from "../components/Spinner";
 import Footer from "../components/Footer";
 
-/* ── Pagination (fixed to accept totalPages as prop) ───────── */
+/* ── Pagination (Updated with Semantic Utilities) ───────── */
 const Pagination = ({ page, setPage, totalPages }) => {
   const capped = Math.min(totalPages, 500); // TMDB caps at page 500
 
@@ -28,28 +28,34 @@ const Pagination = ({ page, setPage, totalPages }) => {
       <button
         onClick={() => setPage(p => Math.max(1, p - 1))}
         disabled={page === 1}
-        className="transition3s px-3 py-1 rounded bg-dark-100/10 text-white hover:bg-indigo-500 disabled:opacity-40 text-sm"
-      >Prev</button>
+        className="transition3s px-3 py-1 rounded bg-brand-text/5 text-brand-text hover:bg-accent hover:text-white disabled:opacity-40 text-sm cursor-pointer"
+      >
+        Prev
+      </button>
 
       {getPageNumbers().map(num => (
         <button
           key={num}
           onClick={() => setPage(num)}
-          className={`transition3s px-3 py-1 rounded text-sm shadow-inner shadow-light-100/10 ${
+          className={`transition3s px-3 py-1 rounded text-sm shadow-inner transition-colors duration-200 cursor-pointer ${
             page === num
-              ? "bg-indigo-500 text-white"
-              : "bg-dark-100/5 text-white hover:bg-indigo-500"
+              ? "bg-accent text-white"
+              : "bg-brand-text/5 text-brand-text hover:bg-accent hover:text-white"
           }`}
-        >{num}</button>
+        >
+          {num}
+        </button>
       ))}
 
       <button
         onClick={() => setPage(p => Math.min(capped, p + 1))}
         disabled={page === capped}
-        className="transition3s px-3 py-1 rounded bg-dark-100/10 text-white hover:bg-indigo-500 disabled:opacity-40 text-sm"
-      >Next</button>
+        className="transition3s px-3 py-1 rounded bg-brand-text/5 text-brand-text hover:bg-accent hover:text-white disabled:opacity-40 text-sm cursor-pointer"
+      >
+        Next
+      </button>
 
-      <span className="text-gray-500 text-xs ml-2">
+      <span className="text-muted text-xs ml-2">
         Page {page} of {capped.toLocaleString()}
       </span>
     </div>
@@ -57,7 +63,6 @@ const Pagination = ({ page, setPage, totalPages }) => {
 };
 
 /* ── Static filter data ────────────────────────────────────── */
-
 const LANGUAGES = [
   { code: "en", label: "English" },
   { code: "es", label: "Spanish" },
@@ -95,41 +100,40 @@ const RATINGS = [
 ];
 
 const YEAR_RANGES = [
-  { label: "All Years",  gte: "",     lte: ""     },
-  { label: "2024–2025",  gte: "2024", lte: "2025" },
-  { label: "2020–2023",  gte: "2020", lte: "2023" },
-  { label: "2010–2019",  gte: "2010", lte: "2019" },
-  { label: "2000–2009",  gte: "2000", lte: "2009" },
-  { label: "1990–1999",  gte: "1990", lte: "1999" },
-  { label: "Before 1990",gte: "1900", lte: "1989" },
+  { label: "All Years",   gte: "",     lte: ""     },
+  { label: "2024–2025",   gte: "2024", lte: "2025" },
+  { label: "2020–2023",   gte: "2020", lte: "2023" },
+  { label: "2010–2019",   gte: "2010", lte: "2019" },
+  { label: "2000–2009",   gte: "2000", lte: "2009" },
+  { label: "1990–1999",   gte: "1990", lte: "1999" },
+  { label: "Before 1990", gte: "1900", lte: "1989" },
 ];
 
 const SORT_OPTIONS = [
   { value: "popularity.desc",          label: "Featured"      },
-  { value: "primary_release_date.desc",label: "Latest"        },
-  { value: "primary_release_date.asc", label: "Oldest"        },
-  { value: "vote_average.desc",        label: "IMDb Rating"   },
-  { value: "original_title.asc",       label: "Alphabetical"  },
+  { value: "primary_release_date.desc", label: "Latest"        },
+  { value: "primary_release_date.asc",  label: "Oldest"        },
+  { value: "vote_average.desc",         label: "IMDb Rating"   },
+  { value: "original_title.asc",        label: "Alphabetical"  },
 ];
 
-// Sort param differs slightly for TV
 const tvSortMap = {
   "primary_release_date.desc": "first_air_date.desc",
   "primary_release_date.asc":  "first_air_date.asc",
   "original_title.asc":        "name.asc",
 };
 
-/* ── Select helper ─────────────────────────────────────────── */
+/* ── Select helper (Updated for Dark/Light Adaptive UI) ────── */
 const FilterSelect = ({ label, value, onChange, children }) => (
   <div className="flex flex-col gap-1 min-w-[110px]">
-    <label className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted">
       {label}
     </label>
     <select
       value={value}
       onChange={e => onChange(e.target.value)}
-      className="bg-dark-100 text-white text-sm rounded-lg px-2 py-1.5 border border-white/10
-                 focus:outline-none focus:border-indigo-500 cursor-pointer transition3s"
+      className="bg-brand-bg text-brand-text text-sm rounded-lg px-2 py-1.5 border border-brand-text/10
+                 focus:outline-none focus:border-accent cursor-pointer transition3s"
     >
       {children}
     </select>
@@ -142,32 +146,27 @@ const SearchPage = () => {
   const [searchParams] = useSearchParams();
 
   const initialQuery = searchParams.get("q") || "";
-
   const [inputValue,    setInputValue]    = useState(initialQuery);
 
-  const [mediaType,   setMediaType]   = useState("movie");
-  const [genres,      setGenres]      = useState([]);
-  const [selectedGenre,setSelectedGenre] = useState("");
-  const [rating,      setRating]      = useState("");
-  const [yearRange,   setYearRange]   = useState(0);   // index into YEAR_RANGES
-  const [language,    setLanguage]    = useState("");
-  const [sortBy,      setSortBy]      = useState("popularity.desc");
+  const [mediaType,     setMediaType]     = useState("movie");
+  const [genres,        setGenres]        = useState([]);
+  const [selectedGenre, setSelectedGenre] = useState("");
+  const [rating,        setRating]        = useState("");
+  const [yearRange,     setYearRange]     = useState(0); 
+  const [language,      setLanguage]      = useState("");
+  const [sortBy,        setSortBy]        = useState("popularity.desc");
 
-  const [results,      setResults]      = useState([]);
-  const [page,         setPage]         = useState(1);
-  const [totalPages,   setTotalPages]   = useState(1);
-  const [totalResults, setTotalResults] = useState(0);
-  const [loading,      setLoading]      = useState(false);
-  const [error,        setError]        = useState("");
+  const [results,       setResults]       = useState([]);
+  const [page,          setPage]          = useState(1);
+  const [totalPages,    setTotalPages]    = useState(1);
+  const [totalResults,  setTotalResults]  = useState(0);
+  const [loading,       setLoading]       = useState(false);
+  const [error,         setError]         = useState("");
 
-  // useRef holds the snapshot so the fetch effect never has stale closure
-  // issues and pagination can never race with handleSearch.
   const committedRef = useRef(null);
-
-  // Plain counter — incrementing it is the ONLY way to fire a fetch.
   const [searchTrigger, setSearchTrigger] = useState(0);
 
-  /* Fetch genres when mediaType changes (UI only, doesn't trigger search) */
+  /* Fetch genres when mediaType changes */
   useEffect(() => {
     setSelectedGenre("");
     const fetchGenres = async () => {
@@ -180,8 +179,7 @@ const SearchPage = () => {
     fetchGenres();
   }, [mediaType]);
 
-  /* Single fetch effect — ONLY depends on searchTrigger.
-     Reads committedRef.current so it can never be stale. */
+  /* Single fetch effect */
   useEffect(() => {
     if (searchTrigger === 0 || !committedRef.current) return;
 
@@ -193,20 +191,17 @@ const SearchPage = () => {
       setError("");
       window.scrollTo({ top: 0, behavior: "smooth" });
       try {
-
         const resolvedSort = mt === "tv" ? (tvSortMap[sb] || sb) : sb;
         const yearObj = YEAR_RANGES[yr];
         let url;
 
         if (q.trim()) {
-          // Title search — use /search endpoint
           url = new URL(`${API_BASE_URL}/search/${mt}`);
           url.searchParams.set("query",    q.trim());
           url.searchParams.set("page",     pg);
           url.searchParams.set("language", "en-US");
           if (lg) url.searchParams.set("with_original_language", lg);
         } else {
-          // Filter browse — use /discover endpoint (full filter support)
           url = new URL(`${API_BASE_URL}/discover/${mt}`);
           url.searchParams.set("page",          pg);
           url.searchParams.set("language",      "en-US");
@@ -241,9 +236,8 @@ const SearchPage = () => {
     };
 
     run();
-  }, [searchTrigger]); // committedRef is a ref, not state — no stale closure
+  }, [searchTrigger]);
 
-  /* Commit current UI filters + page=1 and fire */
   const handleSearch = () => {
     committedRef.current = {
       query: inputValue, mediaType, selectedGenre,
@@ -253,7 +247,6 @@ const SearchPage = () => {
     setSearchTrigger(t => t + 1);
   };
 
-  /* Pagination — reuse committed filters, only change page */
   const handlePageChange = (newPage) => {
     if (!committedRef.current) return;
     committedRef.current = { ...committedRef.current, page: newPage };
@@ -261,7 +254,6 @@ const SearchPage = () => {
     setSearchTrigger(t => t + 1);
   };
 
-  /* Auto-fire once when arriving from navbar with ?q= */
   useEffect(() => {
     if (!initialQuery) return;
     committedRef.current = {
@@ -269,7 +261,6 @@ const SearchPage = () => {
       rating, yearRange, language, sortBy, page: 1,
     };
     setSearchTrigger(1);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleKeyDown = (e) => {
@@ -284,7 +275,7 @@ const SearchPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-primary">
+    <div className="relative min-h-screen bg-brand-bg text-brand-text transition-colors duration-300">
       <div className="pattern" />
       <div className="footer-img" />
 
@@ -292,15 +283,15 @@ const SearchPage = () => {
 
       <div className="search-page-wrapper">
 
-        {/* ── Search & Filter card ─────────────────────────── */}
-        <section className="search-filter-card fade-in">
-          <h2 className="search-filter-title">Search</h2>
+        {/* ── Search & Filter card (Updated with bg-surface) ── */}
+        <section className="search-filter-card fade-in bg-surface border border-brand-text/10 rounded-2xl p-6 shadow-xs">
+          <h2 className="search-filter-title text-brand-text">Search</h2>
 
           {/* Text input row */}
           <div className="search-filter-input-row">
-            <div className="search-filter-input-wrap">
+            <div className="search-filter-input-wrap bg-brand-bg border border-brand-text/10 rounded-xl focus-within:border-accent transition-colors duration-200">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-gray-400 shrink-0">
+                strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-muted shrink-0">
                 <path strokeLinecap="round" strokeLinejoin="round"
                   d="m21 21-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0Z" />
               </svg>
@@ -310,11 +301,11 @@ const SearchPage = () => {
                 onChange={e => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Enter a movie or TV show title…"
-                className="search-filter-input"
+                className="search-filter-input text-brand-text placeholder:text-muted"
               />
               {inputValue && (
                 <button onClick={() => setInputValue("")}
-                  className="text-gray-500 hover:text-white transition-colors shrink-0">
+                  className="text-muted hover:text-brand-text transition-colors shrink-0 cursor-pointer">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                     strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -322,13 +313,13 @@ const SearchPage = () => {
                 </button>
               )}
             </div>
-            <button onClick={handleSearch} className="search-filter-btn">
+            <button onClick={handleSearch} className="search-filter-btn bg-accent hover:bg-accent-hover text-white transition-colors cursor-pointer">
               Search
             </button>
           </div>
 
           {/* Divider */}
-          <div className="border-t border-white/5 my-4" />
+          <div className="border-t border-brand-text/10 my-4" />
 
           {/* Filter row */}
           <div className="search-filter-row">
@@ -372,7 +363,7 @@ const SearchPage = () => {
 
             <button
               onClick={handleReset}
-              className="self-end mb-0.5 text-xs text-gray-400 hover:text-white border border-white/10 hover:border-white/30
+              className="self-end mb-0.5 text-xs text-brand-text border border-brand-text/10 hover:bg-brand-text/5
                          px-3 py-1.5 rounded-lg transition3s cursor-pointer whitespace-nowrap"
             >
               Reset
@@ -380,10 +371,10 @@ const SearchPage = () => {
           </div>
 
           {!loading && totalResults > 0 && (
-            <p className="text-gray-500 text-xs mt-3">
+            <p className="text-muted text-xs mt-3">
               {totalResults.toLocaleString()} results
               {committedRef.current?.query && (
-                <span> for <span className="text-gray-300 font-medium">"{committedRef.current.query}"</span></span>
+                <span> for <span className="text-brand-text font-medium">"{committedRef.current.query}"</span></span>
               )}
             </p>
           )}
@@ -404,8 +395,8 @@ const SearchPage = () => {
             </div>
           ) : error ? (
             <div className="col-span-full flex flex-col items-center py-20 gap-3">
-              <p className="text-gray-400 text-sm">{error}</p>
-              <button onClick={handleReset} className="text-indigo-400 hover:underline text-sm">
+              <p className="text-muted text-sm">{error}</p>
+              <button onClick={handleReset} className="text-accent hover:underline text-sm cursor-pointer">
                 Clear filters
               </button>
             </div>

@@ -117,6 +117,19 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
     setMobileMenuOpen(false);
   };
 
+  const handleToggleTheme = () => {
+    // 1. Check if the browser supports View Transitions
+    if (!document.startViewTransition) {
+      setDarkMode(!darkMode);
+      return;
+    }
+
+    // 2. Wrap the state update in a View Transition
+    document.startViewTransition(() => {
+      setDarkMode(!darkMode);
+    });
+  };
+
   return (
     <nav className="main-navbar">
       <div className="main-navbar-inner">
@@ -135,7 +148,7 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
           
           {/* THEME TOGGLE BUTTON */}
           <button
-            onClick={() => setDarkMode(!darkMode)}
+            onClick={handleToggleTheme}
             className="p-2 rounded-full transition-all duration-300 hover:bg-white/10 dark:hover:bg-black/20 text-gray-300 hover:text-white shrink-0"
             aria-label="Toggle theme"
           >
@@ -169,40 +182,39 @@ const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
               Login
             </button>
           ) : (
-            /* Stateful Dropdown Container */
             <div className="relative" ref={profileRef}>
+              {/* Profile Button - UPDATED CLASSES */}
               <button 
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                className="flex items-center gap-1.5 text-xs lg:text-sm font-semibold bg-white/25 dark:bg-white/10 border border-white/5 px-3 py-1.5 rounded-md dark:text-indigo-300 text-indigo-500 tracking-wider select-none cursor-pointer hover:bg-white/35 dark:hover:bg-white/20 transition-all duration-200"
+                className="flex items-center gap-1.5 text-xs lg:text-sm font-semibold bg-brand-text/5 hover:bg-brand-text/10 border border-brand-text/10 text-indigo-500 dark:text-indigo-300 px-3 py-1.5 rounded-md tracking-wider select-none cursor-pointer transition-all duration-200"
               >
                 Binge on, {getFirstName().toUpperCase()}..
                 <span className="text-base inline-block animate-popcorn-shake">
                   🍿🎬
                 </span>
-                {/* Visual Arrow Indicator */}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className={`w-3 h-3 transition-transform duration-200 ${profileMenuOpen ? "rotate-180" : ""}`}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                 </svg>
               </button>
 
-              {/* Floating Under Menu */}
+              {/* Floating Menu - UPDATED CLASSES */}
               {profileMenuOpen && (
-                <div className="absolute right-0 top-[115%] w-full bg-gray-200 dark:bg-dark-100 border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl py-1.5 z-50 flex flex-col overflow-hidden animate-slide-up fade-in">
+                <div className="absolute right-0 top-[115%] w-full bg-surface border border-brand-text/10 rounded-xl shadow-2xl py-1.5 z-50 flex flex-col overflow-hidden animate-slide-up fade-in">
                   <button 
                     onClick={() => { navigate("/account"); setProfileMenuOpen(false); }}
-                    className="px-4 py-2.5 text-sm text-left text-gray-700 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center gap-2 font-medium cursor-pointer"
+                    className="px-4 py-2.5 text-sm text-left text-brand-text hover:bg-brand-text/5 transition-colors flex items-center gap-2 font-medium cursor-pointer"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-muted">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                     </svg>
                     Account
                   </button>
                   
-                  <hr className="border-gray-100 dark:border-white/5 my-1" />
+                  <hr className="border-brand-text/5 my-1" />
                   
                   <button 
                     onClick={() => { logout(); setProfileMenuOpen(false); }}
-                    className="px-4 py-2.5 text-sm text-left text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors flex items-center gap-2 font-semibold cursor-pointer"
+                    className="px-4 py-2.5 text-sm text-left text-red-500 hover:bg-red-500/10 transition-colors flex items-center gap-2 font-semibold cursor-pointer"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />

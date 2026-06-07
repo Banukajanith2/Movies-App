@@ -75,7 +75,7 @@ const PlaylistPage = ({ playlist, userId, onBack, onPlaylistDeleted }) => {
         <div className="flex items-start gap-3">
           <button 
             onClick={onBack}
-            className="mt-1 p-1.5 hover:bg-indigo-500 rounded-2xl text-gray-400 hover:text-white transition-all cursor-pointer shadow-md"
+            className="mt-1 p-1.5 hover:bg-accent rounded-2xl text-muted hover:text-white transition-all cursor-pointer shadow-md"
             title="Back to Dashboard"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
@@ -84,16 +84,16 @@ const PlaylistPage = ({ playlist, userId, onBack, onPlaylistDeleted }) => {
           </button>
           
           <div>
-            <p className="text-2xl lg:text-3xl font-bold tracking-wide text-white">{playlist.name}</p>
-            <p className="text-xs text-zinc-500 mt-1.5 font-medium tracking-normal">
-              Created: {displayDate} <span className="mx-2 text-zinc-700">•</span> {items.length} Items
+            <p className="text-2xl lg:text-3xl font-bold tracking-wide text-brand-text">{playlist.name}</p>
+            <p className="text-xs text-muted mt-1.5 font-medium tracking-normal">
+              Created: {displayDate} <span className="mx-2 text-brand-text/20">•</span> {items.length} Items
             </p>
           </div>
         </div>
 
         <button
           onClick={handleDeletePlaylist}
-          className="bg-[#ef4444] hover:bg-[#dc2626] text-white text-xs lg:text-sm font-semibold px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-red-500/10 active:scale-[0.98] cursor-pointer shrink-0 sm:self-center"
+          className="bg-red-500 hover:bg-red-600 text-white text-xs lg:text-sm font-semibold px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-red-500/10 active:scale-[0.98] cursor-pointer shrink-0 sm:self-center"
         >
           Delete Playlist
         </button>
@@ -101,7 +101,7 @@ const PlaylistPage = ({ playlist, userId, onBack, onPlaylistDeleted }) => {
 
       {/* ─── DISPLAY GRID (5 Items Per Row Configuration) ─── */}
       {items.length === 0 ? (
-        <div className="w-full border border-dashed border-white/10 rounded-2xl py-16 flex flex-col items-center justify-center text-zinc-500 gap-2">
+        <div className="w-full border border-dashed border-brand-text/10 rounded-2xl py-16 flex flex-col items-center justify-center text-muted gap-2">
           <span className="text-sm font-medium tracking-wide">This playlist contains no items</span>
         </div>
       ) : (
@@ -112,11 +112,22 @@ const PlaylistPage = ({ playlist, userId, onBack, onPlaylistDeleted }) => {
               ? item.type === "movie" 
               : (item.title !== undefined || item.release_date !== undefined);
 
-            // 🔥 DATA ADAPTER: Fixes cross-property naming mismatches between TMDB Movies (.title) and TV Shows (.name)
+            // 🔥 EXTENDED DATA ADAPTER: Maps custom Firestore data properties 
+            // back into the exact naming format that MovieCard and TvCard expect.
             const adaptedItem = {
               ...item,
-              title: item.title || item.name, // Guarantees MovieCard gets a valid string fallback
-              name: item.name || item.title,   // Guarantees TvCard gets a valid string fallback
+              title: item.title || item.name,
+              name: item.name || item.title,
+              
+              // Map Firestore 'rating' to 'vote_average'
+              vote_average: item.rating !== undefined ? item.rating : item.vote_average,
+              
+              // Map Firestore 'year' to 'release_date' or 'first_air_date' as strings
+              release_date: item.year ? String(item.year) : item.release_date,
+              first_air_date: item.year ? String(item.year) : item.first_air_date,
+              
+              // Map Firestore 'language' to 'original_language'
+              original_language: item.language || item.original_language,
             };
 
             return (
@@ -131,7 +142,7 @@ const PlaylistPage = ({ playlist, userId, onBack, onPlaylistDeleted }) => {
                 
                 <button
                   onClick={() => handleRemoveItem(item)}
-                  className="w-full bg-dark-200 hover:bg-[#e04444] text-white text-xs font-semibold py-2 rounded-xl transition-colors duration-200 shadow-md shadow-red-500/5 cursor-pointer mt-1"
+                  className="w-full bg-brand-text/5 hover:bg-red-500 hover:text-white text-muted text-xs font-semibold py-2 rounded-xl transition-colors duration-200 shadow-sm cursor-pointer mt-1"
                 >
                   Remove
                 </button>

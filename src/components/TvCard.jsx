@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom"; // Imported Portal utility for layout insurance
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../firebase/config";
@@ -94,7 +95,6 @@ const TvCard = ({
       return;
     }
 
-    // Toggle dropdown
     if (isDropdownOpen) {
       setIsDropdownOpen(false);
       return;
@@ -112,12 +112,19 @@ const TvCard = ({
     }
   };
 
-  // Package the current item data (Set type to "tv" and title reference to name)
+  // Shifted data parsing logic UP so the payload variable can securely access them
+  const year = first_air_date ? first_air_date.split("-")[0] : null;
+  const lang = original_language === "en" ? "EN" : original_language?.toUpperCase();
+
+  // ── Extended Payload Object ──
   const currentItemPayload = {
     id: Number(id),
     type: "tv",
     title: name,
-    poster_path: poster_path
+    poster_path: poster_path,
+    year: year,                          // Added field
+    rating: Number(vote_average),        // Added field
+    language: lang                       // Added field
   };
 
   const handleSelectExistingPlaylist = async (e, playlistId) => {
@@ -151,9 +158,6 @@ const TvCard = ({
     }
   };
 
-  const year = first_air_date ? first_air_date.split("-")[0] : null;
-  const lang = original_language === "en" ? "EN" : original_language?.toUpperCase();
-
   return (
     <>
       <div className={`movie-card-new relative ${className}`} onClick={handleClick}>
@@ -166,11 +170,11 @@ const TvCard = ({
             loading="lazy"
           />
 
-          {/* Hover overlay: rating left, controls right */}
+          {/* Hover overlay */}
           <div className="mcn-overlay">
             <div className="mcn-overlay-inner">
               
-              {/* Vote/Rating Counter (Now on Left Side) */}
+              {/* Vote/Rating Counter */}
               {vote_average > 0 && (
                 <span className="mcn-rating">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#facc15" className="w-5 h-5 shrink-0">
@@ -180,8 +184,8 @@ const TvCard = ({
                 </span>
               )}
 
-              {/* Controls Cluster (Now on Right Side via ml-auto) */}
-              <div className="flex items-center gap-2 ml-auto">
+              {/* Controls Cluster */}
+              <div className="tv-controls">
                 {/* Playlist Addition Plus Button */}
                 <button 
                   onClick={handlePlaylistButtonClick}
@@ -226,13 +230,11 @@ const TvCard = ({
             </div>
           </div>
 
-          {/* ── Dropdown Options Menu (Centered relative to the entire TV card wrapper) ── */}
+          {/* ── Dropdown Options Menu ── */}
           {isDropdownOpen && (
             <>
-              {/* Back-layer overlay click catcher */}
               <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setIsDropdownOpen(false); }} />
               
-              {/* Centered perfectly using left-1/2 and -translate-x-1/2 */}
               <div className="absolute left-1/2 -translate-x-1/2 bottom-14 z-50 w-48 rounded-md bg-zinc-900 border border-zinc-800 p-1 shadow-xl text-left" onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={handleOpenCreateModal}
@@ -265,7 +267,6 @@ const TvCard = ({
             </>
           )}
 
-          {/* Top-right type badge */}
           <span className="mcn-type-badge mcn-type-badge-tv">TV Show</span>
         </div>
 
@@ -280,8 +281,8 @@ const TvCard = ({
         </div>
       </div>
 
-      {/* ── Playlist Creation Modal (Floating Window) ── */}
-      {isModalOpen && (
+      {/* ── Playlist Creation Modal (Portaled to body to completely prevent layout clipping) ── */}
+      {isModalOpen && createPortal(
         <div 
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm"
           onClick={(e) => { e.stopPropagation(); setIsModalOpen(false); }}
@@ -318,7 +319,8 @@ const TvCard = ({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

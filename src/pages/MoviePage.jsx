@@ -36,7 +36,7 @@ const MoviePage = () => {
 
   if (pageloading)
     return (
-      <div className="fixed inset-0 bg-dark-100 flex items-center justify-center z-[9999]">
+      <div className="fixed inset-0 bg-brand-bg flex items-center justify-center z-[9999]">
         <Spinner />
       </div>
     );
@@ -47,8 +47,7 @@ const MoviePage = () => {
   }
 
   return (
-    <div className="relative">
-      {/* Shared Navbar — no section refs needed on detail pages */}
+    <div className="relative bg-brand-bg min-h-screen">
       <Navbar />
 
       <div className="movie fade-in pt-20">
@@ -95,16 +94,19 @@ const MoviePage = () => {
               alt={movie.title}
             />
           </div>
-          <div className="movie-info">
-            <h2 className="mb-3">{movie.title}</h2>
-            <p className="mb-4 overflow-y-scroll">{movie.overview}</p>
-            <p><strong>Release Date :</strong> {movie.release_date}</p>
-            <p><strong>IMDb :</strong> {movie.vote_average?.toFixed(1) || "N/A"}/10</p>
-            <p><strong>Language :</strong> {movie.original_language === "en" ? "English" : movie.spoken_languages?.[0]?.english_name || movie.original_language}</p>
-            <p><strong>Genre :</strong> {movie.genres?.map((genre, key) => (
+          
+          {/* Movie Info with updated semantic text tokens */}
+          <div className="movie-info text-brand-text">
+            <h2 className="mb-3 text-brand-text">{movie.title}</h2>
+            <p className="mb-4 overflow-y-scroll text-muted">{movie.overview}</p>
+            <p><strong>Release Date :</strong> <span className="text-muted">{movie.release_date}</span></p>
+            <p><strong>IMDb :</strong> <span className="text-muted">{movie.vote_average?.toFixed(1) || "N/A"}/10</span></p>
+            <p><strong>Language :</strong> <span className="text-muted">{movie.original_language === "en" ? "English" : movie.spoken_languages?.[0]?.english_name || movie.original_language}</span></p>
+            <p><strong>Genre :</strong> <span className="text-muted">{movie.genres?.map((genre, key) => (
               <span key={key}>{genre.name}{key < movie.genres.length - 1 ? ", " : ""}</span>
-            ))}</p>
-            <div className="flex items-center gap-3">
+            ))}</span></p>
+            
+            <div className="flex items-center gap-3 mt-4">
               <TrailerButton id={movie.id} mediaType="movie" />
               <ImdbButton id={movie.id} mediaType="movie" />
             </div>

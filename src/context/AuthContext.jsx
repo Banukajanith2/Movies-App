@@ -18,12 +18,21 @@ export const AuthProvider = ({ children }) => {
     return unsubscribe; // Cleanup listener on unmount
   }, []);
 
+  // 🔥 Forces React to update tracking refs when mutations happen to the user object fields
+  const refreshUser = () => {
+    if (auth.currentUser) {
+      // Cloning the object into a new shallow copy forces a React re-render
+      setCurrentUser({ ...auth.currentUser });
+    }
+  };
+
   const logout = () => {
     return signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, logout }}>
+    // 🔥 Added refreshUser to the context value stack
+    <AuthContext.Provider value={{ currentUser, logout, refreshUser }}>
       {!loading && children}
     </AuthContext.Provider>
   );

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom"; // Imported Portal utility for modal safety
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../firebase/config";
@@ -91,7 +92,6 @@ const MovieCard = ({
       return;
     }
 
-    // Toggle dropdown
     if (isDropdownOpen) {
       setIsDropdownOpen(false);
       return;
@@ -109,12 +109,19 @@ const MovieCard = ({
     }
   };
 
-  // Package the current item data
+  // Move data parsing logic UP so the payload can access them safely
+  const year = release_date ? release_date.split("-")[0] : null;
+  const lang = original_language === "en" ? "EN" : original_language?.toUpperCase();
+
+  // ── Extended Payload Object ──
   const currentItemPayload = {
     id: Number(id),
     type: "movie",
     title: title,
-    poster_path: poster_path
+    poster_path: poster_path,
+    year: year,                          // Added field
+    rating: Number(vote_average),        // Added field
+    language: lang                       // Added field
   };
 
   const handleSelectExistingPlaylist = async (e, playlistId) => {
@@ -148,9 +155,6 @@ const MovieCard = ({
     }
   };
 
-  const year = release_date ? release_date.split("-")[0] : null;
-  const lang = original_language === "en" ? "EN" : original_language?.toUpperCase();
-
   return (
     <>
       <div className={`movie-card-new relative ${className}`} onClick={handleClick}>
@@ -167,7 +171,7 @@ const MovieCard = ({
           <div className="mcn-overlay">
             <div className="mcn-overlay-inner">
               
-              {/* Vote/Rating Counter (Now on Left Side) */}
+              {/* Vote/Rating Counter */}
               {vote_average > 0 && (
                 <span className="mcn-rating">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#facc15" className="w-5 h-5 shrink-0">
@@ -177,8 +181,8 @@ const MovieCard = ({
                 </span>
               )}
 
-              {/* Controls Cluster (Now on Right Side via ml-auto) */}
-              <div className="flex items-center gap-2 ml-auto">
+              {/* Controls Cluster */}
+              <div className="movie-controls">
                 
                 {/* Playlist Addition Plus Button */}
                 <button 
@@ -224,13 +228,11 @@ const MovieCard = ({
             </div>
           </div>
 
-          {/* ── Dropdown Options Menu (Kept perfectly centered as requested) ── */}
+          {/* ── Dropdown Options Menu ── */}
           {isDropdownOpen && (
             <>
-              {/* Back-layer overlay click catcher */}
               <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setIsDropdownOpen(false); }} />
               
-              {/* Centered perfectly using left-1/2 and -translate-x-1/2 based on the card's container width */}
               <div className="absolute left-1/2 -translate-x-1/2 bottom-14 z-50 w-48 rounded-md bg-zinc-900 border border-zinc-800 p-1 shadow-xl text-left" onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={handleOpenCreateModal}
@@ -277,8 +279,8 @@ const MovieCard = ({
         </div>
       </div>
 
-      {/* ── Playlist Creation Modal ── */}
-      {isModalOpen && (
+      {/* ── Playlist Creation Modal (Portaled to body to completely prevent layout clipping) ── */}
+      {isModalOpen && createPortal(
         <div 
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm"
           onClick={(e) => { e.stopPropagation(); setIsModalOpen(false); }}
@@ -315,7 +317,8 @@ const MovieCard = ({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
 import Spinner from "../components/Spinner";
-import Navbar from "../components/Navbar"; // 1. Imported the clean Navbar component
+import Navbar from "../components/Navbar";
 import TrailerButton from "../components/TrailerButton";
 import ImdbButton from "../components/ImdbButton";
 import Footer from "../components/Footer";
@@ -71,7 +71,7 @@ const TVPage = () => {
 
   if (pageLoading) {
     return (
-      <div className="fixed inset-0 bg-dark-100 flex items-center justify-center z-[9999]">
+      <div className="fixed inset-0 bg-brand-bg flex items-center justify-center z-[9999]">
         <Spinner />
       </div>
     );
@@ -85,11 +85,9 @@ const TVPage = () => {
   const standardSeasons = tvShow.seasons?.filter((s) => s.season_number > 0) || [];
 
   return (
-    <div className="relative">
-      {/* 2. Swapped old nav structure with your clean Navbar */}
+    <div className="relative bg-brand-bg min-h-screen">
       <Navbar />
 
-      {/* 3. Changed padding-top from pt-18 to pt-20 to perfectly match MoviePage sizing */}
       <div className="tv fade-in pt-20">
         
         {/* Backdrop / Main Player Window */}
@@ -127,16 +125,16 @@ const TVPage = () => {
         </div>
 
         {/* Season & Episode Selector Bar */}
-        <div className="animate-slide-up w-full my-6 flex flex-col items-center justify-center sm:flex-row sm:flex-wrap sm:items-center gap-4 bg-dark-100/60 p-4 rounded-xl border border-light-100/10 backdrop-blur-md">
+        <div className="animate-slide-up w-full my-6 flex flex-col items-center justify-center sm:flex-row sm:flex-wrap sm:items-center gap-4 bg-surface p-4 rounded-xl border border-brand-text/10 backdrop-blur-md">
           <div className="flex flex-col w-full sm:w-auto sm:min-w-[140px]">
-            <label className="text-xs lg:text-sm font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Season</label>
+            <label className="text-xs lg:text-sm font-semibold uppercase tracking-wider text-muted mb-1.5">Season</label>
             <select
               value={selectedSeason}
               onChange={(e) => {
                 setSelectedSeason(Number(e.target.value));
                 setSelectedEpisode(1);
               }}
-              className="bg-dark-200 text-white rounded-lg px-3 py-2 border border-light-100/20 focus:outline-none focus:border-indigo-500 cursor-pointer text-sm font-medium transition w-full"
+              className="bg-brand-bg text-brand-text rounded-lg px-3 py-2 border border-muted/30 focus:outline-none focus:border-accent cursor-pointer text-sm font-medium transition w-full"
             >
               {standardSeasons.length > 0 ? (
                 standardSeasons.map((s) => (
@@ -151,12 +149,12 @@ const TVPage = () => {
           </div>
 
           <div className="flex flex-col w-full sm:w-auto sm:min-w-[140px]">
-            <label className="text-xs lg:text-sm font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Episode</label>
+            <label className="text-xs lg:text-sm font-semibold uppercase tracking-wider text-muted mb-1.5">Episode</label>
             <select
               value={selectedEpisode}
               disabled={episodesLoading}
               onChange={(e) => setSelectedEpisode(Number(e.target.value))}
-              className="bg-dark-200 text-white rounded-lg px-3 py-2 border border-light-100/20 focus:outline-none focus:border-indigo-500 cursor-pointer text-sm font-medium transition disabled:opacity-50 w-full"
+              className="bg-brand-bg text-brand-text rounded-lg px-3 py-2 border border-muted/30 focus:outline-none focus:border-accent cursor-pointer text-sm font-medium transition disabled:opacity-50 w-full"
             >
               {episodesLoading ? (
                 <option>Loading...</option>
@@ -177,7 +175,7 @@ const TVPage = () => {
           </div>
 
           {showPlayer && (
-            <div className="w-full items-center justify-center text-center text-xs sm:text-sm text-gray-400 italic pt-2 self-center">
+            <div className="w-full items-center justify-center text-center text-xs sm:text-sm text-muted italic pt-2 self-center">
               Playing Season {selectedSeason}, Episode {selectedEpisode}
             </div>
           )}
@@ -192,22 +190,20 @@ const TVPage = () => {
               alt={tvShow.name}
             />
           </div>
-          <div className="movie-info">
-            <h2 className="mb-3">{tvShow.name}</h2>
-            <p className="mb-4 overflow-y-scroll max-h-40">{tvShow.overview || "No overview available."}</p>
-            <p><strong>First Air Date :</strong> {tvShow.first_air_date || "N/A"}</p>
-            <p><strong>IMDb :</strong> {tvShow.vote_average?.toFixed(1) || "N/A"}/10</p>
-            <p><strong>Language :</strong> {tvShow.original_language === "en" ? "English" : tvShow.spoken_languages?.[0]?.english_name || tvShow.original_language}</p>
-            <p><strong>Genre :</strong> {tvShow.genres?.map((genre, key) => (<span key={key}>{genre.name}{key < tvShow.genres.length - 1 ? ", " : ""}</span>))}</p>
+          <div className="movie-info text-brand-text">
+            <h2 className="mb-3 text-brand-text">{tvShow.name}</h2>
+            <p className="mb-4 overflow-y-scroll max-h-40 text-muted">{tvShow.overview || "No overview available."}</p>
+            <p><strong>First Air Date :</strong> <span className="text-muted">{tvShow.first_air_date || "N/A"}</span></p>
+            <p><strong>IMDb :</strong> <span className="text-muted">{tvShow.vote_average?.toFixed(1) || "N/A"}/10</span></p>
+            <p><strong>Language :</strong> <span className="text-muted">{tvShow.original_language === "en" ? "English" : tvShow.spoken_languages?.[0]?.english_name || tvShow.original_language}</span></p>
+            <p><strong>Genre :</strong> <span className="text-muted">{tvShow.genres?.map((genre, key) => (<span key={key}>{genre.name}{key < tvShow.genres.length - 1 ? ", " : ""}</span>))}</span></p>
             
-            {/* Perfectly aligned action row */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mt-4">
               <TrailerButton id={tvShow.id} mediaType="tv" />
               <ImdbButton id={tvShow.id} mediaType="tv" />
             </div>
           </div>
         </div>
-
         
         <Footer />
       </div>
