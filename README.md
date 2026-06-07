@@ -26,6 +26,11 @@ A modern movie and TV show browsing app built with React, TMDB API, and Firebase
 
 ---
 
+## 🖼️ Screenshots
+
+### Home Page -
+> ![Home Page](./screenshots/screenshot-home.png)
+
 ## 🔧 Setup & Installation
 
 ### 1. Clone the repo
