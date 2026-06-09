@@ -740,3 +740,41 @@
 @media (min-width: 480px) { .search-results-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (min-width: 768px) { .search-results-grid { grid-template-columns: repeat(4, 1fr); } }
 @media (min-width: 1024px) { .search-results-grid { grid-template-columns: repeat(5, 1fr); } }
+
+/* ── Server Panel Slide-in Animation ──
+   Add this to your global CSS file (e.g. index.css or App.css)
+   ─────────────────────────────────────────────────────────── */
+
+@keyframes serverPanelSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ── Server Panel Layout ──
+   Matches the height of your .backdrop / .player so it always
+   fills the full player height regardless of aspect ratio.
+   ─────────────────────────────────────────────────────────── */
+
+.server-panel {
+  /* Match your player's aspect ratio height automatically */
+  align-self: stretch;
+}
+
+/* Optional: if you want the server panel to scroll
+   with a hidden scrollbar on webkit browsers */
+.server-panel .custom-scrollbar::-webkit-scrollbar {
+  width: 3px;
+}
+.server-panel .custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(99, 102, 241, 0.4); /* indigo tint */
+  border-radius: 999px;
+}
+.server-panel .custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}

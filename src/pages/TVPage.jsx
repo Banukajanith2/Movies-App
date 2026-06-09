@@ -17,7 +17,45 @@ import Spinner from "../components/Spinner";
 import Navbar from "../components/Navbar";
 import TrailerButton from "../components/TrailerButton";
 import ImdbButton from "../components/ImdbButton";
+import MediaSlider, { ENDPOINTS } from "../components/MediaSlider.jsx";
 import Footer from "../components/Footer";
+
+// ── TV Streaming Servers ──
+// season & episode are passed through to each URL that supports them.
+const TV_SERVERS = [
+  {
+    label: "VidSrc",
+    url: (id, s, e) => `https://vidsrcme.ru/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
+  },
+  {
+    label: "EmbosTop",
+    url: (id, s, e) => `https://embos.top/tv/?mid=${id}&s=${s}&e=${e}`,
+  },
+  {
+    label: "VidSrc 2",
+    url: (id, s, e) => `https://vidsrc.to/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    label: "VidKing",
+    url: (id, s, e) => `https://www.vidking.net/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    label: "2Embed",
+    url: (id, s, e) => `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`,
+  },
+  {
+    label: "MultiEmbed",
+    url: (id, s, e) => `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`,
+  },
+  {
+    label: "VidPlus",
+    url: (id, s, e) => `https://player.vidplus.to/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    label: "Vid Easy",
+    url: (id, s, e) => `https://player.videasy.net/tv/${id}/${s}/${e}`,
+  },
+];
 
 const TVPage = () => {
   const { slug } = useParams();
@@ -34,6 +72,9 @@ const TVPage = () => {
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [episodesList, setEpisodesList] = useState([]);
   const [episodesLoading, setEpisodesLoading] = useState(false);
+
+  // Server Selection
+  const [activeServer, setActiveServer] = useState(0);
 
   // Firestore Syncing & UI States
   const [isFavorite, setIsFavorite] = useState(false);
@@ -92,7 +133,7 @@ const TVPage = () => {
     fetchSeasonDetails();
   }, [selectedSeason, tvId, tvShow]);
 
-  // 3. Real-time TV-specific favorite tracking with reliable type normalization
+  // 3. Real-time TV-specific favorite tracking
   useEffect(() => {
     if (!currentUser || !tvShow?.id) {
       setIsFavorite(false);
@@ -106,8 +147,6 @@ const TVPage = () => {
       if (docSnap.exists()) {
         const userData = docSnap.data();
         const favs = userData.favoriteTvShows || [];
-        
-        // Normalize everything to numbers to prevent string-vs-number type bugs
         const hasIt = favs.map(id => Number(id)).includes(targetId);
         setIsFavorite(hasIt);
       } else {
@@ -120,6 +159,12 @@ const TVPage = () => {
 
     return () => unsubscribe();
   }, [currentUser, tvShow?.id]);
+
+  // Reset server + player when navigating to a different show
+  useEffect(() => {
+    setActiveServer(0);
+    setShowPlayer(false);
+  }, [tvId]);
 
   if (pageLoading) {
     return (
@@ -150,13 +195,8 @@ const TVPage = () => {
   };
 
   // ── Action Handlers ──
-  // TVPage.jsx — handleFavoriteClick
   const handleFavoriteClick = async () => {
-    if (!currentUser) {
-      navigate("/login");
-      return;
-    }
-
+    if (!currentUser) { navigate("/login"); return; }
     try {
       if (isFavorite) {
         await removeTvFromFavorites(currentUser.uid, Number(tvShow.id));
@@ -166,19 +206,11 @@ const TVPage = () => {
     } catch (error) {
       console.error("Error toggling favorite TV state:", error);
     }
-    // No optimistic flip — onSnapshot will update isFavorite automatically
   };
 
   const handlePlaylistButtonClick = async () => {
-    if (!currentUser) {
-      navigate("/login");
-      return;
-    }
-
-    if (isDropdownOpen) {
-      setIsDropdownOpen(false);
-      return;
-    }
+    if (!currentUser) { navigate("/login"); return; }
+    if (isDropdownOpen) { setIsDropdownOpen(false); return; }
 
     setIsDropdownOpen(true);
     setIsLoadingPlaylists(true);
@@ -210,7 +242,6 @@ const TVPage = () => {
   const handleCreatePlaylistSubmit = async (e) => {
     e.preventDefault();
     if (!newPlaylistName.trim()) return;
-
     try {
       await createPlaylistAndAddItem(currentUser.uid, newPlaylistName.trim(), currentItemPayload);
       setNewPlaylistName("");
@@ -226,38 +257,93 @@ const TVPage = () => {
       <Navbar />
 
       <div className="tv fade-in pt-20">
-        
-        {/* Backdrop / Main Player Window */}
-        <div className="backdrop animate-slide-up" onClick={() => !showPlayer && setShowPlayer(true)}>
-          {showPlayer ? (
-            <div className="player">
-              <iframe
-                className="iframe"
-                src={`https://vidsrcme.ru/embed/tv?tmdb=${tvShow.id}&season=${selectedSeason}&episode=${selectedEpisode}`}
-                referrerPolicy="origin"
-                allowFullScreen
-              />
-            </div>
-          ) : (
-            <>
-              <img
-                className="backdrop-img"
-                src={tvShow.backdrop_path ? `https://image.tmdb.org/t/p/w500/${tvShow.backdrop_path}` : "no-movie.png"}
-                alt={tvShow.name}
-              />
-              <svg
-                className="play-icon"
-                onClick={() => setShowPlayer(true)}
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z"
-                  clipRule="evenodd"
+
+        {/* ── Backdrop / Player + Server Panel ── */}
+        {/* ── Backdrop / Player + Server Panel ── */}
+        <div className="animate-slide-up relative">
+
+          {/* Backdrop / Player Area — never changes width */}
+          <div
+            className="backdrop"
+            onClick={!showPlayer ? () => setShowPlayer(true) : undefined}
+          >
+            {showPlayer ? (
+              <div className="player">
+                <iframe
+                  key={`${activeServer}-${selectedSeason}-${selectedEpisode}`}
+                  className="iframe"
+                  src={TV_SERVERS[activeServer].url(tvShow.id, selectedSeason, selectedEpisode)}
+                  referrerPolicy="origin"
+                  allowFullScreen
                 />
-              </svg>
-            </>
+              </div>
+            ) : (
+              <>
+                <img
+                  className="backdrop-img"
+                  src={tvShow.backdrop_path ? `https://image.tmdb.org/t/p/w500/${tvShow.backdrop_path}` : "no-movie.png"}
+                  alt={tvShow.name}
+                />
+                <svg
+                  className="play-icon"
+                  onClick={() => setShowPlayer(true)}
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </>
+            )}
+          </div>
+
+          {/* ── Server Panel ── */}
+          {showPlayer && (
+            <div
+              className="server-panel bg-brand-bg border border-zinc-200 dark:border-zinc-800 rounded-lg flex flex-col"
+              style={{
+                position: "absolute",
+                top: "0%",
+                left: "100%",
+                transform: "translateY(-50%)",
+                width: "200px",
+                minWidth: "200px",
+                animation: "serverPanelSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+              }}
+            >
+              <div className="px-4 pt-4 pb-2">
+                <p className="text-[12px] font-semibold tracking-widest uppercase text-brand-text select-none">
+                  Server
+                </p>
+              </div>
+              <div
+                className="overflow-y-auto flex flex-col gap-1 px-2 pb-3 custom-scrollbar"
+                style={{ maxHeight: "calc(5 * 44px)" }}
+              >
+                {TV_SERVERS.map((server, index) => (
+                  <label
+                    key={index}
+                    className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-150 select-none ${
+                      activeServer === index
+                        ? "bg-indigo-600 text-white"
+                        : "text-brand-text hover:bg-zinc-100 dark:hover:bg-zinc-800/70"
+                    }`}
+                  >
+                    <span className={`relative flex-shrink-0 w-[15px] h-[15px] rounded-full border-2 transition-all duration-150 ${activeServer === index ? "border-white" : "border-zinc-400 dark:border-zinc-600"}`}>
+                      {activeServer === index && <span className="absolute inset-[3px] rounded-full bg-white" />}
+                    </span>
+                    <input type="radio" name="tv-server" className="sr-only" checked={activeServer === index} onChange={() => setActiveServer(index)} />
+                    <span className="text-[12px] font-medium leading-tight truncate">{server.label}</span>
+                  </label>
+                ))}
+              </div>
+              <p className="px-4 pb-4 pt-4 text-[12px] text-zinc-400 dark:text-zinc-500 leading-relaxed">
+                Switch server if video won't load.
+              </p>
+            </div>
           )}
         </div>
 
@@ -335,8 +421,8 @@ const TVPage = () => {
             <p><strong>Language :</strong> <span className="text-muted">{tvShow.original_language === "en" ? "English" : tvShow.spoken_languages?.[0]?.english_name || tvShow.original_language}</span></p>
             <p><strong>Genre :</strong> <span className="text-muted">{tvShow.genres?.map((genre, key) => (<span key={key}>{genre.name}{key < tvShow.genres.length - 1 ? ", " : ""}</span>))}</span></p>
             
-            {/* Action Bar Container */}
-            <div className="flex items-center flex-wrap gap-3 mt-5 relative">
+            {/* Action Bar */}
+            <div className="flex items-center flex-wrap gap-3 mt-4 relative">
               <TrailerButton id={tvShow.id} mediaType="tv" />
               <ImdbButton id={tvShow.id} mediaType="tv" />
 
@@ -351,19 +437,12 @@ const TVPage = () => {
                 aria-label="Favorite TV Show"
                 title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
               >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 24 24" 
-                  fill={isFavorite ? "currentColor" : "none"} 
-                  stroke="currentColor" 
-                  strokeWidth={2} 
-                  className="w-5 h-5"
-                >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={isFavorite ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2} className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
                 </svg>
               </button>
 
-              {/* ── Playlist Button Anchor Context ── */}
+              {/* ── Playlist Button ── */}
               <div className="relative flex items-center justify-center">
                 <button 
                   onClick={handlePlaylistButtonClick}
@@ -380,11 +459,9 @@ const TVPage = () => {
                   </svg>
                 </button>
 
-                {/* ── Playlist Dropdown Menu ── */}
                 {isDropdownOpen && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
-                    
                     <div className="absolute left-0 top-12 mt-1 z-50 w-52 rounded-lg bg-zinc-900 border border-zinc-800 p-1 shadow-2xl text-left animate-fade-in">
                       <button
                         onClick={handleOpenCreateModal}
@@ -419,10 +496,15 @@ const TVPage = () => {
                   </>
                 )}
               </div>
-
             </div>
           </div>
         </div>
+
+        <MediaSlider
+          title="Latest Popular TV Shows"
+          endpoint={ENDPOINTS.popularTV}
+          accentColor="amber"
+        />
         
         <Footer />
       </div>

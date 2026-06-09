@@ -1,10 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom"; // Portal for modal safety
+import { createPortal } from "react-dom";
 import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../firebase/config";
 import { doc, onSnapshot } from "firebase/firestore";
+
 import { 
   addMovieToFavorites, 
   removeMovieFromFavorites, 
@@ -17,7 +18,55 @@ import Spinner from "../components/Spinner";
 import Navbar from "../components/Navbar";
 import TrailerButton from "../components/TrailerButton";
 import ImdbButton from "../components/ImdbButton";
+import MediaSlider, { ENDPOINTS } from "../components/MediaSlider.jsx";
 import Footer from "../components/Footer";
+
+// ── Streaming Servers ──
+// Each server is a free embed provider. Add/remove as needed.
+// They're tried in order — if one is down, the user picks another.
+const SERVERS = [
+  {
+    name: "VidSrc",
+    label: "VidSrc",
+    url: (id) => `https://vidsrcme.ru/embed/movie?tmdb=${id}`,
+  },
+  {
+    name: "EmbosTop",
+    label: "EmbosTop",
+    url: (id) => `https://embos.top/movie/?mid=${id}`,
+  },
+  {
+    name: "VidSrc 2",
+    label: "VidSrc 2",
+    url: (id) => `https://vidsrc.to/embed/movie/${id}`,
+  },
+  {
+    name: "VidKing",
+    label: "VidKing",
+    url: (id) => `https://www.vidking.net/embed/movie/${id}`,
+  },
+  {
+    name: "2Embed",
+    label: "2Embed",
+    url: (id) => `https://www.2embed.cc/embed/${id}`,
+  },
+  {
+    name: "MultiEmbed",
+    label: "MultiEmbed",
+    url: (id) => `https://multiembed.mov/?video_id=${id}&tmdb=1`,
+  },
+  {
+    name: "VidPlus",
+    label: "VidPlus",
+    url: (id) => `https://player.vidplus.to/embed/movie/${id}`,
+  },
+  {
+    name: "Vid Easy",
+    label: "Vid Easy",
+    url: (id) => `https://player.videasy.net/movie/${id}`,
+  },
+  
+];
 
 const MoviePage = () => {
   const { slug } = useParams();
@@ -28,6 +77,9 @@ const MoviePage = () => {
   const [movie, setMovie] = useState(null);
   const [pageloading, setPageLoading] = useState(true);
   const [showPlayer, setShowPlayer] = useState(false);
+
+  // Server Selection
+  const [activeServer, setActiveServer] = useState(0);
 
   // Firestore Syncing & UI States
   const [isFavorite, setIsFavorite] = useState(false);
@@ -83,6 +135,12 @@ const MoviePage = () => {
     return () => unsubscribe();
   }, [currentUser, movie?.id]);
 
+  // Reset server selection when movie changes
+  useEffect(() => {
+    setActiveServer(0);
+    setShowPlayer(false);
+  }, [movieId]);
+
   if (pageloading)
     return (
       <div className="fixed inset-0 bg-brand-bg flex items-center justify-center z-[9999]">
@@ -115,7 +173,6 @@ const MoviePage = () => {
       navigate("/login");
       return;
     }
-
     try {
       if (isFavorite) {
         await removeMovieFromFavorites(currentUser.uid, movie.id);
@@ -132,12 +189,10 @@ const MoviePage = () => {
       navigate("/login");
       return;
     }
-
     if (isDropdownOpen) {
       setIsDropdownOpen(false);
       return;
     }
-
     setIsDropdownOpen(true);
     setIsLoadingPlaylists(true);
     try {
@@ -168,7 +223,6 @@ const MoviePage = () => {
   const handleCreatePlaylistSubmit = async (e) => {
     e.preventDefault();
     if (!newPlaylistName.trim()) return;
-
     try {
       await createPlaylistAndAddItem(currentUser.uid, newPlaylistName.trim(), currentItemPayload);
       setNewPlaylistName("");
@@ -179,42 +233,134 @@ const MoviePage = () => {
     }
   };
 
+  const handlePlayClick = () => {
+    setShowPlayer(true);
+  };
+
+  const handleServerChange = (index) => {
+    setActiveServer(index);
+  };
+
   return (
     <div className="relative bg-brand-bg min-h-screen">
       <Navbar />
 
       <div className="movie fade-in pt-20">
-        {/* Backdrop / Player */}
-        <div className="backdrop animate-slide-up" onClick={() => setShowPlayer(true)}>
-          {showPlayer ? (
-            <div className="player">
-              <iframe
-                className="iframe"
-                src={`https://vidsrcme.ru/embed/movie?tmdb=${movie.id}`}
-                referrerPolicy="origin"
-                allowFullScreen
-              />
-            </div>
-          ) : (
-            <>
-              <img
-                className="backdrop-img"
-                src={movie.backdrop_path ? `https://image.tmdb.org/t/p/w500/${movie.backdrop_path}` : "no-movie.png"}
-                alt={movie.title}
-              />
-              <svg
-                className="play-icon"
-                onClick={() => setShowPlayer(true)}
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z"
-                  clipRule="evenodd"
+
+        {/* ── Backdrop / Player + Server Panel ── */}
+        {/* 'relative' here lets the server panel hang outside via absolute positioning */}
+        <div className="animate-slide-up relative">
+
+          {/* Backdrop / Player Area — never changes width */}
+          <div
+            className="backdrop"
+            onClick={!showPlayer ? handlePlayClick : undefined}
+          >
+            {showPlayer ? (
+              <div className="player">
+                <iframe
+                  key={activeServer} // remounts iframe on server change
+                  className="iframe"
+                  src={SERVERS[activeServer].url(movie.id)}
+                  referrerPolicy="origin"
+                  allowFullScreen
                 />
-              </svg>
-            </>
+              </div>
+            ) : (
+              <>
+                <img
+                  className="backdrop-img"
+                  src={
+                    movie.backdrop_path
+                      ? `https://image.tmdb.org/t/p/w500/${movie.backdrop_path}`
+                      : "no-movie.png"
+                  }
+                  alt={movie.title}
+                />
+                <svg
+                  className="play-icon"
+                  onClick={handlePlayClick}
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </>
+            )}
+          </div>
+
+          {/* ── Server Panel (visible only after play) ── */}
+          {/* Sits outside the player: absolute at top-0, left: 100% pushes it into the right page margin */}
+          {showPlayer && (
+            <div
+              className="server-panel bg-brand-bg border border-zinc-200 dark:border-zinc-800 rounded-lg flex flex-col"
+              style={{
+                position: "absolute",
+                top: "0",
+                left: "100%",
+                width: "200px",
+                minWidth: "200px",
+                animation: "serverPanelSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+              }}
+            >
+              {/* Panel Header */}
+              <div className="px-4 pt-4 pb-2">
+                <p className="text-[12px] font-semibold tracking-widest uppercase text-brand-text select-none">
+                  Server
+                </p>
+              </div>
+
+              {/* Server List — scrollable, max 5 visible */}
+              <div
+                className="overflow-y-auto flex flex-col gap-1 px-2 pb-3 custom-scrollbar"
+                style={{ maxHeight: "calc(5 * 44px)" }}
+              >
+                {SERVERS.map((server, index) => (
+                  <label
+                    key={index}
+                    className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-150 select-none ${
+                      activeServer === index
+                        ? "bg-indigo-600 text-white"
+                        : "text-brand-text hover:bg-zinc-100 dark:hover:bg-zinc-800/70"
+                    }`}
+                  >
+                    {/* Custom Radio Dial */}
+                    <span
+                      className={`relative flex-shrink-0 w-[15px] h-[15px] rounded-full border-2 transition-all duration-150 ${
+                        activeServer === index
+                          ? "border-white"
+                          : "border-zinc-400 dark:border-zinc-600"
+                      }`}
+                    >
+                      {activeServer === index && (
+                        <span className="absolute inset-[3px] rounded-full bg-white" />
+                      )}
+                    </span>
+
+                    <input
+                      type="radio"
+                      name="server"
+                      className="sr-only"
+                      checked={activeServer === index}
+                      onChange={() => handleServerChange(index)}
+                    />
+
+                    <span className="text-[12px] font-medium leading-tight truncate">
+                      {server.label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+
+              {/* Hint */}
+              <p className="px-4 pb-4 pt-4 text-[12px] text-zinc-400 dark:text-zinc-500 leading-relaxed">
+                Switch server if video won't load.
+              </p>
+            </div>
           )}
         </div>
 
@@ -240,7 +386,7 @@ const MoviePage = () => {
             ))}</span></p>
             
             {/* Action Bar Container */}
-            <div className="flex items-center flex-wrap gap-3 mt-5 relative">
+            <div className="flex items-center flex-wrap gap-3 mt-4 relative">
               <TrailerButton id={movie.id} mediaType="movie" />
               <ImdbButton id={movie.id} mediaType="movie" />
 
@@ -269,7 +415,6 @@ const MoviePage = () => {
 
               {/* ── Playlist Button Anchor Context ── */}
               <div className="relative flex items-center justify-center">
-                {/* Playlist Action Button (Fixed Dimensions & Shape) */}
                 <button 
                   onClick={handlePlaylistButtonClick}
                   className={`h-[40px] w-[40px] shrink-0 rounded-full text-gray-300 hover:text-white border flex items-center justify-center transition-all duration-200 cursor-pointer backdrop-blur-sm ${
@@ -328,6 +473,18 @@ const MoviePage = () => {
             </div>
           </div>
         </div>
+
+        <MediaSlider
+          title="Trending Popular Movies"
+          endpoint={ENDPOINTS.popularMovies}
+          accentColor="indigo"
+        />
+
+        <MediaSlider
+          title="Latest Movies"
+          endpoint={ENDPOINTS.upcoming}
+          accentColor="cyan"
+        />
 
         <Footer />
       </div>
