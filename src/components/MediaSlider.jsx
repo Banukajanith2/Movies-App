@@ -364,7 +364,7 @@ const MediaSlider = ({ title, endpoint, accentColor = "indigo", sectionRef }) =>
       try {
         const response = await fetch(endpoint, API_OPTIONS);
         const data = await response.json();
-        setItems((data.results || []).slice(0, 10));
+        setItems((data.results || []).slice(0, 25));
       } catch (error) {
         console.error(`Error fetching ${title}:`, error);
       } finally {

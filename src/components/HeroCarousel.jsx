@@ -381,7 +381,7 @@ const HeroCarousel = () => {
               item.backdrop_path &&
               (item.media_type === "movie" || item.media_type === "tv")
           )
-          .slice(0, 10);
+          .slice(0, 20);
         setItems(withBackdrop);
       } catch (error) {
         console.error("Hero carousel fetch error:", error);
@@ -415,7 +415,6 @@ const HeroCarousel = () => {
             nextEl: ".hero-nav-next",
             prevEl: ".hero-nav-prev",
           }}
-          pagination={{ clickable: true }}
           onSwiper={(swiper) => { swiperRef.current = swiper; }}
           style={{
             "--swiper-pagination-color": "#6366f1",
