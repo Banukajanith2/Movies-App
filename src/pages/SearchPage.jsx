@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
 import Navbar from "../components/Navbar";
 import MovieCard from "../components/MovieCard";
@@ -142,7 +142,6 @@ const FilterSelect = ({ label, value, onChange, children }) => (
 
 /* ── Main SearchPage ────────────────────────────────────────── */
 const SearchPage = () => {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const initialQuery = searchParams.get("q") || "";

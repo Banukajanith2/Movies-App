@@ -21,8 +21,6 @@ const App = () => {
       <Navbar
         tvSectionRef={tvSectionRef}
         movieSectionRef={movieSectionRef}
-        browseRef={browseRef}
-        
       />
 
       {/* Hero Carousel — full width, below nav */}

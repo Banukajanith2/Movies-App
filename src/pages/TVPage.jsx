@@ -259,7 +259,6 @@ const TVPage = () => {
       <div className="tv fade-in pt-20">
 
         {/* ── Backdrop / Player + Server Panel ── */}
-        {/* ── Backdrop / Player + Server Panel ── */}
         <div className="animate-slide-up relative">
 
           {/* Backdrop / Player Area — never changes width */}

@@ -6,7 +6,7 @@ import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
 import MovieCard from "./MovieCard";
 import TvCard from "./TvCard";
 
-const Navbar = ({ browseRef, tvSectionRef, movieSectionRef }) => {
+const Navbar = ({ tvSectionRef, movieSectionRef }) => {
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth(); 
   const [searchOpen, setSearchOpen] = useState(false);
