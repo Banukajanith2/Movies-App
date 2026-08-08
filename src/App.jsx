@@ -4,7 +4,6 @@ import HeroCarousel from "./components/HeroCarousel.jsx";
 import ContinueWatchingRow from "./components/ContinueWatchingRow.jsx";
 import BecauseYouLikedRow from "./components/BecauseYouLikedRow.jsx";
 import MediaSlider, { ENDPOINTS } from "./components/MediaSlider.jsx";
-import GenreBrowser from "./components/GenreBrowser.jsx";
 import Footer from "./components/Footer.jsx";
 import BackToTop from "./components/BackToTop.jsx";
 
@@ -12,7 +11,6 @@ const App = () => {
   const tvSectionRef = useRef(null);
   const movieSectionRef = useRef(null);
   const upcomingRef = useRef(null);
-  const browseRef = useRef(null);
 
   return (
     <main className="select-none fade-in home-page">
@@ -59,9 +57,6 @@ const App = () => {
         {/* Personalized recommendations (logged-in users only) */}
         <BecauseYouLikedRow mediaType="movie" />
         <BecauseYouLikedRow mediaType="tv" />
-
-        {/* Browse by Genre */}
-        <GenreBrowser sectionRef={browseRef} />
 
         {/* Footer */}
         <Footer />
