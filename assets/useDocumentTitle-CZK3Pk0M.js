@@ -1,0 +1,1 @@
+import{x as t}from"./index-Dga_4GK-.js";const o="EZ Movies - Watch HD Movies & TV Shows Online",c=e=>{t.useEffect(()=>(document.title=e?`${e} • EZ Movies`:o,()=>{document.title=o}),[e])};export{c as u};
