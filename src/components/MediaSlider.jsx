@@ -375,6 +375,8 @@ const MediaSlider = ({ title, endpoint, accentColor = "indigo", sectionRef }) =>
     fetchItems();
   }, [endpoint, title]);
 
+  if (!loading && items.length === 0) return null;
+
   return (
     <section className="media-slider-section" ref={sectionRef}>
       <div className="media-slider-header">

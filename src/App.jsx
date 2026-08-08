@@ -1,9 +1,11 @@
 import { useRef } from "react";
 import Navbar from "./components/Navbar.jsx";
 import HeroCarousel from "./components/HeroCarousel.jsx";
+import ContinueWatchingRow from "./components/ContinueWatchingRow.jsx";
 import MediaSlider, { ENDPOINTS } from "./components/MediaSlider.jsx";
 import GenreBrowser from "./components/GenreBrowser.jsx";
 import Footer from "./components/Footer.jsx";
+import BackToTop from "./components/BackToTop.jsx";
 
 const App = () => {
   const tvSectionRef = useRef(null);
@@ -25,6 +27,9 @@ const App = () => {
 
       {/* Content sections */}
       <div className="home-content-wrapper">
+
+        {/* Continue Watching (logged-in users only) */}
+        <ContinueWatchingRow />
 
         {/* Popular TV Shows */}
         <MediaSlider
@@ -56,6 +61,8 @@ const App = () => {
         {/* Footer */}
         <Footer />
       </div>
+
+      <BackToTop />
     </main>
   );
 };

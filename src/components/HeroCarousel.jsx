@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
-import Spinner from "./Spinner";
 import TrailerButton from "./TrailerButton";
 import ImdbButton from "./ImdbButton";
 import "swiper/css";
@@ -394,9 +393,25 @@ const HeroCarousel = () => {
 
   if (!items.length) {
     return (
-      <div className="hero-loading">
-        <Spinner />
-      </div>
+      <section className="hero-section">
+        <div className="hero-swiper relative overflow-hidden bg-surface animate-pulse">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 px-5 sm:px-10 pb-12 sm:pb-16 max-w-2xl">
+            <div className="flex gap-2 mb-4">
+              <div className="h-5 w-14 rounded-full bg-brand-text/15" />
+              <div className="h-5 w-20 rounded-full bg-brand-text/15" />
+            </div>
+            <div className="h-8 sm:h-10 w-3/4 rounded bg-brand-text/15 mb-3" />
+            <div className="h-8 sm:h-10 w-1/2 rounded bg-brand-text/15 mb-6" />
+            <div className="h-3 w-full rounded bg-brand-text/10 mb-2" />
+            <div className="h-3 w-5/6 rounded bg-brand-text/10 mb-6" />
+            <div className="flex gap-3">
+              <div className="h-10 w-32 rounded-2xl bg-brand-text/15" />
+              <div className="h-10 w-28 rounded-2xl bg-brand-text/10" />
+            </div>
+          </div>
+        </div>
+      </section>
     );
   }
 

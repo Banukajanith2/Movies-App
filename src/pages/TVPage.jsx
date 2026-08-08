@@ -6,19 +6,22 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { db } from "../firebase/config";
 import { doc, onSnapshot } from "firebase/firestore";
-import { 
-  addTvToFavorites, 
-  removeTvFromFavorites, 
-  getUserPlaylists, 
-  createPlaylistAndAddItem, 
-  addItemToPlaylist 
+import {
+  addTvToFavorites,
+  removeTvFromFavorites,
+  getUserPlaylists,
+  createPlaylistAndAddItem,
+  addItemToPlaylist,
+  recordContinueWatching,
 } from "../firebase/useFirestore";
 
 import Spinner from "../components/Spinner";
 import Navbar from "../components/Navbar";
 import TrailerButton from "../components/TrailerButton";
 import ImdbButton from "../components/ImdbButton";
-import MediaSlider, { ENDPOINTS } from "../components/MediaSlider.jsx";
+import ShareButton from "../components/ShareButton";
+import CastCrew from "../components/CastCrew";
+import MediaSlider from "../components/MediaSlider.jsx";
 import Footer from "../components/Footer";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
@@ -257,6 +260,13 @@ const TVPage = () => {
     }
   };
 
+  const handlePlayClick = () => {
+    setShowPlayer(true);
+    if (currentUser) {
+      recordContinueWatching(currentUser.uid, currentItemPayload);
+    }
+  };
+
   return (
     <div className="relative bg-brand-bg min-h-screen">
       <Navbar />
@@ -269,7 +279,7 @@ const TVPage = () => {
           {/* Backdrop / Player Area — never changes width */}
           <div
             className="backdrop"
-            onClick={!showPlayer ? () => setShowPlayer(true) : undefined}
+            onClick={!showPlayer ? handlePlayClick : undefined}
           >
             {showPlayer ? (
               <div className="player">
@@ -290,7 +300,7 @@ const TVPage = () => {
                 />
                 <svg
                   className="play-icon"
-                  onClick={() => setShowPlayer(true)}
+                  onClick={handlePlayClick}
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                 >
@@ -500,16 +510,20 @@ const TVPage = () => {
                   </>
                 )}
               </div>
+
+              <ShareButton />
             </div>
           </div>
         </div>
 
+        <CastCrew id={tvShow.id} mediaType="tv" creators={tvShow.created_by?.map((c) => c.name) || []} />
+
         <MediaSlider
-          title="Latest Popular TV Shows"
-          endpoint={ENDPOINTS.popularTV}
+          title="More Like This"
+          endpoint={`${API_BASE_URL}/tv/${tvShow.id}/recommendations?language=en-US`}
           accentColor="amber"
         />
-        
+
         <Footer />
       </div>
 

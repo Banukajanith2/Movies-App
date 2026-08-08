@@ -1,13 +1,17 @@
 import { db } from "./config";
-import { 
-  doc, 
-  setDoc, 
-  arrayUnion, 
-  arrayRemove, 
-  collection, 
-  addDoc, 
-  getDocs, 
-  serverTimestamp 
+import {
+  doc,
+  setDoc,
+  deleteDoc,
+  arrayUnion,
+  arrayRemove,
+  collection,
+  addDoc,
+  getDocs,
+  serverTimestamp,
+  query,
+  orderBy,
+  limit,
 } from "firebase/firestore";
 
 /**
@@ -82,13 +86,50 @@ export const createPlaylistAndAddItem = async (userId, playlistName, item) => {
 export const addItemToPlaylist = async (userId, playlistId, item) => {
   try {
     const playlistDocRef = doc(db, "users", userId, "playlists", playlistId);
-    
-    // Using setDoc + merge keeps document writing consistent across your codebase 
+
+    // Using setDoc + merge keeps document writing consistent across your codebase
     await setDoc(playlistDocRef, {
       items: arrayUnion(item)
     }, { merge: true });
   } catch (error) {
     console.error("Error pushing item to existing playlist:", error);
     throw error;
+  }
+};
+
+/**
+ * CONTINUE WATCHING: One doc per title (keyed by type+id) in a user subcollection,
+ * upserted every time the user presses play so `updatedAt` always reflects the latest watch.
+ */
+const MAX_CONTINUE_WATCHING_ENTRIES = 25;
+
+// Upsert a "started watching" entry, then trim anything past the most recent N titles
+// so the collection can't grow forever as a user watches more distinct movies/shows over time.
+// Never throws — this is a background side-effect of pressing play.
+export const recordContinueWatching = async (userId, item) => {
+  try {
+    const entriesRef = collection(db, "users", userId, "continueWatching");
+    const entryRef = doc(entriesRef, `${item.type}-${item.id}`);
+    await setDoc(entryRef, { ...item, updatedAt: serverTimestamp() }, { merge: true });
+
+    const snapshot = await getDocs(query(entriesRef, orderBy("updatedAt", "desc")));
+    const staleDocs = snapshot.docs.slice(MAX_CONTINUE_WATCHING_ENTRIES);
+    if (staleDocs.length) {
+      await Promise.all(staleDocs.map((docSnap) => deleteDoc(docSnap.ref)));
+    }
+  } catch (error) {
+    console.error("Error recording continue-watching entry:", error);
+  }
+};
+
+// Fetch the most recently watched titles, newest first.
+export const getContinueWatching = async (userId, max = 12) => {
+  try {
+    const entriesRef = collection(db, "users", userId, "continueWatching");
+    const snapshot = await getDocs(query(entriesRef, orderBy("updatedAt", "desc"), limit(max)));
+    return snapshot.docs.map((docSnap) => docSnap.data());
+  } catch (error) {
+    console.error("Error fetching continue-watching list:", error);
+    return [];
   }
 };

@@ -4,6 +4,7 @@ import TvCard from "./TvCard";
 import { useToast } from "../context/ToastContext";
 import { db } from "../firebase/config";
 import { doc, deleteDoc, updateDoc, arrayRemove } from "firebase/firestore";
+import { isMovieItem, adaptStoredMediaItem } from "../utils/mediaAdapter";
 
 const PlaylistPage = ({ playlist, userId, onBack, onPlaylistDeleted }) => {
   const { showToast } = useToast();
@@ -109,28 +110,8 @@ const PlaylistPage = ({ playlist, userId, onBack, onPlaylistDeleted }) => {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-6">
           {items.map((item) => {
-            // Determine structural type safely
-            const isMovie = item.type 
-              ? item.type === "movie" 
-              : (item.title !== undefined || item.release_date !== undefined);
-
-            // 🔥 EXTENDED DATA ADAPTER: Maps custom Firestore data properties 
-            // back into the exact naming format that MovieCard and TvCard expect.
-            const adaptedItem = {
-              ...item,
-              title: item.title || item.name,
-              name: item.name || item.title,
-              
-              // Map Firestore 'rating' to 'vote_average'
-              vote_average: item.rating !== undefined ? item.rating : item.vote_average,
-              
-              // Map Firestore 'year' to 'release_date' or 'first_air_date' as strings
-              release_date: item.year ? String(item.year) : item.release_date,
-              first_air_date: item.year ? String(item.year) : item.first_air_date,
-              
-              // Map Firestore 'language' to 'original_language'
-              original_language: item.language || item.original_language,
-            };
+            const isMovie = isMovieItem(item);
+            const adaptedItem = adaptStoredMediaItem(item);
 
             return (
               <div key={item.id} className="flex flex-col gap-3 group h-full justify-between">

@@ -1,9 +1,32 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const Footer = () => {
+  const navigate = useNavigate();
+
+  const goTo = (path) => {
+    navigate(path);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <footer className="bg-tranparent p-5 mt-5 rounded-2xl">
       <div className="flex flex-col items-center gap-4">
+        <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
+          <button onClick={() => goTo("/")} className="text-gray-300 hover:text-white transition-colors cursor-pointer">
+            Home
+          </button>
+          <button onClick={() => goTo("/movies")} className="text-gray-300 hover:text-white transition-colors cursor-pointer">
+            Movies
+          </button>
+          <button onClick={() => goTo("/tv-shows")} className="text-gray-300 hover:text-white transition-colors cursor-pointer">
+            TV Shows
+          </button>
+          <button onClick={() => goTo("/search")} className="text-gray-300 hover:text-white transition-colors cursor-pointer">
+            Browse
+          </button>
+        </nav>
+
         <div className="social-icons">
           <a
             href="https://facebook.com"

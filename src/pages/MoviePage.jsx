@@ -7,19 +7,22 @@ import { useToast } from "../context/ToastContext";
 import { db } from "../firebase/config";
 import { doc, onSnapshot } from "firebase/firestore";
 
-import { 
-  addMovieToFavorites, 
-  removeMovieFromFavorites, 
-  getUserPlaylists, 
-  createPlaylistAndAddItem, 
-  addItemToPlaylist 
+import {
+  addMovieToFavorites,
+  removeMovieFromFavorites,
+  getUserPlaylists,
+  createPlaylistAndAddItem,
+  addItemToPlaylist,
+  recordContinueWatching,
 } from "../firebase/useFirestore";
 
 import Spinner from "../components/Spinner";
 import Navbar from "../components/Navbar";
 import TrailerButton from "../components/TrailerButton";
 import ImdbButton from "../components/ImdbButton";
-import MediaSlider, { ENDPOINTS } from "../components/MediaSlider.jsx";
+import ShareButton from "../components/ShareButton";
+import CastCrew from "../components/CastCrew";
+import MediaSlider from "../components/MediaSlider.jsx";
 import Footer from "../components/Footer";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
@@ -240,6 +243,9 @@ const MoviePage = () => {
 
   const handlePlayClick = () => {
     setShowPlayer(true);
+    if (currentUser) {
+      recordContinueWatching(currentUser.uid, currentItemPayload);
+    }
   };
 
   const handleServerChange = (index) => {
@@ -475,20 +481,18 @@ const MoviePage = () => {
                 )}
               </div>
 
+              <ShareButton />
+
             </div>
           </div>
         </div>
 
-        <MediaSlider
-          title="Trending Popular Movies"
-          endpoint={ENDPOINTS.popularMovies}
-          accentColor="indigo"
-        />
+        <CastCrew id={movie.id} mediaType="movie" />
 
         <MediaSlider
-          title="Latest Movies"
-          endpoint={ENDPOINTS.upcoming}
-          accentColor="cyan"
+          title="More Like This"
+          endpoint={`${API_BASE_URL}/movie/${movie.id}/recommendations?language=en-US`}
+          accentColor="indigo"
         />
 
         <Footer />
