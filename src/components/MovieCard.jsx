@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom"; // Imported Portal utility for modal safety
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import { db } from "../firebase/config";
 import { doc, onSnapshot } from "firebase/firestore";
 import { addMovieToFavorites, removeMovieFromFavorites } from "../firebase/useFirestore";
@@ -20,6 +21,7 @@ const MovieCard = ({
 }) => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const { showToast } = useToast();
   const [isFavorite, setIsFavorite] = useState(false);
 
   // Playlist UI States
@@ -129,7 +131,7 @@ const MovieCard = ({
     try {
       await addItemToPlaylist(currentUser.uid, playlistId, currentItemPayload);
       setIsDropdownOpen(false);
-      alert(`Added to playlist!`);
+      showToast("Added to playlist!");
     } catch (error) {
       console.error("Error saving to playlist", error);
     }
@@ -149,7 +151,7 @@ const MovieCard = ({
       await createPlaylistAndAddItem(currentUser.uid, newPlaylistName.trim(), currentItemPayload);
       setNewPlaylistName("");
       setIsModalOpen(false);
-      alert(`Playlist created and movie added!`);
+      showToast("Playlist created and movie added!");
     } catch (error) {
       console.error("Error creating new playlist", error);
     }

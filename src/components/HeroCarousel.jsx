@@ -13,10 +13,11 @@ import "swiper/css/pagination";
 
 // Firebase Context & Firestore Modules
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import { db } from "../firebase/config";
 import { doc, onSnapshot } from "firebase/firestore";
-import { 
-  addMovieToFavorites, removeMovieFromFavorites, 
+import {
+  addMovieToFavorites, removeMovieFromFavorites,
   addTvToFavorites, removeTvFromFavorites,
   getUserPlaylists, createPlaylistAndAddItem, addItemToPlaylist
 } from "../firebase/useFirestore";
@@ -25,6 +26,7 @@ import {
 const HeroSlideItem = ({ item, handleWatch, onPause, onResume }) => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const { showToast } = useToast();
   const [isFavorite, setIsFavorite] = useState(false);
 
   // Playlist UI States
@@ -133,7 +135,7 @@ const HeroSlideItem = ({ item, handleWatch, onPause, onResume }) => {
       await addItemToPlaylist(currentUser.uid, playlistId, currentItemPayload);
       setIsDropdownOpen(false);
       onResume?.();
-      alert("Added to playlist!");
+      showToast("Added to playlist!");
     } catch (error) {
       console.error("Error saving item to selected hero list", error);
     }
@@ -154,7 +156,7 @@ const HeroSlideItem = ({ item, handleWatch, onPause, onResume }) => {
       setNewPlaylistName("");
       setIsModalOpen(false);
       onResume?.();
-      alert("Playlist created and media item added!");
+      showToast("Playlist created and media item added!");
     } catch (error) {
       console.error("Error handling new hero collection workflow", error);
     }

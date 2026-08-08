@@ -712,6 +712,11 @@
   @apply max-w-7xl mx-auto px-3 sm:px-6 pt-24 pb-10 relative z-10;
 }
 
+/* Full-bleed variant for pages with a left filter rail — no side centering gutter */
+.browse-page-wrapper {
+  @apply w-full px-3 sm:px-6 pt-24 pb-10 relative z-10;
+}
+
 .search-filter-card {
   @apply bg-surface border border-brand-text/10 rounded-2xl p-5 sm:p-6 shadow-xs backdrop-blur-md;
 }

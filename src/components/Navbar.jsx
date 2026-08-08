@@ -6,7 +6,7 @@ import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
 import MovieCard from "./MovieCard";
 import TvCard from "./TvCard";
 
-const Navbar = ({ tvSectionRef, movieSectionRef }) => {
+const Navbar = () => {
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth(); 
   const [searchOpen, setSearchOpen] = useState(false);
@@ -109,14 +109,6 @@ const Navbar = ({ tvSectionRef, movieSectionRef }) => {
     setErrorMessage("");
   };
 
-  const scrollToRef = (ref) => {
-    if (ref?.current) {
-      const offsetTop = ref.current.getBoundingClientRect().top + window.scrollY - 90;
-      window.scrollTo({ top: offsetTop, behavior: "smooth" });
-    }
-    setMobileMenuOpen(false);
-  };
-
   const handleToggleTheme = () => {
     // 1. Check if the browser supports View Transitions
     if (!document.startViewTransition) {
@@ -166,10 +158,10 @@ const Navbar = ({ tvSectionRef, movieSectionRef }) => {
           <button className="navbar-link" onClick={() => { navigate("/"); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
             Home
           </button>
-          <button className="navbar-link" onClick={() => scrollToRef(movieSectionRef)}>
+          <button className="navbar-link" onClick={() => { navigate("/movies"); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
             Movies
           </button>
-          <button className="navbar-link" onClick={() => scrollToRef(tvSectionRef)}>
+          <button className="navbar-link" onClick={() => { navigate("/tv-shows"); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
             TV Shows
           </button>
           <button className="navbar-link" onClick={() => { navigate("/search"); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
@@ -324,8 +316,8 @@ const Navbar = ({ tvSectionRef, movieSectionRef }) => {
             </>
           )}
           <button className="mobile-menu-link" onClick={() => { navigate("/"); window.scrollTo({ top: 0, behavior: "smooth" }); setMobileMenuOpen(false); }}>Home</button>
-          <button className="mobile-menu-link" onClick={() => scrollToRef(movieSectionRef)}>Movies</button>
-          <button className="mobile-menu-link" onClick={() => scrollToRef(tvSectionRef)}>TV Shows</button>
+          <button className="mobile-menu-link" onClick={() => { navigate("/movies"); window.scrollTo({ top: 0, behavior: "smooth" }); setMobileMenuOpen(false); }}>Movies</button>
+          <button className="mobile-menu-link" onClick={() => { navigate("/tv-shows"); window.scrollTo({ top: 0, behavior: "smooth" }); setMobileMenuOpen(false); }}>TV Shows</button>
           <button className="mobile-menu-link" onClick={() => { navigate("/search"); window.scrollTo({ top: 0, behavior: "smooth" }); setMobileMenuOpen(false); }}>Browse</button>
           
           <button 

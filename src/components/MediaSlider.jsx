@@ -4,16 +4,16 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
-import Spinner from "./Spinner";
 import "swiper/css";
 import "swiper/css/navigation";
 
 // Firebase Context & Firestore Modules
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import { db } from "../firebase/config";
 import { doc, onSnapshot } from "firebase/firestore";
-import { 
-  addMovieToFavorites, removeMovieFromFavorites, 
+import {
+  addMovieToFavorites, removeMovieFromFavorites,
   addTvToFavorites, removeTvFromFavorites,
   getUserPlaylists, createPlaylistAndAddItem, addItemToPlaylist
 } from "../firebase/useFirestore";
@@ -21,6 +21,7 @@ import {
 const SliderCard = ({ item }) => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const { showToast } = useToast();
   const [isFavorite, setIsFavorite] = useState(false);
 
   // Playlist UI States
@@ -149,7 +150,7 @@ const SliderCard = ({ item }) => {
     try {
       await addItemToPlaylist(currentUser.uid, playlistId, currentItemPayload);
       setIsDropdownOpen(false);
-      alert(`Added to playlist!`);
+      showToast("Added to playlist!");
     } catch (error) {
       console.error("Error saving item to selected slider list", error);
     }
@@ -169,7 +170,7 @@ const SliderCard = ({ item }) => {
       await createPlaylistAndAddItem(currentUser.uid, newPlaylistName.trim(), currentItemPayload);
       setNewPlaylistName("");
       setIsModalOpen(false);
-      alert(`Playlist created and media item added!`);
+      showToast("Playlist created and media item added!");
     } catch (error) {
       console.error("Error handling new slider collection workflow", error);
     }
@@ -384,8 +385,16 @@ const MediaSlider = ({ title, endpoint, accentColor = "indigo", sectionRef }) =>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-10">
-          <Spinner />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 py-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="media-slider-card-img-wrap bg-brand-text/10" />
+              <div className="media-slider-card-info">
+                <div className="h-3 w-4/5 rounded bg-brand-text/10 mb-2" />
+                <div className="h-2.5 w-2/5 rounded bg-brand-text/10" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : (
         <div className="relative media-slider-wrap">

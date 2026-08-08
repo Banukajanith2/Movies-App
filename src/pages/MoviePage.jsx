@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import { db } from "../firebase/config";
 import { doc, onSnapshot } from "firebase/firestore";
 
@@ -20,6 +21,7 @@ import TrailerButton from "../components/TrailerButton";
 import ImdbButton from "../components/ImdbButton";
 import MediaSlider, { ENDPOINTS } from "../components/MediaSlider.jsx";
 import Footer from "../components/Footer";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 // ── Streaming Servers ──
 // Each server is a free embed provider. Add/remove as needed.
@@ -72,7 +74,8 @@ const MoviePage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  
+  const { showToast } = useToast();
+
   // Movie Details States
   const [movie, setMovie] = useState(null);
   const [pageloading, setPageLoading] = useState(true);
@@ -90,6 +93,8 @@ const MoviePage = () => {
   const [isLoadingPlaylists, setIsLoadingPlaylists] = useState(false);
 
   const movieId = slug?.split("-").pop();
+
+  useDocumentTitle(movie?.title);
 
   // 1. Fetch Movie Details
   useEffect(() => {
@@ -209,7 +214,7 @@ const MoviePage = () => {
     try {
       await addItemToPlaylist(currentUser.uid, playlistId, currentItemPayload);
       setIsDropdownOpen(false);
-      alert(`Added to playlist!`);
+      showToast("Added to playlist!");
     } catch (error) {
       console.error("Error saving to playlist", error);
     }
@@ -227,7 +232,7 @@ const MoviePage = () => {
       await createPlaylistAndAddItem(currentUser.uid, newPlaylistName.trim(), currentItemPayload);
       setNewPlaylistName("");
       setIsModalOpen(false);
-      alert(`Playlist created and movie added!`);
+      showToast("Playlist created and movie added!");
     } catch (error) {
       console.error("Error creating new playlist", error);
     }

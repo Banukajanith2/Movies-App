@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import MovieCard from "./MovieCard";
 import TvCard from "./TvCard";
+import { useToast } from "../context/ToastContext";
 import { db } from "../firebase/config";
 import { doc, deleteDoc, updateDoc, arrayRemove } from "firebase/firestore";
 
 const PlaylistPage = ({ playlist, userId, onBack, onPlaylistDeleted }) => {
+  const { showToast } = useToast();
   const [items, setItems] = useState([]);
 
   // Load and sort items: latest added items on top
@@ -16,7 +18,7 @@ const PlaylistPage = ({ playlist, userId, onBack, onPlaylistDeleted }) => {
 
   // Handle deleting the entire playlist document
   const handleDeletePlaylist = async () => {
-    if (!userId) return alert("User reference missing.");
+    if (!userId) return showToast("User reference missing.", "error");
 
     const confirmDelete = window.confirm(
       `Are you sure you want to delete the entire "${playlist.name}" playlist?`
@@ -35,13 +37,13 @@ const PlaylistPage = ({ playlist, userId, onBack, onPlaylistDeleted }) => {
       }
     } catch (error) {
       console.error("Error deleting playlist document:", error);
-      alert("Failed to delete the playlist. Please try again.");
+      showToast("Failed to delete the playlist. Please try again.", "error");
     }
   };
 
   // Handle removing a single item from the items array
   const handleRemoveItem = async (itemToRemove) => {
-    if (!userId) return alert("User reference missing.");
+    if (!userId) return showToast("User reference missing.", "error");
 
     // Snappy UI: Optimistically filter out item from local runtime state right away
     setItems((prevItems) => prevItems.filter((item) => item.id !== itemToRemove.id));

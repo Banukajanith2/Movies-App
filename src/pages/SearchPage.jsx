@@ -4,111 +4,13 @@ import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
 import Navbar from "../components/Navbar";
 import MovieCard from "../components/MovieCard";
 import TvCard from "../components/TvCard";
-import Spinner from "../components/Spinner";
+import { MovieCardSkeletonGrid } from "../components/MovieCardSkeleton";
 import Footer from "../components/Footer";
-
-/* ── Pagination (Updated with Semantic Utilities) ───────── */
-const Pagination = ({ page, setPage, totalPages }) => {
-  const capped = Math.min(totalPages, 500); // TMDB caps at page 500
-
-  const getPageNumbers = () => {
-    let start = Math.max(1, page - 2);
-    let end   = Math.min(capped, page + 2);
-    if (end - start < 4) {
-      if (start === 1) end   = Math.min(start + 4, capped);
-      else             start = Math.max(end - 4, 1);
-    }
-    const pages = [];
-    for (let i = start; i <= end; i++) pages.push(i);
-    return pages;
-  };
-
-  return (
-    <div className="flex items-center gap-2 overflow-x-auto py-2 flex-wrap">
-      <button
-        onClick={() => setPage(p => Math.max(1, p - 1))}
-        disabled={page === 1}
-        className="transition3s px-3 py-1 rounded bg-brand-text/5 text-brand-text hover:bg-accent hover:text-white disabled:opacity-40 text-sm cursor-pointer"
-      >
-        Prev
-      </button>
-
-      {getPageNumbers().map(num => (
-        <button
-          key={num}
-          onClick={() => setPage(num)}
-          className={`transition3s px-3 py-1 rounded text-sm shadow-inner transition-colors duration-200 cursor-pointer ${
-            page === num
-              ? "bg-accent text-white"
-              : "bg-brand-text/5 text-brand-text hover:bg-accent hover:text-white"
-          }`}
-        >
-          {num}
-        </button>
-      ))}
-
-      <button
-        onClick={() => setPage(p => Math.min(capped, p + 1))}
-        disabled={page === capped}
-        className="transition3s px-3 py-1 rounded bg-brand-text/5 text-brand-text hover:bg-accent hover:text-white disabled:opacity-40 text-sm cursor-pointer"
-      >
-        Next
-      </button>
-
-      <span className="text-muted text-xs ml-2">
-        Page {page} of {capped.toLocaleString()}
-      </span>
-    </div>
-  );
-};
+import Pagination from "../components/Pagination";
+import { LANGUAGES, RATINGS, YEAR_RANGES } from "../constants/filters";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 /* ── Static filter data ────────────────────────────────────── */
-const LANGUAGES = [
-  { code: "en", label: "English" },
-  { code: "es", label: "Spanish" },
-  { code: "fr", label: "French" },
-  { code: "de", label: "German" },
-  { code: "it", label: "Italian" },
-  { code: "pt", label: "Portuguese" },
-  { code: "ja", label: "Japanese" },
-  { code: "ko", label: "Korean" },
-  { code: "zh", label: "Chinese" },
-  { code: "hi", label: "Hindi" },
-  { code: "ar", label: "Arabic" },
-  { code: "ru", label: "Russian" },
-  { code: "tr", label: "Turkish" },
-  { code: "pl", label: "Polish" },
-  { code: "nl", label: "Dutch" },
-  { code: "sv", label: "Swedish" },
-  { code: "th", label: "Thai" },
-  { code: "id", label: "Indonesian" },
-  { code: "vi", label: "Vietnamese" },
-  { code: "fa", label: "Persian" },
-];
-
-const RATINGS = [
-  { value: "", label: "All" },
-  { value: "1", label: "1+" },
-  { value: "2", label: "2+" },
-  { value: "3", label: "3+" },
-  { value: "4", label: "4+" },
-  { value: "5", label: "5+" },
-  { value: "6", label: "6+" },
-  { value: "7", label: "7+" },
-  { value: "8", label: "8+" },
-  { value: "9", label: "9+" },
-];
-
-const YEAR_RANGES = [
-  { label: "All Years",   gte: "",     lte: ""     },
-  { label: "2024–2025",   gte: "2024", lte: "2025" },
-  { label: "2020–2023",   gte: "2020", lte: "2023" },
-  { label: "2010–2019",   gte: "2010", lte: "2019" },
-  { label: "2000–2009",   gte: "2000", lte: "2009" },
-  { label: "1990–1999",   gte: "1990", lte: "1999" },
-  { label: "Before 1990", gte: "1900", lte: "1989" },
-];
-
 const SORT_OPTIONS = [
   { value: "popularity.desc",          label: "Featured"      },
   { value: "primary_release_date.desc", label: "Latest"        },
@@ -146,6 +48,8 @@ const SearchPage = () => {
 
   const initialQuery = searchParams.get("q") || "";
   const [inputValue,    setInputValue]    = useState(initialQuery);
+
+  useDocumentTitle(inputValue.trim() ? `Search: ${inputValue.trim()}` : "Search");
 
   const [mediaType,     setMediaType]     = useState("movie");
   const [genres,        setGenres]        = useState([]);
@@ -389,9 +293,7 @@ const SearchPage = () => {
         {/* ── Results grid ─────────────────────────────────── */}
         <section className="search-results-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-10">
           {loading ? (
-            <div className="col-span-full flex justify-center py-20">
-              <Spinner />
-            </div>
+            <MovieCardSkeletonGrid />
           ) : error ? (
             <div className="col-span-full flex flex-col items-center py-20 gap-3">
               <p className="text-muted text-sm">{error}</p>

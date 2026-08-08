@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom"; // Safe absolute container rendering
 import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import { db } from "../firebase/config";
 import { doc, onSnapshot } from "firebase/firestore";
 import { 
@@ -19,6 +20,7 @@ import TrailerButton from "../components/TrailerButton";
 import ImdbButton from "../components/ImdbButton";
 import MediaSlider, { ENDPOINTS } from "../components/MediaSlider.jsx";
 import Footer from "../components/Footer";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 // ── TV Streaming Servers ──
 // season & episode are passed through to each URL that supports them.
@@ -61,6 +63,7 @@ const TVPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const { showToast } = useToast();
 
   // TV Show Core States
   const [tvShow, setTvShow] = useState(null);
@@ -85,6 +88,8 @@ const TVPage = () => {
   const [isLoadingPlaylists, setIsLoadingPlaylists] = useState(false);
 
   const tvId = slug?.split("-").pop();
+
+  useDocumentTitle(tvShow?.name);
 
   // 1. Fetch Core TV Show details
   useEffect(() => {
@@ -228,7 +233,7 @@ const TVPage = () => {
     try {
       await addItemToPlaylist(currentUser.uid, playlistId, currentItemPayload);
       setIsDropdownOpen(false);
-      alert(`Added to playlist!`);
+      showToast("Added to playlist!");
     } catch (error) {
       console.error("Error saving to playlist", error);
     }
@@ -246,7 +251,7 @@ const TVPage = () => {
       await createPlaylistAndAddItem(currentUser.uid, newPlaylistName.trim(), currentItemPayload);
       setNewPlaylistName("");
       setIsModalOpen(false);
-      alert(`Playlist created and TV show added!`);
+      showToast("Playlist created and TV show added!");
     } catch (error) {
       console.error("Error creating new playlist", error);
     }

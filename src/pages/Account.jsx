@@ -7,8 +7,8 @@ import Navbar from "../components/Navbar";
 import MovieCard from "../components/MovieCard";
 import TvCard from "../components/TvCard";
 import PlaylistCard from "../components/PlaylistCard";
-import PlaylistPage from "../components/PlaylistPage"; 
-import Spinner from "../components/Spinner";
+import PlaylistPage from "../components/PlaylistPage";
+import { MovieCardSkeletonGrid } from "../components/MovieCardSkeleton";
 
 // Firebase Modules
 import { db, auth } from "../firebase/config"; 
@@ -18,8 +18,10 @@ import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
 
 // Import playlist retrieval service
 import { getUserPlaylists } from "../firebase/useFirestore";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 const Account = () => {
+  useDocumentTitle("My Account");
   const navigate = useNavigate();
   const { currentUser, logout, refreshUser } = useAuth();
 
@@ -249,8 +251,15 @@ const Account = () => {
               }}
             />
           ) : loadingMedia ? (
-            <div className="flex items-center justify-center py-20">
-              <Spinner />
+            <div className="flex flex-col gap-12">
+              {["Favourite Movies", "Favourite TV Shows", "Playlists"].map((label) => (
+                <div key={label}>
+                  <div className="h-6 w-48 rounded bg-brand-text/10 animate-pulse mb-6" />
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    <MovieCardSkeletonGrid count={5} />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <>

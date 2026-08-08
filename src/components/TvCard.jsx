@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom"; // Imported Portal utility for layout insurance
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import { db } from "../firebase/config";
 import { doc, onSnapshot } from "firebase/firestore";
 
@@ -22,6 +23,7 @@ const TvCard = ({
 }) => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const { showToast } = useToast();
   const [isFavorite, setIsFavorite] = useState(false);
 
   // Playlist UI States
@@ -132,7 +134,7 @@ const TvCard = ({
     try {
       await addItemToPlaylist(currentUser.uid, playlistId, currentItemPayload);
       setIsDropdownOpen(false);
-      alert(`Added to playlist!`);
+      showToast("Added to playlist!");
     } catch (error) {
       console.error("Error saving to playlist", error);
     }
@@ -152,7 +154,7 @@ const TvCard = ({
       await createPlaylistAndAddItem(currentUser.uid, newPlaylistName.trim(), currentItemPayload);
       setNewPlaylistName("");
       setIsModalOpen(false);
-      alert(`Playlist created and TV show added!`);
+      showToast("Playlist created and TV show added!");
     } catch (error) {
       console.error("Error creating new playlist", error);
     }

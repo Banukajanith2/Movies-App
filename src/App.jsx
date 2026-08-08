@@ -18,10 +18,7 @@ const App = () => {
       <div className="footer-img" />
 
       {/* Sticky Navbar */}
-      <Navbar
-        tvSectionRef={tvSectionRef}
-        movieSectionRef={movieSectionRef}
-      />
+      <Navbar />
 
       {/* Hero Carousel — full width, below nav */}
       <HeroCarousel />

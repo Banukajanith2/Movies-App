@@ -4,10 +4,12 @@ import { auth, googleProvider } from "../firebase/config";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 const Login = () => {
   const navigate = useNavigate();
   const [isRegistering, setIsRegistering] = useState(false);
+  useDocumentTitle(isRegistering ? "Create Account" : "Login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
