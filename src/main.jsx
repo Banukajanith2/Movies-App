@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import App from './App.jsx';
 import PageLoad from './components/PageLoad.jsx';
@@ -17,7 +17,7 @@ const Login  = lazy(() => import('./pages/Login.jsx'));
 const Account = lazy(() => import('./pages/Account.jsx'));
 
 createRoot(document.getElementById('root')).render(
-  <HashRouter>
+  <BrowserRouter basename={import.meta.env.BASE_URL}>
     <AuthProvider> {/* 2. Wrapped the app inside the Auth Context */}
       <ToastProvider>
         <Suspense>
@@ -38,5 +38,5 @@ createRoot(document.getElementById('root')).render(
         </Suspense>
       </ToastProvider>
     </AuthProvider>
-  </HashRouter>
+  </BrowserRouter>
 );
