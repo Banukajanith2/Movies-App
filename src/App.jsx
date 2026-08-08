@@ -2,6 +2,7 @@ import { useRef } from "react";
 import Navbar from "./components/Navbar.jsx";
 import HeroCarousel from "./components/HeroCarousel.jsx";
 import ContinueWatchingRow from "./components/ContinueWatchingRow.jsx";
+import BecauseYouLikedRow from "./components/BecauseYouLikedRow.jsx";
 import MediaSlider, { ENDPOINTS } from "./components/MediaSlider.jsx";
 import GenreBrowser from "./components/GenreBrowser.jsx";
 import Footer from "./components/Footer.jsx";
@@ -54,6 +55,10 @@ const App = () => {
           accentColor="cyan"
           sectionRef={upcomingRef}
         />
+
+        {/* Personalized recommendations (logged-in users only) */}
+        <BecauseYouLikedRow mediaType="movie" />
+        <BecauseYouLikedRow mediaType="tv" />
 
         {/* Browse by Genre */}
         <GenreBrowser sectionRef={browseRef} />

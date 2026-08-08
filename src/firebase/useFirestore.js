@@ -1,6 +1,7 @@
 import { db } from "./config";
 import {
   doc,
+  getDoc,
   setDoc,
   deleteDoc,
   arrayUnion,
@@ -49,6 +50,22 @@ export const removeTvFromFavorites = async (userId, tvId) => {
   await setDoc(userRef, {
     favoriteTvShows: arrayRemove(Number(tvId))
   }, { merge: true });
+};
+
+// Read back just the favorite ID lists, used to seed recommendations when there's no watch history yet.
+export const getUserFavoriteIds = async (userId) => {
+  try {
+    const snap = await getDoc(doc(db, "users", userId));
+    if (!snap.exists()) return { favoriteMovies: [], favoriteTvShows: [] };
+    const data = snap.data();
+    return {
+      favoriteMovies: data.favoriteMovies || [],
+      favoriteTvShows: data.favoriteTvShows || [],
+    };
+  } catch (error) {
+    console.error("Error fetching user favorites:", error);
+    return { favoriteMovies: [], favoriteTvShows: [] };
+  }
 };
 
 /**
