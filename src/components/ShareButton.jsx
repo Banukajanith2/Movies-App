@@ -15,7 +15,7 @@ const legacyCopy = (text) => {
 };
 
 const ShareButton = ({
-  className = "h-[40px] w-[40px] shrink-0 rounded-full text-gray-300 hover:text-white border border-brand-text/10 bg-zinc-900/80 hover:bg-zinc-800 flex items-center justify-center transition-all duration-200 cursor-pointer backdrop-blur-sm",
+  className = "ui-icon-btn",
 }) => {
   const { showToast } = useToast();
 

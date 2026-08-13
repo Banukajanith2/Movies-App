@@ -168,7 +168,7 @@ const FilterSidebar = ({
             <div className="relative h-full overflow-y-auto custom-scrollbar">
               <button
                 onClick={onClose}
-                className="absolute -top-1 right-1 z-10 w-8 h-8 rounded-full bg-zinc-900/80 text-white flex items-center justify-center cursor-pointer"
+                className="absolute -top-1 right-1 z-10 w-8 h-8 rounded-full bg-surface border border-brand-text/10 text-brand-text hover:bg-accent hover:text-white transition-colors duration-200 flex items-center justify-center cursor-pointer"
                 aria-label="Close filters"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">

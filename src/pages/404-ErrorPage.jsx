@@ -1,10 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { usePageMeta } from "../hooks/usePageMeta";
 
 const ErrorPage = () => {
-  useDocumentTitle("Page Not Found");
+  usePageMeta({ title: "Page Not Found" });
   const homenavigate = useNavigate();
 
   const handleClick = () => {

@@ -18,10 +18,10 @@ import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
 
 // Import playlist retrieval service
 import { getUserPlaylists } from "../firebase/useFirestore";
-import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { usePageMeta } from "../hooks/usePageMeta";
 
 const Account = () => {
-  useDocumentTitle("My Account");
+  usePageMeta({ title: "My Account" });
   const navigate = useNavigate();
   const { currentUser, logout, refreshUser } = useAuth();
 

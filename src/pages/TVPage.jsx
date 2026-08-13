@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom"; // Safe absolute container rendering
 import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
 import { useAuth } from "../context/AuthContext";
@@ -24,7 +24,13 @@ import CastCrew from "../components/CastCrew";
 import MediaSlider from "../components/MediaSlider.jsx";
 import Footer from "../components/Footer";
 import BackToTop from "../components/BackToTop";
-import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import WatchProviders from "../components/WatchProviders";
+import RatingGauge from "../components/RatingGauge";
+import Reviews from "../components/Reviews";
+import SeasonsOverview from "../components/SeasonsOverview";
+import ShortcutsHelp from "../components/ShortcutsHelp";
+import { usePageMeta } from "../hooks/usePageMeta";
+import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 
 // ── TV Streaming Servers ──
 // season & episode are passed through to each URL that supports them.
@@ -85,6 +91,23 @@ const TVPage = () => {
   // Bumped to force-remount the iframe when the user asks for a reload
   const [reloadKey, setReloadKey] = useState(0);
 
+  // Keyboard shortcuts. Handlers live behind a ref because the hook has to run
+  // before this component's early returns, while the handlers are defined after.
+  const playerRef = useRef(null);
+  const actionsRef = useRef({});
+  const [showShortcuts, setShowShortcuts] = useState(false);
+
+  useKeyboardShortcuts({
+    k: () => actionsRef.current.play?.(),
+    f: () => actionsRef.current.fullscreen?.(),
+    s: () => actionsRef.current.nextSource?.(),
+    r: () => actionsRef.current.reload?.(),
+    n: () => actionsRef.current.nextEpisode?.(),
+    p: () => actionsRef.current.prevEpisode?.(),
+    "?": () => setShowShortcuts((v) => !v),
+    Escape: () => setShowShortcuts(false),
+  });
+
   // Firestore Syncing & UI States
   const [isFavorite, setIsFavorite] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -95,7 +118,36 @@ const TVPage = () => {
 
   const tvId = slug?.split("-").pop();
 
-  useDocumentTitle(tvShow?.name);
+  usePageMeta({
+    title: tvShow?.name,
+    description: tvShow?.overview,
+    image: tvShow?.backdrop_path
+      ? `https://image.tmdb.org/t/p/w1280${tvShow.backdrop_path}`
+      : tvShow?.poster_path
+        ? `https://image.tmdb.org/t/p/w780${tvShow.poster_path}`
+        : undefined,
+    type: "video.tv_show",
+    jsonLd: tvShow && {
+      "@context": "https://schema.org",
+      "@type": "TVSeries",
+      name: tvShow.name,
+      description: tvShow.overview,
+      image: tvShow.poster_path ? `https://image.tmdb.org/t/p/w500${tvShow.poster_path}` : undefined,
+      startDate: tvShow.first_air_date || undefined,
+      genre: tvShow.genres?.map((g) => g.name),
+      numberOfSeasons: tvShow.number_of_seasons,
+      numberOfEpisodes: tvShow.number_of_episodes,
+      aggregateRating: tvShow.vote_count
+        ? {
+            "@type": "AggregateRating",
+            ratingValue: tvShow.vote_average?.toFixed(1),
+            ratingCount: tvShow.vote_count,
+            bestRating: 10,
+            worstRating: 0,
+          }
+        : undefined,
+    },
+  });
 
   // 1. Fetch Core TV Show details
   useEffect(() => {
@@ -310,6 +362,35 @@ const TVPage = () => {
     if (!showPlayer) handlePlayClick();
   };
 
+  /* Fullscreens the player shell rather than the iframe, so our own chrome
+     (and the browser's fullscreen affordances) stay attached to it. */
+  const toggleFullscreen = () => {
+    const el = playerRef.current;
+    if (!el) return;
+    if (document.fullscreenElement) document.exitFullscreen?.();
+    else el.requestFullscreen?.().catch(() => {});
+  };
+
+  const SHORTCUTS = [
+    { label: "Play", keys: ["K"] },
+    { label: "Fullscreen player", keys: ["F"] },
+    { label: "Next / previous episode", keys: ["N", "P"] },
+    { label: "Next source", keys: ["S"] },
+    { label: "Reload player", keys: ["R"] },
+    { label: "Show this help", keys: ["?"] },
+  ];
+
+  // Published for the shortcut hook registered above
+  actionsRef.current = {
+    play: () => !showPlayer && handlePlayClick(),
+    fullscreen: toggleFullscreen,
+    nextSource: () => handleServerChange((activeServer + 1) % TV_SERVERS.length),
+    reload: () => showPlayer && setReloadKey((k) => k + 1),
+    nextEpisode: () =>
+      selectedEpisode < seasonEpisodeCount && handleEpisodeSelect(selectedEpisode + 1),
+    prevEpisode: () => selectedEpisode > 1 && handleEpisodeSelect(selectedEpisode - 1),
+  };
+
   return (
     <main className="watch-page is-tv fade-in">
       {/* Ambient blurred backdrop — fills the previously empty side gutters */}
@@ -343,7 +424,7 @@ const TVPage = () => {
         <div className="wp-stage">
 
           <div className="wp-stage-main wp-rise" style={{ "--d": "0.06s" }}>
-            <div className="wp-player">
+            <div className="wp-player" ref={playerRef}>
               {showPlayer ? (
                 <iframe
                   key={`${activeServer}-${selectedSeason}-${selectedEpisode}-${reloadKey}`}
@@ -428,12 +509,27 @@ const TVPage = () => {
                   className="wp-ghost-btn"
                   onClick={() => setReloadKey((k) => k + 1)}
                   disabled={!showPlayer}
-                  title="Reload the current source"
+                  title="Reload the current source (R)"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992V4.356m-4.992 4.992-1.5-1.5A7.5 7.5 0 0 0 4.5 12m15-3.652V12a7.5 7.5 0 0 1-12.516 5.652l-1.5-1.5m0 0H2.985v4.992" />
                   </svg>
                   Reload
+                </button>
+                <button className="wp-ghost-btn" onClick={toggleFullscreen} title="Fullscreen (F)">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                  </svg>
+                </button>
+                <button
+                  className="wp-ghost-btn"
+                  onClick={() => setShowShortcuts(true)}
+                  title="Keyboard shortcuts (?)"
+                  aria-label="Keyboard shortcuts"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 9h.008v.008H6V9Zm3 0h.008v.008H9V9Zm3 0h.008v.008H12V9Zm3 0h.008v.008H15V9Zm3 0h.008v.008H18V9ZM6 12h.008v.008H6V12Zm12 0h.008v.008H18V12ZM9 15h6M3.75 6h16.5a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5H3.75a1.5 1.5 0 0 1-1.5-1.5v-9a1.5 1.5 0 0 1 1.5-1.5Z" />
+                  </svg>
                 </button>
               </div>
             </div>
@@ -467,6 +563,9 @@ const TVPage = () => {
                 </p>
               </div>
             </div>
+
+            {/* Legal streaming availability */}
+            <WatchProviders id={tvShow.id} mediaType="tv" />
 
             {/* Episodes */}
             <div className="wp-card">
@@ -599,6 +698,10 @@ const TVPage = () => {
 
             {tvShow.overview && <p className="wp-overview">{tvShow.overview}</p>}
 
+            <div className="mt-6">
+              <RatingGauge value={tvShow.vote_average} count={tvShow.vote_count} />
+            </div>
+
             {facts.length > 0 && (
               <div className="wp-facts">
                 {facts.map((fact) => (
@@ -617,7 +720,7 @@ const TVPage = () => {
 
               <button
                 onClick={handleFavoriteClick}
-                className={`wp-icon-btn ${isFavorite ? "is-fav" : ""}`}
+                className={`ui-icon-btn ${isFavorite ? "is-fav" : ""}`}
                 aria-label="Favorite TV Show"
                 title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
               >
@@ -636,7 +739,7 @@ const TVPage = () => {
               <div className="relative flex items-center justify-center">
                 <button
                   onClick={handlePlaylistButtonClick}
-                  className={`wp-icon-btn ${isDropdownOpen ? "is-open" : ""}`}
+                  className={`ui-icon-btn ${isDropdownOpen ? "is-open" : ""}`}
                   aria-label="Add to Playlist"
                   title="Add to Playlist"
                 >
@@ -649,27 +752,27 @@ const TVPage = () => {
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
 
-                    <div className="wp-menu">
-                      <button onClick={handleOpenCreateModal} className="wp-menu-new">
+                    <div className="ui-menu absolute left-0 top-12">
+                      <button onClick={handleOpenCreateModal} className="ui-menu-new">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         </svg>
                         Make a new playlist
                       </button>
 
-                      {playlists.length > 0 && <div className="wp-menu-divider" />}
+                      {playlists.length > 0 && <div className="ui-menu-divider" />}
 
-                      <div className="wp-menu-scroll">
+                      <div className="ui-menu-scroll">
                         {isLoadingPlaylists ? (
-                          <p className="wp-menu-empty">Loading lists...</p>
+                          <p className="ui-menu-empty">Loading lists...</p>
                         ) : playlists.length === 0 ? (
-                          <p className="wp-menu-empty">No playlists available</p>
+                          <p className="ui-menu-empty">No playlists available</p>
                         ) : (
                           playlists.map((list) => (
                             <button
                               key={list.id}
                               onClick={() => handleSelectExistingPlaylist(list.id)}
-                              className="wp-menu-item"
+                              className="ui-menu-item"
                             >
                               {list.name}
                             </button>
@@ -681,14 +784,26 @@ const TVPage = () => {
                 )}
               </div>
 
-              <ShareButton className="wp-icon-btn" />
+              <ShareButton className="ui-icon-btn" />
             </div>
           </div>
           </section>
         </div>
 
         <div className="wp-rise" style={{ "--d": "0.24s" }}>
+          <SeasonsOverview
+            seasons={tvShow.seasons || []}
+            selectedSeason={selectedSeason}
+            onSelectSeason={(n) => {
+              setSelectedSeason(n);
+              setSelectedEpisode(1);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          />
+
           <CastCrew id={tvShow.id} mediaType="tv" creators={tvShow.created_by?.map((c) => c.name) || []} />
+
+          <Reviews id={tvShow.id} mediaType="tv" />
 
           <MediaSlider
             title="More Like This"
@@ -702,11 +817,15 @@ const TVPage = () => {
 
       <BackToTop />
 
+      {showShortcuts && (
+        <ShortcutsHelp items={SHORTCUTS} onClose={() => setShowShortcuts(false)} />
+      )}
+
       {/* ── Playlist Creation Modal ── */}
       {isModalOpen && createPortal(
-        <div className="wp-modal-backdrop" onClick={() => setIsModalOpen(false)}>
+        <div className="ui-modal-backdrop" onClick={() => setIsModalOpen(false)}>
           <form
-            className="wp-modal"
+            className="ui-modal"
             onClick={(e) => e.stopPropagation()}
             onSubmit={handleCreatePlaylistSubmit}
           >
@@ -719,14 +838,14 @@ const TVPage = () => {
               value={newPlaylistName}
               onChange={(e) => setNewPlaylistName(e.target.value)}
               placeholder="e.g., Series Binge List"
-              className="wp-modal-input"
+              className="ui-modal-input"
             />
 
             <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => setIsModalOpen(false)} className="wp-btn-secondary">
+              <button type="button" onClick={() => setIsModalOpen(false)} className="ui-btn-secondary">
                 Cancel
               </button>
-              <button type="submit" disabled={!newPlaylistName.trim()} className="wp-btn-primary">
+              <button type="submit" disabled={!newPlaylistName.trim()} className="ui-btn-primary">
                 Create
               </button>
             </div>

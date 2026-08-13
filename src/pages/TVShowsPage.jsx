@@ -7,7 +7,7 @@ import { MovieCardSkeletonGrid } from "../components/MovieCardSkeleton";
 import Footer from "../components/Footer";
 import Pagination from "../components/Pagination";
 import FilterSidebar from "../components/FilterSidebar";
-import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { usePageMeta } from "../hooks/usePageMeta";
 
 const CATEGORIES = [
   { value: "popular",     label: "Popular",         icon: "🔥" },
@@ -66,7 +66,11 @@ const buildDiscoverUrl = ({ category, page, selectedGenres, selectedProviders, l
 };
 
 const TVShowsPage = () => {
-  useDocumentTitle("TV Shows");
+  usePageMeta({
+    title: "TV Shows",
+    description:
+      "Browse TV series by genre, year, rating and language. Track seasons and episodes and stream them in HD on EZ Movies.",
+  });
   const [category, setCategory] = useState("popular");
   const [genres, setGenres] = useState([]);
   const [selectedGenres, setSelectedGenres] = useState([]);

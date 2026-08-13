@@ -8,7 +8,7 @@ import { MovieCardSkeletonGrid } from "../components/MovieCardSkeleton";
 import Footer from "../components/Footer";
 import Pagination from "../components/Pagination";
 import { LANGUAGES, RATINGS, YEAR_RANGES } from "../constants/filters";
-import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { usePageMeta } from "../hooks/usePageMeta";
 
 /* ── Static filter data ────────────────────────────────────── */
 const SORT_OPTIONS = [
@@ -49,7 +49,11 @@ const SearchPage = () => {
   const initialQuery = searchParams.get("q") || "";
   const [inputValue,    setInputValue]    = useState(initialQuery);
 
-  useDocumentTitle(inputValue.trim() ? `Search: ${inputValue.trim()}` : "Search");
+  usePageMeta({
+    title: inputValue.trim() ? `Search: ${inputValue.trim()}` : "Search",
+    description:
+      "Search across movies and TV shows on EZ Movies — filter by genre, year, rating and language to find something to watch.",
+  });
 
   const [mediaType,     setMediaType]     = useState("movie");
   const [genres,        setGenres]        = useState([]);

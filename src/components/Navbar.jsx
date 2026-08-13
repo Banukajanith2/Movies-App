@@ -275,13 +275,13 @@ const Navbar = () => {
                         ))}
                       </ul>
                       <div
-                        className="bg-dark-200 flex justify-center items-center h-9 rounded-b-xl sticky bottom-0 cursor-pointer hover:bg-indigo-600 transition3s"
+                        className="bg-brand-text/5 hover:bg-accent border-t border-brand-text/10 flex justify-center items-center h-9 rounded-b-xl sticky bottom-0 cursor-pointer transition3s group/showall"
                         onClick={() => {
                           navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
                           closeSearch();
                         }}
                       >
-                        <p className="text-white text-sm font-medium">
+                        <p className="text-brand-text group-hover/showall:text-white text-sm font-medium transition-colors">
                           Show All Results →
                         </p>
                       </div>

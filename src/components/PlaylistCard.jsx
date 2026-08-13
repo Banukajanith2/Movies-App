@@ -37,7 +37,7 @@ const PlaylistCard = ({
       {/* ── Poster image wrap ── */}
       <div className="mcn-img-wrap relative">
         <img
-          src={posterPath ? `https://image.tmdb.org/t/p/w500${posterPath}` : "no-movie.png"}
+          src={posterPath ? `https://image.tmdb.org/t/p/w500${posterPath}` : `${import.meta.env.BASE_URL}no-movie.png`}
           alt={name}
           loading="lazy"
         />

@@ -4,12 +4,15 @@ import { auth, googleProvider } from "../firebase/config";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { usePageMeta } from "../hooks/usePageMeta";
 
 const Login = () => {
   const navigate = useNavigate();
   const [isRegistering, setIsRegistering] = useState(false);
-  useDocumentTitle(isRegistering ? "Create Account" : "Login");
+  usePageMeta({
+    title: isRegistering ? "Create Account" : "Login",
+    description: "Sign in to EZ Movies to save favourites, build playlists and resume what you were watching.",
+  });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");

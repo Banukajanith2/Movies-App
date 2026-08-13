@@ -167,7 +167,7 @@ const TvCard = ({
         {/* ── Poster image wrap ── */}
         <div className="mcn-img-wrap relative">
           <img
-            src={poster_path ? `https://image.tmdb.org/t/p/w500${poster_path}` : "no-movie.png"}
+            src={poster_path ? `https://image.tmdb.org/t/p/w500${poster_path}` : `${import.meta.env.BASE_URL}no-movie.png`}
             alt={name}
             loading="lazy"
           />
@@ -191,7 +191,7 @@ const TvCard = ({
                 {/* Playlist Addition Plus Button */}
                 <button 
                   onClick={handlePlaylistButtonClick}
-                  className="w-8 h-8 rounded-full bg-zinc-900/80 hover:bg-indigo-600 text-gray-300 hover:text-white border border-white/10 flex items-center justify-center transition-all cursor-pointer backdrop-blur-sm"
+                  className="media-chip-btn"
                   aria-label="Add to Playlist"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
@@ -202,11 +202,7 @@ const TvCard = ({
                 {/* Heart Favorite Button */}
                 <button 
                   onClick={handleFavoriteClick}
-                  className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all cursor-pointer backdrop-blur-sm ${
-                    isFavorite 
-                      ? "bg-rose-600/90 border-rose-500 text-white" 
-                      : "bg-zinc-900/80 border-white/10 text-gray-300 hover:text-rose-400"
-                  }`}
+                  className={`media-chip-btn ${isFavorite ? "is-fav" : ""}`}
                   aria-label="Favorite TV Show"
                 >
                   <svg 
@@ -237,10 +233,10 @@ const TvCard = ({
             <>
               <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setIsDropdownOpen(false); }} />
               
-              <div className="absolute left-1/2 -translate-x-1/2 bottom-14 z-50 w-48 rounded-md bg-zinc-900 border border-zinc-800 p-1 shadow-xl text-left" onClick={(e) => e.stopPropagation()}>
+              <div className="ui-menu absolute left-1/2 -translate-x-1/2 bottom-14 w-48" onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={handleOpenCreateModal}
-                  className="flex w-full items-center gap-2 rounded px-3 py-2 text-xs font-medium text-indigo-400 hover:bg-zinc-800 transition-colors"
+                  className="ui-menu-new"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -248,17 +244,17 @@ const TvCard = ({
                   Make a new playlist
                 </button>
 
-                {playlists.length > 0 && <div className="my-1 border-t border-zinc-800" />}
+                {playlists.length > 0 && <div className="ui-menu-divider" />}
 
-                <div className="max-h-32 overflow-y-auto custom-scrollbar">
+                <div className="ui-menu-scroll custom-scrollbar">
                   {isLoadingPlaylists ? (
-                    <p className="px-3 py-1.5 text-[11px] text-zinc-500">Loading lists...</p>
+                    <p className="ui-menu-empty">Loading lists...</p>
                   ) : (
                     playlists.map((list) => (
                       <button
                         key={list.id}
                         onClick={(e) => handleSelectExistingPlaylist(e, list.id)}
-                        className="block w-full truncate rounded px-3 py-1.5 text-left text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
+                        className="ui-menu-item"
                       >
                         {list.name}
                       </button>
@@ -286,15 +282,15 @@ const TvCard = ({
       {/* ── Playlist Creation Modal (Portaled to body to completely prevent layout clipping) ── */}
       {isModalOpen && createPortal(
         <div 
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          className="ui-modal-backdrop"
           onClick={(e) => { e.stopPropagation(); setIsModalOpen(false); }}
         >
           <div 
-            className="w-full max-w-sm rounded-xl bg-zinc-900 border border-zinc-800 p-6 shadow-2xl modal-animation"
+            className="ui-modal"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-lg font-semibold text-white mb-2">Create New Playlist</h3>
-            <p className="text-xs text-zinc-400 mb-4">Enter a name for your playlist. This TV show will be added automatically.</p>
+            <h3>Create New Playlist</h3>
+            <p>Enter a name for your playlist. This TV show will be added automatically.</p>
             
             <input
               type="text"
@@ -302,20 +298,20 @@ const TvCard = ({
               value={newPlaylistName}
               onChange={(e) => setNewPlaylistName(e.target.value)}
               placeholder="e.g., Weekend Binge"
-              className="w-full rounded-lg bg-zinc-950 border border-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-600 outline-none focus:border-indigo-500 transition-colors mb-5"
+              className="ui-modal-input"
             />
 
-            <div className="flex justify-end gap-2 text-sm">
+            <div className="flex justify-end gap-2">
               <button
                 onClick={(e) => { e.stopPropagation(); setIsModalOpen(false); }}
-                className="px-4 py-2 rounded-md bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors cursor-pointer"
+                className="ui-btn-secondary"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreatePlaylistSubmit}
                 disabled={!newPlaylistName.trim()}
-                className="px-4 py-2 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                className="ui-btn-primary"
               >
                 OK
               </button>

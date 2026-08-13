@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
 import { useAuth } from "../context/AuthContext";
@@ -25,7 +25,12 @@ import CastCrew from "../components/CastCrew";
 import MediaSlider from "../components/MediaSlider.jsx";
 import Footer from "../components/Footer";
 import BackToTop from "../components/BackToTop";
-import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import WatchProviders from "../components/WatchProviders";
+import RatingGauge from "../components/RatingGauge";
+import Reviews from "../components/Reviews";
+import ShortcutsHelp from "../components/ShortcutsHelp";
+import { usePageMeta } from "../hooks/usePageMeta";
+import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 
 // ── Streaming Servers ──
 // Each server is a free embed provider. Add/remove as needed.
@@ -108,6 +113,21 @@ const MoviePage = () => {
   // Bumped to force-remount the iframe when the user asks for a reload
   const [reloadKey, setReloadKey] = useState(0);
 
+  // Keyboard shortcuts. Handlers live behind a ref because the hook has to run
+  // before this component's early returns, while the handlers are defined after.
+  const playerRef = useRef(null);
+  const actionsRef = useRef({});
+  const [showShortcuts, setShowShortcuts] = useState(false);
+
+  useKeyboardShortcuts({
+    k: () => actionsRef.current.play?.(),
+    f: () => actionsRef.current.fullscreen?.(),
+    s: () => actionsRef.current.nextSource?.(),
+    r: () => actionsRef.current.reload?.(),
+    "?": () => setShowShortcuts((v) => !v),
+    Escape: () => setShowShortcuts(false),
+  });
+
   // Firestore Syncing & UI States
   const [isFavorite, setIsFavorite] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -118,7 +138,35 @@ const MoviePage = () => {
 
   const movieId = slug?.split("-").pop();
 
-  useDocumentTitle(movie?.title);
+  usePageMeta({
+    title: movie?.title,
+    description: movie?.overview,
+    image: movie?.backdrop_path
+      ? `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}`
+      : movie?.poster_path
+        ? `https://image.tmdb.org/t/p/w780${movie.poster_path}`
+        : undefined,
+    type: "video.movie",
+    jsonLd: movie && {
+      "@context": "https://schema.org",
+      "@type": "Movie",
+      name: movie.title,
+      description: movie.overview,
+      image: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : undefined,
+      datePublished: movie.release_date || undefined,
+      genre: movie.genres?.map((g) => g.name),
+      duration: movie.runtime ? `PT${movie.runtime}M` : undefined,
+      aggregateRating: movie.vote_count
+        ? {
+            "@type": "AggregateRating",
+            ratingValue: movie.vote_average?.toFixed(1),
+            ratingCount: movie.vote_count,
+            bestRating: 10,
+            worstRating: 0,
+          }
+        : undefined,
+    },
+  });
 
   // 1. Fetch Movie Details
   useEffect(() => {
@@ -297,6 +345,31 @@ const MoviePage = () => {
     if (!showPlayer) handlePlayClick();
   };
 
+  /* Fullscreens the player shell rather than the iframe, so our own chrome
+     (and the browser's fullscreen affordances) stay attached to it. */
+  const toggleFullscreen = () => {
+    const el = playerRef.current;
+    if (!el) return;
+    if (document.fullscreenElement) document.exitFullscreen?.();
+    else el.requestFullscreen?.().catch(() => {});
+  };
+
+  const SHORTCUTS = [
+    { label: "Play", keys: ["K"] },
+    { label: "Fullscreen player", keys: ["F"] },
+    { label: "Next source", keys: ["S"] },
+    { label: "Reload player", keys: ["R"] },
+    { label: "Show this help", keys: ["?"] },
+  ];
+
+  // Published for the shortcut hook registered above
+  actionsRef.current = {
+    play: () => !showPlayer && handlePlayClick(),
+    fullscreen: toggleFullscreen,
+    nextSource: () => handleServerChange((activeServer + 1) % SERVERS.length),
+    reload: () => showPlayer && setReloadKey((k) => k + 1),
+  };
+
   return (
     <main className="watch-page is-movie fade-in">
       {/* Ambient blurred backdrop — fills the previously empty side gutters */}
@@ -330,7 +403,7 @@ const MoviePage = () => {
         <div className="wp-stage">
 
           <div className="wp-stage-main wp-rise" style={{ "--d": "0.06s" }}>
-            <div className="wp-player">
+            <div className="wp-player" ref={playerRef}>
               {showPlayer ? (
                 <iframe
                   key={`${activeServer}-${reloadKey}`} // remounts iframe on server change / reload
@@ -404,11 +477,26 @@ const MoviePage = () => {
                 <button
                   className="wp-ghost-btn"
                   onClick={() => handleServerChange((activeServer + 1) % SERVERS.length)}
-                  title="Try the next source"
+                  title="Try the next source (S)"
                 >
                   Next source
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                  </svg>
+                </button>
+                <button className="wp-ghost-btn" onClick={toggleFullscreen} title="Fullscreen (F)">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                  </svg>
+                </button>
+                <button
+                  className="wp-ghost-btn"
+                  onClick={() => setShowShortcuts(true)}
+                  title="Keyboard shortcuts (?)"
+                  aria-label="Keyboard shortcuts"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 9h.008v.008H6V9Zm3 0h.008v.008H9V9Zm3 0h.008v.008H12V9Zm3 0h.008v.008H15V9Zm3 0h.008v.008H18V9ZM6 12h.008v.008H6V12Zm12 0h.008v.008H18V12ZM9 15h6M3.75 6h16.5a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5H3.75a1.5 1.5 0 0 1-1.5-1.5v-9a1.5 1.5 0 0 1 1.5-1.5Z" />
                   </svg>
                 </button>
               </div>
@@ -443,6 +531,9 @@ const MoviePage = () => {
                 </p>
               </div>
             </div>
+
+            {/* Legal streaming availability */}
+            <WatchProviders id={movie.id} mediaType="movie" />
 
             {/* Quick facts */}
             {detailRows.length > 0 && (
@@ -500,6 +591,10 @@ const MoviePage = () => {
 
             {movie.overview && <p className="wp-overview">{movie.overview}</p>}
 
+            <div className="mt-6">
+              <RatingGauge value={movie.vote_average} count={movie.vote_count} />
+            </div>
+
             {/* Action Bar */}
             <div className="wp-actions">
               <TrailerButton id={movie.id} mediaType="movie" />
@@ -507,7 +602,7 @@ const MoviePage = () => {
 
               <button
                 onClick={handleFavoriteClick}
-                className={`wp-icon-btn ${isFavorite ? "is-fav" : ""}`}
+                className={`ui-icon-btn ${isFavorite ? "is-fav" : ""}`}
                 aria-label="Favorite Movie"
                 title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
               >
@@ -526,7 +621,7 @@ const MoviePage = () => {
               <div className="relative flex items-center justify-center">
                 <button
                   onClick={handlePlaylistButtonClick}
-                  className={`wp-icon-btn ${isDropdownOpen ? "is-open" : ""}`}
+                  className={`ui-icon-btn ${isDropdownOpen ? "is-open" : ""}`}
                   aria-label="Add to Playlist"
                   title="Add to Playlist"
                 >
@@ -539,27 +634,27 @@ const MoviePage = () => {
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
 
-                    <div className="wp-menu">
-                      <button onClick={handleOpenCreateModal} className="wp-menu-new">
+                    <div className="ui-menu absolute left-0 top-12">
+                      <button onClick={handleOpenCreateModal} className="ui-menu-new">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         </svg>
                         Make a new playlist
                       </button>
 
-                      {playlists.length > 0 && <div className="wp-menu-divider" />}
+                      {playlists.length > 0 && <div className="ui-menu-divider" />}
 
-                      <div className="wp-menu-scroll">
+                      <div className="ui-menu-scroll">
                         {isLoadingPlaylists ? (
-                          <p className="wp-menu-empty">Loading lists...</p>
+                          <p className="ui-menu-empty">Loading lists...</p>
                         ) : playlists.length === 0 ? (
-                          <p className="wp-menu-empty">No playlists available</p>
+                          <p className="ui-menu-empty">No playlists available</p>
                         ) : (
                           playlists.map((list) => (
                             <button
                               key={list.id}
                               onClick={() => handleSelectExistingPlaylist(list.id)}
-                              className="wp-menu-item"
+                              className="ui-menu-item"
                             >
                               {list.name}
                             </button>
@@ -571,7 +666,7 @@ const MoviePage = () => {
                 )}
               </div>
 
-              <ShareButton className="wp-icon-btn" />
+              <ShareButton className="ui-icon-btn" />
             </div>
           </div>
           </section>
@@ -579,6 +674,8 @@ const MoviePage = () => {
 
         <div className="wp-rise" style={{ "--d": "0.24s" }}>
           <CastCrew id={movie.id} mediaType="movie" />
+
+          <Reviews id={movie.id} mediaType="movie" />
 
           <MediaSlider
             title="More Like This"
@@ -592,11 +689,15 @@ const MoviePage = () => {
 
       <BackToTop />
 
+      {showShortcuts && (
+        <ShortcutsHelp items={SHORTCUTS} onClose={() => setShowShortcuts(false)} />
+      )}
+
       {/* ── Playlist Creation Modal ── */}
       {isModalOpen && createPortal(
-        <div className="wp-modal-backdrop" onClick={() => setIsModalOpen(false)}>
+        <div className="ui-modal-backdrop" onClick={() => setIsModalOpen(false)}>
           <form
-            className="wp-modal"
+            className="ui-modal"
             onClick={(e) => e.stopPropagation()}
             onSubmit={handleCreatePlaylistSubmit}
           >
@@ -609,14 +710,14 @@ const MoviePage = () => {
               value={newPlaylistName}
               onChange={(e) => setNewPlaylistName(e.target.value)}
               placeholder="e.g., Chill Weekend Watchlist"
-              className="wp-modal-input"
+              className="ui-modal-input"
             />
 
             <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => setIsModalOpen(false)} className="wp-btn-secondary">
+              <button type="button" onClick={() => setIsModalOpen(false)} className="ui-btn-secondary">
                 Cancel
               </button>
-              <button type="submit" disabled={!newPlaylistName.trim()} className="wp-btn-primary">
+              <button type="submit" disabled={!newPlaylistName.trim()} className="ui-btn-primary">
                 Create
               </button>
             </div>

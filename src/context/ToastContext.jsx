@@ -42,8 +42,8 @@ export const ToastProvider = ({ children }) => {
               onClick={() => dismissToast(t.id)}
               className={`pointer-events-auto flex items-center gap-2.5 max-w-sm px-4 py-3 rounded-xl shadow-2xl border backdrop-blur-sm cursor-pointer animate-slide-up ${
                 t.type === "error"
-                  ? "bg-rose-950/90 border-rose-500/30 text-rose-200"
-                  : "bg-zinc-900/90 border-emerald-500/30 text-emerald-200"
+                  ? "bg-surface border-rose-500/40 text-rose-600 dark:text-rose-300"
+                  : "bg-surface border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
               }`}
             >
               {ICONS[t.type] || ICONS.success}

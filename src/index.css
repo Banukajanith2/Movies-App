@@ -1084,89 +1084,110 @@
 
 .wp-actions { @apply flex flex-wrap items-center gap-2.5 mt-6 relative; }
 
-/* TrailerButton / ImdbButton ship their own margins + mobile height — level them
-   with the 40px icon buttons so the action row reads as one control cluster. */
-.wp-actions > a {
-  height: 40px;
-  margin-top: 0;
-  margin-bottom: 0;
-}
 
-.wp-icon-btn {
+.ui-icon-btn {
   @apply h-10 w-10 shrink-0 grid place-items-center rounded-full border border-brand-text/10 bg-brand-text/5 text-brand-text cursor-pointer;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease,
     color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
-.wp-icon-btn:hover { @apply bg-brand-text/10; transform: translateY(-2px); }
-.wp-icon-btn svg { @apply w-5 h-5; }
+.ui-icon-btn:hover { @apply bg-brand-text/10; transform: translateY(-2px); }
+.ui-icon-btn svg { @apply w-5 h-5; }
 
-.wp-icon-btn.is-fav {
+.ui-icon-btn.is-fav {
   @apply bg-rose-600 border-rose-500 text-white;
   box-shadow: 0 10px 24px -10px rgba(225, 29, 72, 0.8);
 }
-.wp-icon-btn.is-fav:hover { @apply bg-rose-500; }
+.ui-icon-btn.is-fav:hover { @apply bg-rose-500; }
 
-.wp-icon-btn.is-open {
-  background: var(--wp-accent);
+.ui-icon-btn.is-open {
+  background: var(--wp-accent, var(--accent));
   border-color: transparent;
   color: #fff;
 }
 
-/* ── Playlist dropdown (theme aware) ── */
-.wp-menu {
-  @apply absolute left-0 top-12 z-50 w-56 rounded-xl border border-brand-text/10 p-1.5 text-left overflow-hidden;
+/* ── Buttons that sit on top of poster / backdrop artwork ──
+   These float over imagery, not over the page background, so they stay dark in
+   both themes on purpose. Distinct from .ui-icon-btn, which sits on the page. */
+.media-chip-btn {
+  @apply w-8 h-8 shrink-0 grid place-items-center rounded-full border border-white/10 text-gray-300 cursor-pointer transition-all duration-200;
+  background: rgba(24, 24, 27, 0.8);
+  backdrop-filter: blur(4px);
+}
+.media-chip-btn:hover { @apply text-white; background: var(--accent); }
+.media-chip-btn svg { @apply w-4 h-4; }
+
+.media-chip-btn.is-fav { @apply bg-rose-600/90 border-rose-500 text-white; }
+.media-chip-btn.is-fav:hover { @apply bg-rose-500; }
+
+.media-chip-btn-lg { @apply w-10 h-10; }
+.media-chip-btn-lg svg { @apply w-5 h-5; }
+
+/* Pill-shaped link buttons (Trailer, IMDb) — used both on page backgrounds and
+   over hero artwork, so they follow the theme like the rest of the chrome. */
+.ui-pill-btn {
+  @apply inline-flex items-center gap-1.5 h-10 px-4 rounded-2xl text-sm font-medium cursor-pointer w-fit border border-brand-text/10 bg-brand-text/5 text-brand-text transition-all duration-200;
+  backdrop-filter: blur(6px);
+}
+.ui-pill-btn:hover { @apply bg-brand-text/10; transform: translateY(-2px); }
+.ui-pill-btn svg { @apply w-4 h-4; }
+
+/* ── Playlist dropdown (theme aware) ──
+   Deliberately sets no position: callers supply their own anchoring utilities
+   (these rules are unlayered and would otherwise beat Tailwind's). */
+.ui-menu {
+  @apply z-50 w-56 rounded-xl border border-brand-text/10 p-1.5 text-left overflow-hidden;
   background: color-mix(in srgb, var(--surface) 92%, transparent);
   backdrop-filter: blur(18px);
   box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.55);
   animation: wpPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.wp-menu-new {
+.ui-menu-new {
   @apply flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-xs font-semibold cursor-pointer transition-colors duration-150 hover:bg-brand-text/5;
-  color: var(--wp-accent);
+  color: var(--wp-accent, var(--accent));
 }
-.wp-menu-new svg { @apply w-4 h-4; }
+.ui-menu-new svg { @apply w-4 h-4; }
 
-.wp-menu-divider { @apply my-1 border-t border-brand-text/10; }
-.wp-menu-scroll { @apply max-h-44 overflow-y-auto; }
-.wp-menu-empty { @apply px-3 py-2 text-[11px] text-muted; }
+.ui-menu-divider { @apply my-1 border-t border-brand-text/10; }
+.ui-menu-scroll { @apply max-h-44 overflow-y-auto; }
+.ui-menu-empty { @apply px-3 py-2 text-[11px] text-muted; }
 
-.wp-menu-item {
+.ui-menu-item {
   @apply block w-full truncate rounded-lg px-3 py-2 text-left text-xs text-brand-text cursor-pointer transition-colors duration-150 hover:bg-brand-text/5;
 }
 
 /* ── Playlist modal (theme aware) ── */
-.wp-modal-backdrop {
+.ui-modal-backdrop {
   @apply fixed inset-0 z-[100] flex items-center justify-center p-4;
   background: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(8px);
   animation: wpFadeIn 0.2s ease-out both;
 }
 
-.wp-modal {
+.ui-modal {
   @apply w-full max-w-sm rounded-2xl border border-brand-text/10 bg-surface p-6;
   box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.7);
   animation: wpPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.wp-modal h3 { @apply text-lg font-semibold text-brand-text mb-1.5; }
-.wp-modal p { @apply text-xs text-muted mb-4; }
+.ui-modal h3 { @apply text-lg font-semibold text-brand-text mb-1.5; }
+.ui-modal p { @apply text-xs text-muted mb-4; }
 
-.wp-modal-input {
+.ui-modal-input {
   @apply w-full rounded-xl border border-brand-text/10 px-3 py-2.5 text-sm text-brand-text placeholder-muted outline-none mb-5 transition-colors duration-200;
   background: color-mix(in srgb, var(--brand-bg) 80%, transparent);
 }
-.wp-modal-input:focus { border-color: var(--wp-accent); }
+.ui-modal-input:focus { border-color: var(--wp-accent, var(--accent)); }
 
-.wp-btn-secondary {
+.ui-btn-secondary {
   @apply px-4 py-2 rounded-lg text-sm bg-brand-text/10 text-brand-text cursor-pointer transition-colors duration-200 hover:bg-brand-text/20;
 }
 
-.wp-btn-primary {
+.ui-btn-primary {
   @apply px-4 py-2 rounded-lg text-sm font-medium text-white cursor-pointer transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed;
-  background: var(--wp-accent);
+  background: var(--wp-accent, var(--accent));
 }
-.wp-btn-primary:not(:disabled):hover { filter: brightness(1.12); }
+.ui-btn-primary:not(:disabled):hover { filter: brightness(1.12); }
 
 /* ── Motion opt-out ── */
 @media (prefers-reduced-motion: reduce) {
@@ -1175,9 +1196,9 @@
   .animate-fade-in,
   .modal-animation,
   .scale-in,
-  .wp-menu,
-  .wp-modal,
-  .wp-modal-backdrop {
+  .ui-menu,
+  .ui-modal,
+  .ui-modal-backdrop {
     animation: none !important;
     opacity: 1;
     transform: none;
@@ -1210,7 +1231,7 @@
    drawn inside the field. The container carries the indicator instead. */
 .navbar-search-input:focus-visible,
 .search-filter-input:focus-visible,
-.wp-modal-input:focus-visible,
+.ui-modal-input:focus-visible,
 .wp-select:focus-visible {
   outline: none;
 }
@@ -1357,3 +1378,157 @@
 .site-footer-bar p { @apply text-xs text-muted; }
 
 .site-footer-author { @apply text-brand-text underline underline-offset-2 hover:no-underline; }
+
+/* ==========================================================================
+   SHARED SECTION HEADINGS
+   ========================================================================== */
+.section-heading { @apply text-lg sm:text-xl font-bold text-brand-text; }
+
+.section-count {
+  @apply text-[10px] font-bold px-2 py-0.5 rounded-full;
+  color: var(--wp-accent, var(--accent));
+  background: var(--wp-soft, color-mix(in srgb, var(--accent) 14%, transparent));
+}
+
+/* ==========================================================================
+   WATCH PROVIDERS (TMDB / JustWatch)
+   ========================================================================== */
+.provider-group-label {
+  @apply text-[10px] font-bold uppercase tracking-[0.14em] text-muted mb-2;
+}
+
+.provider-row { @apply flex flex-wrap gap-2; }
+
+.provider-chip {
+  @apply block w-10 h-10 rounded-xl overflow-hidden border border-brand-text/10 bg-brand-text/5;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.provider-chip:hover {
+  transform: translateY(-2px);
+  border-color: var(--wp-ring, color-mix(in srgb, var(--accent) 40%, transparent));
+  box-shadow: 0 8px 18px -10px var(--wp-ring, color-mix(in srgb, var(--accent) 40%, transparent));
+}
+.provider-chip img { @apply w-full h-full object-cover; }
+
+/* ==========================================================================
+   RATING GAUGE
+   ========================================================================== */
+.rating-gauge { @apply inline-flex items-center gap-3; }
+
+.rating-gauge-ring { @apply relative grid place-items-center w-16 h-16 shrink-0; }
+.rating-gauge-ring svg { @apply w-full h-full; transform: rotate(-90deg); }
+
+.rating-gauge-track {
+  fill: none;
+  stroke: color-mix(in srgb, var(--brand-text) 12%, transparent);
+  stroke-width: 5;
+}
+
+.rating-gauge-value {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rating-gauge.is-good .rating-gauge-value { stroke: #22c55e; }
+.rating-gauge.is-mixed .rating-gauge-value { stroke: #f59e0b; }
+.rating-gauge.is-poor .rating-gauge-value { stroke: #ef4444; }
+
+.rating-gauge-score { @apply absolute text-base font-bold text-brand-text; }
+.rating-gauge-label { @apply text-[11px] font-bold uppercase tracking-[0.14em] text-muted; }
+.rating-gauge-count { @apply text-sm font-semibold text-brand-text mt-0.5; }
+
+/* ==========================================================================
+   REVIEWS
+   ========================================================================== */
+.review-grid {
+  @apply grid gap-4 mt-4;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 900px) {
+  .review-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.review-card {
+  @apply rounded-2xl border border-brand-text/10 p-4;
+  background: color-mix(in srgb, var(--surface) 65%, transparent);
+}
+
+.review-head { @apply flex items-center gap-3 mb-3; }
+
+.review-avatar {
+  @apply grid place-items-center w-9 h-9 rounded-full overflow-hidden shrink-0 bg-brand-text/10;
+}
+.review-avatar img { @apply w-full h-full object-cover; }
+.review-avatar-initial { @apply text-sm font-bold text-brand-text; }
+
+.review-author { @apply text-sm font-semibold text-brand-text truncate; }
+.review-date { @apply text-[11px] text-muted; }
+
+.review-rating {
+  @apply ml-auto inline-flex items-center gap-1 shrink-0 text-xs font-bold text-amber-600 dark:text-yellow-400 px-2 py-1 rounded-lg;
+  background: color-mix(in srgb, #f59e0b 12%, transparent);
+}
+.review-rating svg { @apply w-3.5 h-3.5; }
+
+.review-body { @apply text-sm leading-relaxed text-muted whitespace-pre-line; }
+.review-body.is-clamped { @apply line-clamp-5; }
+
+.review-toggle {
+  @apply mt-2 text-xs font-semibold cursor-pointer transition-opacity duration-200 hover:opacity-75;
+  color: var(--wp-accent, var(--accent));
+}
+
+/* ==========================================================================
+   SEASONS OVERVIEW
+   ========================================================================== */
+.season-grid {
+  @apply grid gap-3 mt-4;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 640px) { .season-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .season-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+.season-card {
+  @apply flex flex-col text-left rounded-2xl overflow-hidden border border-brand-text/10 cursor-pointer;
+  background: color-mix(in srgb, var(--surface) 65%, transparent);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.season-card:hover { transform: translateY(-3px); }
+.season-card.is-active {
+  border-color: var(--wp-ring, color-mix(in srgb, var(--accent) 40%, transparent));
+  box-shadow: 0 12px 28px -16px var(--wp-ring, color-mix(in srgb, var(--accent) 40%, transparent));
+}
+
+.season-poster {
+  @apply relative block w-full overflow-hidden bg-brand-text/10 grid place-items-center;
+  aspect-ratio: 2 / 3;
+}
+.season-poster img { @apply w-full h-full object-cover; }
+.season-poster-fallback { @apply text-2xl font-bold text-muted; }
+
+.season-badge {
+  @apply absolute left-2 top-2 text-[10px] font-bold px-2 py-0.5 rounded-md text-white;
+  background: var(--wp-accent, var(--accent));
+}
+
+.season-info { @apply block p-2.5; }
+.season-name { @apply block text-[13px] font-semibold text-brand-text line-clamp-1; }
+.season-meta { @apply block text-[11px] text-muted mt-0.5; }
+
+/* ==========================================================================
+   KEYBOARD SHORTCUTS HELP
+   ========================================================================== */
+.shortcuts-list { @apply flex flex-col gap-2 mt-1; }
+
+.shortcuts-row {
+  @apply flex items-center justify-between gap-4 py-1.5 border-b border-brand-text/5 last:border-0;
+}
+.shortcuts-desc { @apply text-sm text-muted; }
+
+.shortcut-key {
+  @apply inline-grid place-items-center min-w-[26px] px-2 py-0.5 rounded-md text-[11px] font-bold text-brand-text border border-brand-text/15;
+  background: color-mix(in srgb, var(--brand-text) 6%, transparent);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--brand-text) 12%, transparent);
+}
