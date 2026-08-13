@@ -207,49 +207,6 @@
     @apply bg-amber-700/90 text-white;
   }
 
-  /* ── Interactive Viewports (Movie/TV Detailed Sections) ── */
-  .movie, .tv {
-    @apply max-w-5xl flex flex-col mx-auto;
-
-    & .backdrop {
-      @apply flex h-[250px] sm:h-[55vh] overflow-hidden relative cursor-pointer;
-    }
-
-    & .backdrop-img {
-      @apply rounded-lg w-[100%] object-cover object-center hover:w-[120%] hover:opacity-50 transition3s;
-    }
-
-    & .play-icon {
-      @apply h-[100px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 fill-gray-300 hover:h-[115px] transition3s;
-    }
-
-    & .poster {
-      @apply hidden sm:block relative;
-    }
-
-    & .poster-img {
-      @apply h-[100%] w-[100%] object-cover rounded-tl-lg rounded-tr-lg rounded-bl-lg;
-    }
-
-    & .movie-info {
-      @apply flex-1/2 flex flex-col justify-center items-start ml-5 mr-5 text-white pb-3 sm:pb-3;
-    }
-
-    & .iframe {
-      @apply absolute inset-0 w-full h-full rounded-xl;
-    }
-    
-    & .controls {
-      @apply flex items-center gap-2 ml-auto;
-    }
-  }
-
-  .movie .play-icon { @apply hover:fill-indigo-500; }
-  .movie .poster-and-info { @apply sm:h-[300px] rounded-br-lg rounded-bl-xl flex mt-5 bg-linear-to-b from-transparent to-indigo-500/50; }
-
-  .tv .play-icon { @apply hover:fill-amber-500; }
-  .tv .poster-and-info { @apply sm:h-[300px] rounded-br-lg rounded-bl-xl flex mt-5 bg-linear-to-b from-transparent to-amber-800/50; }
-
   /* ── Social Footers ── */
   .social-icons {
     @apply flex justify-center gap-5 text-brand-text transition-colors duration-300;
@@ -714,40 +671,520 @@
 @media (min-width: 768px) { .search-results-grid { grid-template-columns: repeat(4, 1fr); } }
 @media (min-width: 1024px) { .search-results-grid { grid-template-columns: repeat(5, 1fr); } }
 
-/* ── Server Panel Slide-in Animation ──
-   Add this to your global CSS file (e.g. index.css or App.css)
-   ─────────────────────────────────────────────────────────── */
+/* ==========================================================================
+   SHARED OVERLAY MOTION (dropdowns, modals)
+   ========================================================================== */
+@keyframes wpFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 
-@keyframes serverPanelSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(100%);
+@keyframes wpPopIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Ends on `transform: none` (not translateY(0)) so the settled element does not
+   become a containing block for the `position: fixed` dropdown backdrops inside it. */
+@keyframes wpRise {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes wpAmbientIn {
+  from { opacity: 0; transform: scale(1.3); }
+  to   { opacity: 1; transform: scale(1.15); }
+}
+
+@keyframes wpPulseRing {
+  0%   { transform: scale(1); opacity: 0.55; }
+  70%  { transform: scale(1.55); opacity: 0; }
+  100% { transform: scale(1.55); opacity: 0; }
+}
+
+@keyframes wpBlink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.25; }
+}
+
+.animate-fade-in { animation: wpFadeIn 0.2s ease-out both; }
+.modal-animation,
+.scale-in { animation: wpPopIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* Entrance choreography — each element sets its own `--d` delay */
+.wp-rise {
+  animation: wpRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--d, 0s);
+}
+
+/* ==========================================================================
+   WATCH PAGE — Movie & TV player experience
+   ========================================================================== */
+.watch-page {
+  @apply relative min-h-screen bg-brand-bg;
+  overflow-x: clip;
+  --wp-accent: #6366f1;
+  --wp-soft: rgba(99, 102, 241, 0.14);
+  --wp-ring: rgba(99, 102, 241, 0.4);
+}
+
+.watch-page.is-tv {
+  --wp-accent: #d97706;
+  --wp-soft: rgba(217, 119, 6, 0.15);
+  --wp-ring: rgba(217, 119, 6, 0.4);
+}
+
+.dark .watch-page.is-tv { --wp-accent: #f59e0b; }
+
+/* ── Ambient backdrop glow behind the whole stage ── */
+.wp-ambient {
+  @apply absolute inset-x-0 top-0 pointer-events-none z-0 overflow-hidden;
+  height: min(760px, 78vh);
+}
+
+.wp-ambient-img {
+  @apply w-full h-full object-cover object-top;
+  filter: blur(48px) saturate(1.35);
+  transform: scale(1.15);
+  opacity: 0.55;
+  animation: wpAmbientIn 1.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dark .wp-ambient-img { opacity: 0.42; }
+
+.wp-ambient-veil {
+  @apply absolute inset-0;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--brand-bg) 62%, transparent) 0%,
+    color-mix(in srgb, var(--brand-bg) 82%, transparent) 45%,
+    var(--brand-bg) 100%
+  );
+}
+
+.wp-shell {
+  @apply relative z-10 w-full max-w-7xl mx-auto px-3 sm:px-6 pt-24 pb-10;
+}
+
+/* ── Top bar: back + breadcrumbs ── */
+.wp-topbar { @apply flex items-center justify-between gap-3 mb-4; }
+
+.wp-back {
+  @apply inline-flex items-center gap-2 text-sm font-medium text-muted px-2.5 py-1.5 -ml-2.5 rounded-lg cursor-pointer transition-all duration-200 hover:text-brand-text hover:bg-brand-text/5;
+}
+.wp-back svg { @apply w-4 h-4 transition-transform duration-200; }
+.wp-back:hover svg { transform: translateX(-3px); }
+
+.wp-crumbs { @apply hidden sm:flex items-center gap-2 text-xs text-muted min-w-0; }
+.wp-crumbs-current { @apply text-brand-text font-medium truncate max-w-[320px]; }
+
+/* ── Stage: player + rail ── */
+.wp-stage {
+  @apply grid gap-4 items-start;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 1024px) {
+  .wp-stage {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    grid-template-rows: auto auto;
+    gap: 20px;
   }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  /* Rail spans both rows so a long episode list is balanced by the detail
+     block beneath the player instead of leaving a dead gutter. */
+  .wp-stage-main { grid-column: 1; grid-row: 1; }
+  .wp-rail { grid-column: 2; grid-row: 1 / span 2; }
+  .wp-detail { grid-column: 1; grid-row: 2; }
 }
 
-/* ── Server Panel Layout ──
-   Matches the height of your .backdrop / .player so it always
-   fills the full player height regardless of aspect ratio.
-   ─────────────────────────────────────────────────────────── */
+.wp-stage-main { @apply min-w-0; }
 
-.server-panel {
-  /* Match your player's aspect ratio height automatically */
-  align-self: stretch;
+.wp-player {
+  @apply relative w-full overflow-hidden rounded-2xl bg-black;
+  aspect-ratio: 16 / 9;
+  box-shadow:
+    0 40px 80px -40px rgba(0, 0, 0, 0.7),
+    0 0 0 1px color-mix(in srgb, var(--brand-text) 10%, transparent);
 }
 
-/* Optional: if you want the server panel to scroll
-   with a hidden scrollbar on webkit browsers */
-.server-panel .custom-scrollbar::-webkit-scrollbar {
-  width: 3px;
+.wp-frame { @apply absolute inset-0 w-full h-full border-0; }
+
+/* ── Pre-roll preview state ── */
+.wp-preview { @apply absolute inset-0 cursor-pointer; }
+
+.wp-preview-img {
+  @apply absolute inset-0 w-full h-full object-cover;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.server-panel .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(99, 102, 241, 0.4); /* indigo tint */
+.wp-preview:hover .wp-preview-img { transform: scale(1.06); }
+
+.wp-preview-scrim {
+  @apply absolute inset-0 transition-opacity duration-500;
+  background:
+    radial-gradient(60% 60% at 50% 45%, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.55) 100%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.15) 55%, rgba(0, 0, 0, 0.35) 100%);
+}
+
+.wp-play {
+  @apply absolute left-1/2 top-1/2 grid place-items-center rounded-full text-white cursor-pointer;
+  width: clamp(64px, 8vw, 88px);
+  height: clamp(64px, 8vw, 88px);
+  transform: translate(-50%, -50%);
+  background: var(--wp-accent);
+  box-shadow: 0 18px 50px -10px var(--wp-ring);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+}
+.wp-play svg { @apply w-8 h-8 sm:w-10 sm:h-10 translate-x-[2px]; }
+.wp-preview:hover .wp-play {
+  transform: translate(-50%, -50%) scale(1.09);
+  box-shadow: 0 24px 60px -8px var(--wp-ring);
+}
+.wp-preview:active .wp-play { transform: translate(-50%, -50%) scale(0.97); }
+
+.wp-play-ring {
+  @apply absolute inset-0 rounded-full pointer-events-none;
+  border: 2px solid var(--wp-accent);
+  animation: wpPulseRing 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.wp-preview-caption {
+  @apply absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-4 sm:p-6;
+}
+
+.wp-preview-kicker {
+  @apply text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.18em] mb-1;
+  color: color-mix(in srgb, var(--wp-accent) 70%, white);
+}
+
+.wp-preview-title {
+  @apply text-white font-bold text-lg sm:text-2xl leading-tight line-clamp-1 drop-shadow-lg;
+}
+
+.wp-preview-hint {
+  @apply hidden sm:inline-flex items-center gap-1.5 shrink-0 text-[11px] font-semibold text-white/85 px-3 py-1.5 rounded-full border border-white/15;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+}
+
+/* ── Player status bar ── */
+.wp-playbar {
+  @apply mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-text/10 px-3.5 py-2.5;
+  background: color-mix(in srgb, var(--surface) 75%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+.wp-playbar-label { @apply flex items-center gap-2 text-xs text-muted min-w-0; }
+.wp-playbar-label b { @apply text-brand-text font-semibold; }
+.wp-playbar-actions { @apply flex items-center gap-2 ml-auto; }
+
+.wp-live-dot {
+  @apply w-2 h-2 rounded-full shrink-0;
+  background: var(--wp-accent);
+  box-shadow: 0 0 0 3px var(--wp-soft);
+  animation: wpBlink 1.8s ease-in-out infinite;
+}
+
+.wp-ghost-btn {
+  @apply inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-brand-text/10 text-brand-text cursor-pointer transition-all duration-200 hover:bg-brand-text/5 disabled:opacity-35 disabled:cursor-not-allowed disabled:hover:bg-transparent;
+}
+.wp-ghost-btn svg { @apply w-3.5 h-3.5; }
+.wp-ghost-btn:not(:disabled):hover { border-color: var(--wp-ring); }
+
+/* ── Right rail cards ── */
+.wp-rail { @apply flex flex-col gap-4 min-w-0; }
+
+@media (min-width: 1024px) {
+  .wp-rail { @apply sticky; top: 96px; }
+}
+
+.wp-card {
+  @apply rounded-2xl border border-brand-text/10 overflow-hidden;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 20px 45px -30px rgba(0, 0, 0, 0.6);
+}
+
+.wp-card-head {
+  @apply flex items-center justify-between gap-2 px-4 py-3 border-b border-brand-text/10;
+}
+
+.wp-card-title {
+  @apply text-[11px] font-bold uppercase tracking-[0.16em] text-muted;
+}
+
+.wp-card-count {
+  @apply text-[10px] font-bold px-2 py-0.5 rounded-full;
+  color: var(--wp-accent);
+  background: var(--wp-soft);
+}
+
+.wp-card-body { @apply p-3; }
+
+/* ── Source (server) chips ── */
+.wp-server-grid { @apply grid grid-cols-2 gap-2; }
+
+.wp-server {
+  @apply flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-[12px] font-semibold text-brand-text border border-brand-text/10 cursor-pointer select-none;
+  background: color-mix(in srgb, var(--brand-bg) 60%, transparent);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease,
+    border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+
+.wp-server:hover {
+  transform: translateY(-2px);
+  border-color: var(--wp-ring);
+  box-shadow: 0 8px 20px -12px var(--wp-ring);
+}
+
+.wp-server.is-active {
+  background: var(--wp-accent);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 10px 24px -10px var(--wp-ring);
+}
+
+.wp-server-dot {
+  @apply w-1.5 h-1.5 rounded-full shrink-0;
+  background: currentColor;
+  opacity: 0.4;
+}
+.wp-server.is-active .wp-server-dot { opacity: 1; animation: wpBlink 1.8s ease-in-out infinite; }
+.wp-server-label { @apply truncate; }
+
+.wp-hint { @apply px-1 pt-3 text-[11px] leading-relaxed text-muted; }
+
+/* ── Key/value detail rows ── */
+.wp-meta-row {
+  @apply flex items-start justify-between gap-3 px-1 py-2 border-b border-brand-text/5 last:border-0;
+}
+.wp-meta-k { @apply text-[11px] uppercase tracking-wider text-muted shrink-0 pt-px; }
+.wp-meta-v { @apply text-[12px] font-semibold text-brand-text text-right; }
+
+/* ── Season picker + episode list (TV) ── */
+.wp-select {
+  @apply w-full text-sm font-medium text-brand-text rounded-xl px-3 py-2.5 border border-brand-text/10 cursor-pointer outline-none transition-colors duration-200;
+  background: color-mix(in srgb, var(--brand-bg) 70%, transparent);
+}
+.wp-select:focus { border-color: var(--wp-accent); }
+
+.wp-eplist {
+  @apply flex flex-col gap-1 overflow-y-auto pr-1 mt-3;
+  max-height: 360px;
+  scrollbar-width: thin;
+}
+.wp-eplist::-webkit-scrollbar { width: 4px; }
+.wp-eplist::-webkit-scrollbar-thumb {
+  background-color: var(--wp-ring);
   border-radius: 999px;
 }
-.server-panel .custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+
+.wp-ep {
+  @apply flex items-center gap-3 rounded-xl p-2 text-left cursor-pointer border border-transparent;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.wp-ep:hover { @apply bg-brand-text/5; transform: translateX(2px); }
+.wp-ep.is-active {
+  background: var(--wp-soft);
+  border-color: var(--wp-ring);
+}
+
+.wp-ep-thumb {
+  @apply relative w-[86px] shrink-0 rounded-lg overflow-hidden bg-brand-text/10 grid place-items-center;
+  aspect-ratio: 16 / 9;
+}
+.wp-ep-thumb img { @apply w-full h-full object-cover; }
+.wp-ep-badge {
+  @apply absolute left-1 top-1 text-[9px] font-bold px-1.5 py-0.5 rounded text-white;
+  background: rgba(0, 0, 0, 0.65);
+}
+.wp-ep-body { @apply min-w-0 flex-1; }
+.wp-ep-title { @apply text-[12px] font-semibold text-brand-text line-clamp-1; }
+.wp-ep-meta { @apply text-[11px] text-muted line-clamp-1 mt-0.5; }
+.wp-ep-now {
+  @apply text-[10px] font-bold uppercase tracking-wider mt-1 inline-block;
+  color: var(--wp-accent);
+}
+.wp-ep-skeleton { @apply h-[66px] rounded-xl bg-brand-text/5 animate-pulse; }
+
+/* ── Detail block: poster + copy ── */
+.wp-detail {
+  @apply grid gap-6 mt-8 sm:mt-10;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 640px) {
+  .wp-detail { grid-template-columns: 160px minmax(0, 1fr); gap: 28px; }
+}
+@media (min-width: 1024px) {
+  .wp-detail { grid-template-columns: 210px minmax(0, 1fr); gap: 36px; }
+}
+
+.wp-poster {
+  @apply relative hidden sm:block rounded-2xl overflow-hidden border border-brand-text/10;
+  aspect-ratio: 2 / 3;
+  box-shadow: 0 30px 60px -35px rgba(0, 0, 0, 0.85);
+}
+.wp-poster img {
+  @apply w-full h-full object-cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.wp-poster:hover img { transform: scale(1.06); }
+
+.wp-info { @apply min-w-0; }
+
+/* Overrides the global centered `h1` base style */
+.wp-title {
+  @apply text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-brand-text;
+  line-height: 1.06;
+  text-align: left;
+  margin-inline: 0;
+  max-width: none;
+}
+
+.wp-tagline { @apply mt-2.5 text-sm sm:text-[15px] italic text-muted; }
+
+.wp-badges { @apply flex flex-wrap items-center gap-2 mt-4; }
+
+.wp-badge {
+  @apply inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg border border-brand-text/10 bg-brand-text/5 text-brand-text;
+}
+
+.wp-badge-imdb {
+  @apply text-amber-600 dark:text-yellow-400 border-amber-500/25 dark:border-yellow-400/25;
+  background: color-mix(in srgb, #f59e0b 12%, transparent);
+}
+.wp-badge-imdb svg { @apply w-3.5 h-3.5; }
+
+.wp-badge-type {
+  color: var(--wp-accent);
+  background: var(--wp-soft);
+  border-color: var(--wp-ring);
+}
+
+.wp-genres { @apply flex flex-wrap gap-2 mt-3; }
+
+.wp-genre {
+  @apply text-xs px-3 py-1 rounded-full border border-brand-text/10 text-muted transition-all duration-200;
+}
+.wp-genre:hover { color: var(--wp-accent); border-color: var(--wp-ring); }
+
+.wp-overview {
+  @apply mt-5 text-sm sm:text-[15px] leading-relaxed text-muted;
+  max-width: 68ch;
+}
+
+.wp-facts { @apply grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6; }
+
+.wp-fact {
+  @apply rounded-xl border border-brand-text/10 px-3 py-2.5;
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+}
+.wp-fact-k { @apply text-[10px] uppercase tracking-[0.12em] text-muted; }
+.wp-fact-v { @apply text-sm font-semibold text-brand-text mt-1 truncate; }
+
+.wp-actions { @apply flex flex-wrap items-center gap-2.5 mt-6 relative; }
+
+/* TrailerButton / ImdbButton ship their own margins + mobile height — level them
+   with the 40px icon buttons so the action row reads as one control cluster. */
+.wp-actions > a {
+  height: 40px;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.wp-icon-btn {
+  @apply h-10 w-10 shrink-0 grid place-items-center rounded-full border border-brand-text/10 bg-brand-text/5 text-brand-text cursor-pointer;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease,
+    color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.wp-icon-btn:hover { @apply bg-brand-text/10; transform: translateY(-2px); }
+.wp-icon-btn svg { @apply w-5 h-5; }
+
+.wp-icon-btn.is-fav {
+  @apply bg-rose-600 border-rose-500 text-white;
+  box-shadow: 0 10px 24px -10px rgba(225, 29, 72, 0.8);
+}
+.wp-icon-btn.is-fav:hover { @apply bg-rose-500; }
+
+.wp-icon-btn.is-open {
+  background: var(--wp-accent);
+  border-color: transparent;
+  color: #fff;
+}
+
+/* ── Playlist dropdown (theme aware) ── */
+.wp-menu {
+  @apply absolute left-0 top-12 z-50 w-56 rounded-xl border border-brand-text/10 p-1.5 text-left overflow-hidden;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.55);
+  animation: wpPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.wp-menu-new {
+  @apply flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-xs font-semibold cursor-pointer transition-colors duration-150 hover:bg-brand-text/5;
+  color: var(--wp-accent);
+}
+.wp-menu-new svg { @apply w-4 h-4; }
+
+.wp-menu-divider { @apply my-1 border-t border-brand-text/10; }
+.wp-menu-scroll { @apply max-h-44 overflow-y-auto; }
+.wp-menu-empty { @apply px-3 py-2 text-[11px] text-muted; }
+
+.wp-menu-item {
+  @apply block w-full truncate rounded-lg px-3 py-2 text-left text-xs text-brand-text cursor-pointer transition-colors duration-150 hover:bg-brand-text/5;
+}
+
+/* ── Playlist modal (theme aware) ── */
+.wp-modal-backdrop {
+  @apply fixed inset-0 z-[100] flex items-center justify-center p-4;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  animation: wpFadeIn 0.2s ease-out both;
+}
+
+.wp-modal {
+  @apply w-full max-w-sm rounded-2xl border border-brand-text/10 bg-surface p-6;
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.7);
+  animation: wpPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.wp-modal h3 { @apply text-lg font-semibold text-brand-text mb-1.5; }
+.wp-modal p { @apply text-xs text-muted mb-4; }
+
+.wp-modal-input {
+  @apply w-full rounded-xl border border-brand-text/10 px-3 py-2.5 text-sm text-brand-text placeholder-muted outline-none mb-5 transition-colors duration-200;
+  background: color-mix(in srgb, var(--brand-bg) 80%, transparent);
+}
+.wp-modal-input:focus { border-color: var(--wp-accent); }
+
+.wp-btn-secondary {
+  @apply px-4 py-2 rounded-lg text-sm bg-brand-text/10 text-brand-text cursor-pointer transition-colors duration-200 hover:bg-brand-text/20;
+}
+
+.wp-btn-primary {
+  @apply px-4 py-2 rounded-lg text-sm font-medium text-white cursor-pointer transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed;
+  background: var(--wp-accent);
+}
+.wp-btn-primary:not(:disabled):hover { filter: brightness(1.12); }
+
+/* ── Motion opt-out ── */
+@media (prefers-reduced-motion: reduce) {
+  .wp-rise,
+  .wp-ambient-img,
+  .animate-fade-in,
+  .modal-animation,
+  .scale-in,
+  .wp-menu,
+  .wp-modal,
+  .wp-modal-backdrop {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+  .wp-play-ring,
+  .wp-live-dot,
+  .wp-server.is-active .wp-server-dot { animation: none !important; }
+  .wp-preview:hover .wp-preview-img,
+  .wp-poster:hover img { transform: none; }
 }
