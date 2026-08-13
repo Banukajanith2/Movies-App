@@ -1007,9 +1007,15 @@
 .wp-ep-skeleton { @apply h-[66px] rounded-xl bg-brand-text/5 animate-pulse; }
 
 /* ── Detail block: poster + copy ── */
+/* .wp-rise animates transform, which makes this block its own stacking context —
+   so the playlist dropdown's own z-index can never lift it above the Cast /
+   Seasons sections that follow. Raising the whole block fixes it at the level
+   where the stacking context actually is. */
 .wp-detail {
   @apply grid gap-6 mt-8 sm:mt-10;
   grid-template-columns: minmax(0, 1fr);
+  position: relative;
+  z-index: 30;
 }
 
 @media (min-width: 640px) {
