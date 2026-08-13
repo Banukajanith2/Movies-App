@@ -12,14 +12,11 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
-    "@lottiefiles/react-lottie-player": "^3.6.0",
     "@tailwindcss/vite": "^4.1.10",
-    "appwrite": "^18.1.1",
-    "firebase": "^11.9.1",
+    "firebase": "^11.10.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.2",
-    "react-use": "^17.6.0",
     "styled-components": "^6.1.19",
     "swiper": "^11.2.8",
     "tailwindcss": "^4.1.10"

@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
 
     <!-- Favicon -->
-    <link rel="icon" href="https://img.icons8.com/office/80/film-reel--v2.png" />
+    <link rel="icon" href="/icons8-film-reel-40.png" />
+    
 
     <!-- Viewport for responsive design -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -43,6 +44,22 @@
 
     <!-- PWA Manifest (optional if you're building a PWA) -->
     <!-- <link rel="manifest" href="/site.webmanifest" /> -->
+
+    <!-- Single Page Apps for GitHub Pages: decodes the path 404.html encoded and
+         restores the clean URL via history.replaceState before React Router mounts.
+         https://github.com/rafgraph/spa-github-pages -->
+    <script type="text/javascript">
+      (function(l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search.slice(1).split('&').map(function(s) {
+            return s.replace(/~and~/g, '&');
+          }).join('?');
+          window.history.replaceState(null, null,
+            l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location));
+    </script>
   </head>
   <body>
     <div id="root"></div>

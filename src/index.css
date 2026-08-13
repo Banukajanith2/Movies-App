@@ -2,6 +2,52 @@
 @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap");
 
 @import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
+
+/* ==========================================================================
+   DYNAMIC COLOR THEME TOKENS (Light Mode Default / Dark Mode Overrides)
+   ========================================================================== */
+:root {
+  --brand-bg: #f8fafc;
+  --brand-text: #0f172a;
+  --surface: #ffffff;
+  --accent: #4f46e5;
+  --accent-hover: #4338ca;
+  --muted: #6b7280;
+}
+
+.dark {
+  --brand-bg: #030014;
+  --brand-text: #ffffff;
+  --surface: #0f0d23;
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --muted: #9ca4ab;
+}
+
+@theme {
+  /* Dynamic Semantic Colors mapped to Tailwind tokens */
+  --color-brand-bg: var(--brand-bg);
+  --color-brand-text: var(--brand-text);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-muted: var(--muted);
+
+  /* Original Legacy Tokens */
+  --color-primary: #030014;
+  --color-light-100: #cecefb;
+  --color-light-200: #a8b5db;
+  --color-purple-100: #AB8BFF;
+  --color-gray-100: #9ca4ab;
+  --color-dark-100: #0f0d23;
+  --color-dark-200: #1d1a36;
+
+  --font-dm-sans: DM Sans, sans-serif;
+  --breakpoint-xs: 480px;
+  --background-image-hero-pattern: url("");
+  --background-image-footer-pattern: url("");
+}
 
 .fade-in {
   opacity: 0;
@@ -13,6 +59,7 @@
     opacity: 1;
   }
 }
+
 @layer utilities {
   @keyframes slideUp {
     0% {
@@ -30,45 +77,35 @@
   }
 }
 
-@theme {
-  --color-primary: #030014;
-
-  --color-light-100: #cecefb;
-  --color-light-200: #a8b5db;
-
-  --color-purple-100: #AB8BFF;
-
-  --color-gray-100: #9ca4ab;
-
-  --color-dark-100: #0f0d23;
-  --color-dark-200: #1d1a36;
-
-  --font-dm-sans: DM Sans, sans-serif;
-
-  --breakpoint-xs: 480px;
-
-  --background-image-hero-pattern: url("/background.png");
-
-  --background-image-footer-pattern: url("/footer.png");
-}
-
+/* ==========================================================================
+   BASE LAYOUT STYLES
+   ========================================================================== */
 @layer base {
   body {
     font-family: "DM Sans", serif;
     font-optical-sizing: auto;
-    background: #030014;
+    background: var(--brand-bg);
+    color: var(--brand-text);
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  ::view-transition-group(root) {
+  animation-duration: 0.4s;
   }
 
   h1 {
-    @apply mx-auto max-w-4xl text-center text-6xl font-bold leading-tight tracking-[-1%] text-white sm:text-[64px] sm:leading-[76px];
+    @apply mx-auto max-w-4xl text-center text-6xl font-bold leading-tight tracking-[-1%] text-brand-text sm:text-[64px] sm:leading-[76px];
+    transition: color 0.3s ease;
   }
 
   h2 {
-    @apply text-2xl font-bold text-white sm:text-3xl;
+    @apply text-2xl font-bold text-brand-text sm:text-3xl;
+    transition: color 0.3s ease;
   }
 
   main {
-    @apply min-h-screen relative bg-primary;
+    @apply min-h-screen relative bg-brand-bg;
+    transition: background 0.3s ease;
   }
 
   header {
@@ -80,191 +117,23 @@
   }
 }
 
+/* ==========================================================================
+   COMPONENTS & UTILITIES
+   ========================================================================== */
 @layer components {
   .pattern {
     @apply bg-hero-pattern w-full h-screen bg-center bg-cover absolute z-0;
   }
 
   .footer-img {
-      @apply bg-footer-pattern w-full h-screen bg-center bg-cover absolute bottom-0 z-0;
-  }
-
-  .nav {
-    @apply fixed top-0 left-0 right-0 z-50 bg-dark-100/90 backdrop-blur-md;
-  } 
-
-  .nav-bar {
-    @apply flex flex-row justify-between items-center h-18 pl-3 pr-0 sm:pl-3 sm:pr-3; /* Matched horizontal padding */
-
-    .nav-text {
-    @apply  bg-linear-to-r from-[#D6C7FF] to-indigo-500 bg-clip-text text-transparent text-xl sm:text-2xl lg:ml-2 ml-0 cursor-pointer max-w-30 min-w-20;
-    }
-
-    .search-nav {
-    @apply h-auto;
-
-      & input {
-        @apply text-gray-200 placeholder-light-200/50 outline-0 focus:w-55 focus:sm:w-100 w-55 sm:w-55 transition3s ml-2 pl-1;
-      }
-    }
-
-    .moviesearch-card-nav {
-    @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:bg-dark-200 transition3s relative overflow-hidden flex flex-row h-[150px];
-
-    & .type-badge {
-      @apply bg-indigo-800 text-white text-xs font-semibold py-3 w-6 rounded-b-md mr-1 flex items-center justify-center opacity-100 translate-x-0 transition3s;
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
-    }
-
-    &:hover .type-badge {
-      @apply opacity-70 -translate-x-0.5 bg-indigo-900;
-    }
-
-    & img {
-      @apply rounded-lg object-cover w-[120px] transition3s;
-    }
-
-    &:hover img {
-      @apply w-[150px];
-    }
-
-    & .h3title2 {
-      @apply text-white font-bold text-base line-clamp-1 ;
-    }
-
-    & .h3title1 {
-      @apply hidden;
-    }
-
-    & .content {
-      @apply w-full flex flex-col justify-start p-2 gap-3;
-    }
-
-    & .content2 {
-      @apply w-full flex flex-row gap-2 justify-start;
-    }
-
-    & .rating {
-      @apply flex flex-row gap-1 items-center;
-    }
-
-    & .rating img {
-      @apply size-4 object-contain;
-    }
-
-    & .rating p {
-      @apply font-bold text-base text-white;
-    }
-
-    & .content span {
-      @apply text-sm text-gray-100;
-    }
-
-    & .content .lang {
-      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
-    }
-
-    & .content .year {
-      @apply text-gray-100 font-medium text-base;
-    }
-
-    & .watch {
-      @apply absolute right-5 bottom-5 text-white opacity-0 translate-x-0 transition3s;
-    }
-
-    &:hover .watch {
-      @apply opacity-100 -translate-x-0.5;
-    }
-
-    & .watch :hover {
-      @apply text-indigo-500;
-    }
-
-  } 
-
-    .tvsearch-card-nav {
-    @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:bg-dark-200 transition3s relative overflow-hidden flex flex-row h-[150px];
-
-    & .type-badge {
-      @apply bg-amber-950 text-white text-xs font-semibold py-3 w-6 rounded-b-md mr-1 flex items-center justify-center opacity-100 translate-x-0 transition3s;
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
-    }
-
-    &:hover .type-badge {
-      @apply opacity-70 -translate-x-0.5 bg-amber-900;
-    }
-
-    & img {
-      @apply rounded-lg object-cover w-[120px] transition3s;
-    }
-
-    &:hover img {
-      @apply w-[150px];
-    }
-
-    & .h3title2 {
-      @apply text-white font-bold text-base line-clamp-1 ;
-    }
-
-    & .h3title1 {
-      @apply hidden;
-    }
-
-    & .content {
-      @apply w-full flex flex-col justify-start p-2 gap-3;
-    }
-
-    & .content2 {
-      @apply w-full flex flex-row gap-2 justify-start;
-    }
-
-    & .rating {
-      @apply flex flex-row gap-1 items-center;
-    }
-
-    & .rating img {
-      @apply size-4 object-contain;
-    }
-
-    & .rating p {
-      @apply font-bold text-base text-white;
-    }
-
-    & .content span {
-      @apply text-sm text-gray-100;
-    }
-
-    & .content .lang {
-      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
-    }
-
-    & .content .year {
-      @apply text-gray-100 font-medium text-base;
-    }
-
-    & .watch {
-      @apply absolute right-5 bottom-5 text-white opacity-0 translate-x-0 transition3s;
-    }
-
-    &:hover .watch {
-      @apply opacity-100 -translate-x-0.5;
-    }
-
-    & .watch :hover {
-      @apply text-amber-500;
-    }
-
-  }
-    
+    @apply bg-footer-pattern w-full h-screen bg-center bg-cover absolute bottom-0 z-0;
   }
 
   .error-page {
     @apply max-w-5xl mx-auto p-5;
 
     .error-page-nav {
-      @apply  flex flex-col justify-center items-start mb-16 sm:mb-5;
+      @apply flex flex-col justify-center items-start mb-16 sm:mb-5;
 
       .error-text {
         @apply bg-linear-to-r from-[#D6C7FF] to-indigo-500 bg-clip-text text-transparent text-xl sm:text-2xl m-0 cursor-pointer;
@@ -272,574 +141,87 @@
     }
   }
 
-  .wrapper {
-    @apply sm:px-5 px-2 xs:p-2 pt-5 max-w-7xl mx-auto flex flex-col relative z-10;
+  /* ── New Movie Card ── */
+  .movie-card-new {
+    @apply cursor-pointer select-none;
   }
 
-  .search {
-    @apply w-full py-3 mt-10 max-w-3xl mx-auto;
-
-    & div {
-      @apply relative flex items-center ;
-    }
-
-    & img {
-      @apply absolute left-5 h-5 w-5;
-    }
-
-    & input {
-      @apply w-full  bg-light-100/5 py-5 sm:pr-10 pl-14 text-base text-gray-200 placeholder-light-200 outline-0  rounded-md  transition3s shadow-lg focus:shadow-indigo-500/30;
-    }
+  .mcn-img-wrap {
+    @apply relative overflow-hidden rounded-xl;
+    aspect-ratio: 3/4;
   }
 
-  .moviesearch-card {
-    @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:bg-dark-200 transition3s relative overflow-hidden flex flex-row h-[150px];
-
-    & .type-badge {
-      @apply bg-indigo-800 text-white text-xs font-semibold py-3 w-6 rounded-b-md mr-1 flex items-center justify-center opacity-100 translate-x-0 transition3s;
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
-    }
-
-    &:hover .type-badge {
-      @apply opacity-70 -translate-x-0.5 bg-indigo-900;
-    }
-
-    & img {
-      @apply rounded-lg object-cover transition3s;
-    }
-
-    &:hover img {
-      @apply w-[150px];
-    }
-
-    & .h3title2 {
-      @apply text-white font-bold text-base line-clamp-1 ;
-    }
-
-    & .h3title1 {
-      @apply hidden;
-    }
-
-    & .content {
-      @apply w-full flex flex-col justify-start p-2 gap-3;
-    }
-
-    & .content2 {
-      @apply w-full flex flex-row gap-2 justify-start;
-    }
-
-    & .rating {
-      @apply flex flex-row gap-1 items-center;
-    }
-
-    & .rating img {
-      @apply size-4 object-contain;
-    }
-
-    & .rating p {
-      @apply font-bold text-base text-white;
-    }
-
-    & .content span {
-      @apply text-sm text-gray-100;
-    }
-
-    & .content .lang {
-      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
-    }
-
-    & .content .year {
-      @apply text-gray-100 font-medium text-base;
-    }
-
-    & .watch {
-      @apply absolute right-5 bottom-5 text-white opacity-0 translate-x-0 transition3s;
-    }
-
-    &:hover .watch {
-      @apply opacity-100 -translate-x-0.5;
-    }
-
-    & .watch :hover {
-      @apply text-indigo-500;
-    }
-
+  .mcn-img-wrap img {
+    @apply w-full h-full object-cover transition-transform duration-300 ease-in-out;
   }
 
-  .tvsearch-card {
-    @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:bg-dark-200 transition3s relative overflow-hidden flex flex-row h-[150px];
-
-    & .type-badge {
-      @apply bg-amber-950 text-white text-xs font-semibold py-3 w-6 rounded-b-md mr-1 flex items-center justify-center opacity-100 translate-x-0 transition3s;
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
-    }
-
-    &:hover .type-badge {
-      @apply opacity-70 -translate-x-0.5 bg-amber-900;
-    }
-
-    & img {
-      @apply rounded-lg object-cover transition3s;
-    }
-
-    &:hover img {
-      @apply w-[150px];
-    }
-
-    & .h3title2 {
-      @apply text-white font-bold text-base line-clamp-1 ;
-    }
-
-    & .h3title1 {
-      @apply hidden;
-    }
-
-    & .content {
-      @apply w-full flex flex-col justify-start p-2 gap-3;
-    }
-
-    & .content2 {
-      @apply w-full flex flex-row gap-2 justify-start;
-    }
-
-    & .rating {
-      @apply flex flex-row gap-1 items-center;
-    }
-
-    & .rating img {
-      @apply size-4 object-contain;
-    }
-
-    & .rating p {
-      @apply font-bold text-base text-white;
-    }
-
-    & .content span {
-      @apply text-sm text-gray-100;
-    }
-
-    & .content .lang {
-      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
-    }
-
-    & .content .year {
-      @apply text-gray-100 font-medium text-base;
-    }
-
-    & .watch {
-      @apply absolute right-5 bottom-5 text-white opacity-0 translate-x-0 transition3s;
-    }
-
-    &:hover .watch {
-      @apply opacity-100 -translate-x-0.5;
-    }
-
-    & .watch :hover {
-      @apply text-amber-500;
-    }
-
+  .movie-card-new:hover .mcn-img-wrap img {
+    @apply scale-120;
   }
 
-  .all-movies {
-    @apply mt-10;
-
-    & ul {
-      @apply grid gap-5 grid-cols-2 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-5;
-    }
+  .mcn-overlay {
+    @apply absolute inset-0 flex items-end bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 transition-opacity duration-300;
   }
 
-  .movie-card {
-    @apply bg-dark-100 cursor-pointer pb-5 p-2 rounded-2xl hover:border-b-10 border-indigo-500 shadow-lg hover:shadow-indigo-500/30 transition3s relative overflow-hidden;
-
-    & .type-badge {
-    @apply absolute top-3 left-3 bg-indigo-500 text-white text-sm font-semibold px-2 py-1 rounded-md opacity-0 translate-y-2 transition3s z-10;
-    }
-
-    &:hover .type-badge {
-    @apply opacity-100 translate-y-0;
-    }
-
-    & img {
-      @apply rounded-lg w-full h-[250px] object-cover transition3s;
-    }
-
-    &:hover img {
-      @apply h-[200px];
-    }
-
-    & .h3title1 {
-      @apply text-white font-bold text-base line-clamp-1 ;
-    }
-
-    & .h3title2 {
-      @apply hidden;
-    }
-
-    & .content2 {
-      @apply mt-2 flex flex-row items-center flex-wrap gap-1;
-    }
-
-    & .rating {
-      @apply flex flex-row items-center gap-1;
-    }
-
-    & .rating img {
-      @apply size-4 object-contain;
-    }
-
-    & .rating p {
-      @apply font-bold text-base text-white;
-    }
-
-    & .content span {
-      @apply text-sm text-gray-100;
-    }
-
-    & .content .lang {
-      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
-    }
-
-    & .content .year {
-      @apply text-gray-100 font-medium text-base;
-    }
-
-    & .watch {
-      @apply absolute bottom-0 pb-5 text-white font-semibold opacity-0 translate-y-full transition3s;
-
-        p {
-        @apply transition3s;
-
-        &:hover {
-          @apply text-indigo-500;
-        }
-      }
-    }
-    
-    &:hover .watch {
-      @apply opacity-100 translate-y-0;
-    }
-
-    
+  .movie-card-new:hover .mcn-overlay {
+    @apply opacity-100;
   }
 
-  .tv-card {
-    @apply bg-amber-950 cursor-pointer pb-5 p-2 rounded-2xl hover:border-b-10 border-amber-800 shadow-lg hover:shadow-indigo-500/30 transition3s relative overflow-hidden;
-
-    & .type-badge {
-    @apply absolute top-3 left-3 bg-slate-300 text-dark-200 text-sm font-semibold px-2 py-1 rounded-md opacity-0 translate-y-2 transition3s z-10;
-    }
-
-    &:hover .type-badge {
-    @apply opacity-100 translate-y-0;
-    }
-
-    & img {
-      @apply rounded-lg w-full h-[250px] object-cover transition3s;
-    }
-
-    &:hover img {
-      @apply h-[200px];
-    }
-
-    & .h3title1 {
-      @apply text-white font-bold text-base line-clamp-1 ;
-    }
-
-    & .h3title2 {
-      @apply hidden;
-    }
-
-    & .content2 {
-      @apply mt-2 flex flex-row items-center flex-wrap gap-1;
-    }
-
-    & .rating {
-      @apply flex flex-row items-center gap-1;
-    }
-
-    & .rating img {
-      @apply size-4 object-contain;
-    }
-
-    & .rating p {
-      @apply font-bold text-base text-white;
-    }
-
-    & .content span {
-      @apply text-sm text-gray-100;
-    }
-
-    & .content .lang {
-      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
-    }
-
-    & .content .year {
-      @apply text-gray-100 font-medium text-base;
-    }
-
-    & .watch {
-      @apply absolute bottom-0 pb-5 text-white font-semibold opacity-0 translate-y-full transition3s;
-
-        p {
-        @apply transition3s;
-
-        &:hover {
-          @apply text-indigo-500;
-        }
-      }
-    }
-    
-    &:hover .watch {
-      @apply opacity-100 translate-y-0;
-    }
+  .mcn-overlay-inner {
+    @apply w-full flex items-center justify-between px-2.5 pb-2.5;
   }
 
-  .trendingmovie-card {
-    @apply bg-indigo-950 cursor-pointer pb-5 p-2 rounded-2xl hover:border-b-10 border-indigo-800 shadow-lg hover:shadow-indigo-500/30 transition3s relative overflow-hidden;
-
-    & .type-badge {
-    @apply absolute top-3 left-3 bg-slate-300 text-dark-200 text-sm font-semibold px-2 py-1 rounded-md opacity-0 translate-y-2 transition3s z-10;
-    }
-
-    &:hover .type-badge {
-    @apply opacity-100 translate-y-0;
-    }
-
-    & img {
-      @apply rounded-lg w-full h-[250px] object-cover transition3s;
-    }
-
-    &:hover img {
-      @apply h-[200px];
-    }
-
-    & .h3title1 {
-      @apply text-white font-bold text-base line-clamp-1 ;
-    }
-
-    & .h3title2 {
-      @apply hidden;
-    }
-
-    & .content2 {
-      @apply mt-2 flex flex-row items-center flex-wrap gap-1;
-    }
-
-    & .rating {
-      @apply flex flex-row items-center gap-1;
-    }
-
-    & .rating img {
-      @apply size-4 object-contain;
-    }
-
-    & .rating p {
-      @apply font-bold text-base text-white;
-    }
-
-    & .content span {
-      @apply text-sm text-gray-100;
-    }
-
-    & .content .lang {
-      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
-    }
-
-    & .content .year {
-      @apply text-gray-100 font-medium text-base;
-    }
-
-    & .watch {
-      @apply absolute bottom-0 pb-5 text-white font-semibold opacity-0 translate-y-full transition3s;
-
-        p {
-        @apply transition3s;
-
-        &:hover {
-          @apply text-indigo-500;
-        }
-      }
-    }
-    
-    &:hover .watch {
-      @apply opacity-100 translate-y-0;
-    }
+  .mcn-rating {
+    @apply flex items-center gap-1 text-white text-[11px] sm:text-[15px] font-bold;
   }
 
-  .trendingtv-card {
-    @apply bg-amber-950 cursor-pointer pb-5 p-2 rounded-2xl hover:border-b-10 border-amber-700 shadow-lg hover:shadow-amber-500/30 transition3s relative overflow-hidden;
-
-    & .type-badge {
-    @apply absolute top-3 left-3 bg-amber-800 text-white text-sm font-semibold px-2 py-1 rounded-md opacity-0 translate-y-2 transition3s z-10;
-    }
-
-    &:hover .type-badge {
-    @apply opacity-100 translate-y-0;
-    }
-
-    & img {
-      @apply rounded-lg w-full h-[250px] object-cover transition3s;
-    }
-
-    &:hover img {
-      @apply h-[200px];
-    }
-
-    & .h3title1 {
-      @apply text-white font-bold text-base line-clamp-1 ;
-    }
-
-    & .h3title2 {
-      @apply hidden;
-    }
-
-    & .content2 {
-      @apply mt-2 flex flex-row items-center flex-wrap gap-1;
-    }
-
-    & .rating {
-      @apply flex flex-row items-center gap-1;
-    }
-
-    & .rating img {
-      @apply size-4 object-contain;
-    }
-
-    & .rating p {
-      @apply font-bold text-base text-white;
-    }
-
-    & .content span {
-      @apply text-sm text-gray-100;
-    }
-
-    & .content .lang {
-      @apply capitalize text-gray-100 font-medium text-base hidden sm:block;
-    }
-
-    & .content .year {
-      @apply text-gray-100 font-medium text-base;
-    }
-
-    & .watch {
-      @apply absolute bottom-0 pb-5 text-white font-semibold opacity-0 translate-y-full transition3s;
-
-        p {
-        @apply transition3s;
-
-        &:hover {
-          @apply text-yellow-500;
-        }
-      }
-    }
-    
-    &:hover .watch {
-      @apply opacity-100 translate-y-0;
-    }
+  .movie-controls, .tv-controls {
+    @apply flex items-center gap-2 ml-auto;
   }
 
-  .movie {
-    @apply max-w-5xl flex flex-col mx-auto ;
-
-    & .backdrop {
-      @apply flex h-[250px] sm:h-[55vh] overflow-hidden relative cursor-pointer;
-    }
-
-    & .backdrop-img {
-      @apply rounded-lg w-[100%] object-cover object-center hover:w-[120%] hover:opacity-50 transition3s;
-    }
-
-    & .play-icon {
-      @apply h-[100px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 fill-gray-300 hover:h-[115px] hover:fill-indigo-500 transition3s;
-    }
-
-    & .poster-and-info {
-      @apply sm:h-[300px] rounded-br-lg rounded-bl-xl flex mt-5 bg-linear-to-b from-transparent to-indigo-500/50;
-    }
-
-    & .poster {
-      @apply hidden sm:block relative;
-    }
-
-    & .poster-img {
-      @apply h-[100%] w-[100%] object-cover rounded-tl-lg rounded-tr-lg rounded-bl-lg;
-    }
-
-    & .movie-info {
-      @apply flex-1/2 flex flex-col justify-center items-start ml-5 mr-5 text-white pb-3 sm:pb-3;
-    }
-
-    & .iframe {
-      @apply absolute inset-0 w-full h-full rounded-xl;
-    }
-
+  .mcn-play-btn {
+    @apply bg-indigo-600 hover:bg-indigo-500 text-white p-1.5 rounded-full transition-colors duration-200 cursor-pointer;
   }
 
-  .tv {
-    @apply max-w-5xl flex flex-col mx-auto ;
-
-    & .backdrop {
-      @apply flex h-[250px] sm:h-[55vh] overflow-hidden relative cursor-pointer;
-    }
-
-    & .backdrop-img {
-      @apply rounded-lg w-[100%] object-cover object-center hover:w-[120%] hover:opacity-50 transition3s;
-    }
-
-    & .play-icon {
-      @apply h-[100px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 fill-gray-300 hover:h-[115px] hover:fill-amber-500 transition3s;
-    }
-
-    & .poster-and-info {
-      @apply sm:h-[300px] rounded-br-lg rounded-bl-xl flex mt-5 bg-linear-to-b from-transparent to-amber-800/50;
-    }
-
-    & .poster {
-      @apply hidden sm:block relative;
-    }
-
-    & .poster-img {
-      @apply h-[100%] w-[100%] object-cover rounded-tl-lg rounded-tr-lg rounded-bl-lg;
-    }
-
-    & .movie-info {
-      @apply flex-1/2 flex flex-col justify-center items-start ml-5 mr-5 text-white pb-3 sm:pb-3;
-    }
-
-    & .iframe {
-      @apply absolute inset-0 w-full h-full rounded-xl;
-    }
-
+  .mcn-type-badge {
+    @apply absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-indigo-600/90 text-white;
   }
 
+  .mcn-info {
+    @apply mt-2 ml-2 px-0.5;
+  }
+
+  .mcn-title {
+    @apply text-brand-text text-[11px] sm:text-[15px] font-semibold line-clamp-1 leading-snug transition-colors duration-300;
+  }
+
+  .mcn-meta {
+    @apply flex items-center gap-1.5 mt-0.5 text-muted text-[11px] sm:text-[15px] transition-colors duration-300;
+  }
+
+  .movie-card, .tv-card {
+    @apply cursor-pointer;
+  }
+
+  .mcn-type-badge-tv {
+    @apply bg-amber-700/90 text-white;
+  }
+
+  /* ── Social Footers ── */
   .social-icons {
-    @apply flex justify-center gap-5 text-white;
+    @apply flex justify-center gap-5 text-brand-text transition-colors duration-300;
 
-    & a {
-      @apply hover:text-blue-500 transition-colors;
-    }
-
-    & a:nth-child(2) {
-      @apply hover:text-sky-400;
-    }
-
-    & a:nth-child(3) {
-      @apply hover:text-pink-500;
-    }
-
-    & a:nth-child(4) {
-      @apply hover:text-blue-700;
-    }
-
-    & svg {
-      @apply w-6 h-6;
-    }
+    & a { @apply hover:text-blue-500 transition-colors; }
+    & a:nth-child(2) { @apply hover:text-sky-400; }
+    & a:nth-child(3) { @apply hover:text-pink-500; }
+    & a:nth-child(4) { @apply hover:text-blue-700; }
+    & svg { @apply w-6 h-6; }
   }
-  
 }
 
+/* ==========================================================================
+   TAILWIND UTILITY VARIATIONS
+   ========================================================================== */
 @utility text-gradient {
   @apply bg-linear-to-r from-[#D6C7FF] to-indigo-500 bg-clip-text text-transparent text-5xl sm:text-7xl;
 }
@@ -849,27 +231,31 @@
 }
 
 @utility text-desciption {
-  @apply  text-center bg-gray-300 bg-clip-text text-transparent;
+  @apply text-center bg-gray-600 dark:bg-gray-300 bg-clip-text text-transparent;
 }
 
 @utility fancy-text {
-  -webkit-text-stroke: 5px rgba(206, 206, 251, 0.5);
+  -webkit-text-stroke: 5px rgba(15, 13, 35, 0.15);
   font-size: 190px;
   font-family: "Bebas Neue", sans-serif;
+  
+  .dark & {
+    -webkit-text-stroke: 5px rgba(206, 206, 251, 0.5);
+  }
 }
 
 @utility hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  &::-webkit-scrollbar { display: none; }
 }
 
+/* ==========================================================================
+   GLOBAL SCROLLBAR INTEGRATION
+   ========================================================================== */
 ::-webkit-scrollbar {
-  height: 7px; /* horizontal scrollbar height */
-  width: 5px; /* vertical scrollbar width */
+  height: 7px;
+  width: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -877,20 +263,928 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #ffffff; /* custom color */
+  background-color: #cbd5e1;
   border-radius: 6px;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+  transition: background-color 0.3s;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: #ffffff;
   box-shadow: inset 0 2px 4px 0 rgba(156, 164, 171, 0.1);
 }
 
 ::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
   background-color: #030014;
 }
 
-/*TrendingMovies swiper buttons*/
 .swiper-pagination-bullet {
   @apply sm:w-2 sm:h-2 w-1 h-1 sm:opacity-70 opacity-0 transition-all duration-300;
 }
 
 .swiper-pagination-bullet-active {
   @apply w-3 h-3 sm:opacity-100 opacity-0;
+}
+
+/* ==========================================================================
+   NAVBAR COMPONENT ENGINE
+   ========================================================================== */
+.main-navbar {
+  @apply fixed top-0 left-0 right-0 z-50;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  background: rgba(255, 255, 255, 0.82);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.dark .main-navbar {
+  background: rgba(3, 0, 20, 0.72);
+  border-bottom: 1px solid rgba(206, 206, 251, 0.07);
+}
+
+.main-navbar-inner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0px 25px;
+  height: 80px;
+}
+
+.navbar-logo {
+  @apply flex flex-col cursor-pointer;
+}
+
+.navbar-logo-text {
+  @apply font-bold leading-tight;
+  font-size: clamp(18px, 2vw, 28px);
+  background: linear-gradient(90deg, #4f46e5, #7c3aed);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dark .navbar-logo-text {
+  background: linear-gradient(90deg, #D6C7FF, #6366f1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.navbar-logo-sub {
+  @apply text-[10px] leading-tight lg:min-w-[250px] lg:max-w-[250px] max-w-[200px] text-muted transition-colors duration-300;
+}
+
+.navbar-links {
+  @apply hidden sm:flex items-center justify-center gap-1;
+}
+
+.navbar-link {
+  @apply lg:text-base px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer font-medium text-brand-text hover:text-accent hover:bg-brand-text/5;
+  
+  .dark & {
+    @apply hover:text-indigo-400 hover:bg-brand-text/10;
+  }
+}
+
+.navbar-search-area {
+  @apply flex gap-2 justify-end lg:min-w-[250px] lg:max-w-[250px] max-w-[150px] relative;
+}
+
+.navbar-search-btn {
+  @apply flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer text-muted hover:text-brand-text bg-black/5 hover:bg-black/10 border border-black/10;
+  
+  .dark & {
+    @apply border-white/10 hover:bg-white/10;
+  }
+}
+
+.navbar-search-expanded {
+  @apply min-w-[250px] lg:min-w-[350px] relative;
+}
+
+.navbar-search-input-row {
+  @apply flex items-center gap-2 rounded-xl px-3 py-2 border bg-surface border-muted/30;
+}
+
+.navbar-search-input {
+  @apply flex-1 bg-transparent text-sm outline-none text-brand-text placeholder-muted;
+}
+
+.navbar-search-close {
+  @apply transition-colors cursor-pointer shrink-0 text-brand-text hover:text-accent;
+}
+
+.navbar-search-dropdown {
+  position: absolute;
+  top: calc(100% + 20px);
+  width: min(90vw, 400px);
+  max-height: 70vh;
+  overflow-y: auto;
+  right: 0;
+  left: auto;
+  @apply rounded-xl shadow-2xl overflow-hidden z-50 border bg-surface border-muted/10;
+}
+
+@media (max-width: 640px) {
+  .navbar-search-dropdown {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+/* ── Mobile menu Overhauls ── */
+.mobile-menu {
+  @apply bg-surface/95 border-t border-muted/10 px-4 py-3 flex flex-col gap-1;
+  backdrop-filter: blur(12px);
+}
+
+.mobile-menu-link {
+  @apply text-sm text-brand-text hover:text-accent text-left py-2.5 px-3 rounded-lg hover:bg-brand-text/5 transition-all duration-200 cursor-pointer;
+}
+
+/* ── Embedded Cards inside Dropdown ── */
+.moviesearch-card-nav, .tvsearch-card-nav {
+  @apply bg-surface cursor-pointer pb-5 p-2 rounded-2xl hover:bg-brand-bg transition3s relative overflow-hidden flex flex-row h-[150px];
+  
+  & .h3title2 { @apply text-brand-text font-bold text-base line-clamp-1; }
+  & .rating p { @apply font-bold text-base text-brand-text; }
+  & .content span { @apply text-sm text-muted; }
+  & .content .lang, & .content .year { @apply text-brand-text font-medium text-base; }
+  & .content .lang { @apply hidden sm:block capitalize; }
+  & img { @apply rounded-lg object-cover w-[120px] transition3s; }
+  &:hover img { @apply w-[150px]; }
+  & .h3title1 { @apply hidden; }
+  & .content { @apply w-full flex flex-col justify-start p-2 gap-3; }
+  & .content2 { @apply w-full flex flex-row gap-2 justify-start; }
+  & .rating { @apply flex flex-row gap-1 items-center; }
+  & .rating img { @apply size-4 object-contain; }
+  & .watch { @apply absolute right-5 bottom-5 text-brand-text opacity-0 translate-x-0 transition3s; }
+  &:hover .watch { @apply opacity-100 -translate-x-0.5; }
+  & .movie-controls, & .tv-controls { @apply hidden; }
+}
+
+.moviesearch-card-nav .type-badge {
+  @apply bg-indigo-100 text-indigo-700 text-xs font-semibold py-3 w-6 rounded-b-md mr-1 flex items-center justify-center opacity-100 translate-x-0 transition3s;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  
+  .dark & { @apply bg-indigo-800 text-white; }
+}
+.moviesearch-card-nav:hover .type-badge { @apply opacity-70 -translate-x-0.5; }
+
+.tvsearch-card-nav .type-badge {
+  @apply bg-amber-100 text-amber-800 text-xs font-semibold py-3 w-6 rounded-b-md mr-1 flex items-center justify-center opacity-100 translate-x-0 transition3s;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  
+  .dark & { @apply bg-amber-950 text-white; }
+}
+.tvsearch-card-nav:hover .type-badge { @apply opacity-70 -translate-x-0.5; }
+
+.moviesearch-card-nav .watch :hover { @apply text-indigo-500; }
+.tvsearch-card-nav .watch :hover { @apply text-amber-500; }
+
+@keyframes popcornShake {
+  0%, 100%, 30% { transform: rotate(0deg); }
+  35% { transform: rotate(-12deg); }
+  40% { transform: rotate(10deg); }
+  45% { transform: rotate(-10deg); }
+  50% { transform: rotate(8deg); }
+  55% { transform: rotate(-6deg); }
+  60% { transform: rotate(4deg); }
+  65% { transform: rotate(0deg); }
+}
+
+.animate-popcorn-shake {
+  animation: popcornShake 3s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* ==========================================================================
+   HOME VIEWPORT WRAPPERS
+   ========================================================================== */
+.home-page {
+  @apply min-h-screen bg-brand-bg relative transition-colors duration-300;
+}
+
+.home-content-wrapper {
+  @apply max-w-7xl mx-auto px-3 sm:px-6 relative z-10 pb-10;
+}
+
+/* ==========================================================================
+   THEATRICAL HERO SWIPER
+   ========================================================================== */
+.hero-section {
+  @apply w-full relative z-10;
+  margin-top: 80px;
+}
+
+.hero-loading {
+  @apply flex justify-center items-center;
+  height: 50vh;
+  margin-top: 64px;
+}
+
+.hero-swiper {
+  @apply w-full;
+  height: clamp(550px, 40vw, 680px);
+}
+
+.hero-slide {
+  @apply relative w-full h-full overflow-hidden;
+}
+
+.hero-backdrop {
+  @apply absolute inset-0 w-full h-full object-cover object-center;
+}
+
+.hero-overlay-bottom {
+  @apply absolute inset-0;
+  background: linear-gradient(
+    to top, 
+    var(--brand-bg) 0%, 
+    color-mix(in srgb, var(--brand-bg) 60%, transparent) 30%, 
+    color-mix(in srgb, var(--brand-bg) 0%, transparent) 60%, 
+    transparent 100%
+  );
+}
+
+.hero-overlay-left {
+  @apply absolute inset-0;
+  background: linear-gradient(
+    to right, 
+    color-mix(in srgb, var(--brand-bg) 85%, transparent) 0%, 
+    color-mix(in srgb, var(--brand-bg) 40%, transparent) 20%, 
+    transparent 50%
+  );
+}
+
+.hero-content {
+  @apply absolute bottom-0 lg:left-10 left-0 right-0 px-5 sm:px-10 pb-12 sm:pb-16 max-w-2xl;
+}
+
+.hero-badges {
+  @apply flex flex-wrap items-center gap-2 mb-3;
+}
+
+.hero-badge-year {
+  @apply text-sm text-brand-text bg-brand-text/5 border border-brand-text/10 px-2 py-0.5 rounded-md font-medium;
+}
+
+.hero-badge-imdb {
+  @apply text-xs font-bold text-amber-600 dark:text-yellow-400 bg-amber-500/10 dark:bg-yellow-400/10 border border-amber-500/20 dark:border-yellow-400/20 px-2 py-0.5 rounded-md flex items-center;
+}
+
+.hero-badge-type {
+  @apply text-xs font-semibold px-2 py-0.5 h-[25px] flex items-center rounded-md;
+}
+
+.hero-badge-movie { @apply text-indigo-600 dark:text-indigo-300 bg-indigo-500/15 border border-indigo-400/25; }
+.hero-badge-tv { @apply text-amber-700 dark:text-amber-300 bg-amber-500/15 border border-amber-400/25; }
+
+.hero-title {
+  @apply text-2xl sm:text-4xl lg:text-5xl font-extrabold text-brand-text leading-tight mb-3;
+  text-shadow: 0 2px 10px rgba(var(--brand-bg), 0.4);
+}
+
+.hero-overview {
+  @apply text-xs sm:text-sm text-brand-text/80 leading-relaxed mb-5 line-clamp-3 sm:line-clamp-4 max-w-lg;
+}
+
+.hero-actions {
+  @apply flex items-center gap-3;
+}
+
+.hero-watch-btn {
+  @apply flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl transition-all duration-200 cursor-pointer shadow-lg shadow-indigo-500/25;
+}
+
+.hero-nav-prev, .hero-nav-next {
+  @apply absolute top-1/2 -translate-y-1/2 z-20 text-brand-text bg-surface/40 hover:bg-accent border border-brand-text/10 p-2 rounded-full transition-all duration-200 cursor-pointer;
+  backdrop-filter: blur(6px);
+}
+.hero-nav-prev { @apply left-2 sm:left-4; }
+.hero-nav-next { @apply right-2 sm:right-4; }
+
+/* ==========================================================================
+   MEDIA GRID SLIDERS
+   ========================================================================== */
+.media-slider-section {
+  @apply mt-10 sm:mt-14;
+}
+
+.media-slider-header {
+  @apply flex items-center justify-between mb-4;
+}
+
+.media-slider-title-row {
+  @apply flex items-center gap-3;
+}
+
+.media-slider-dot {
+  @apply w-1 h-6 rounded-full shrink-0;
+}
+
+.media-slider-title {
+  @apply text-xl sm:text-2xl font-bold text-brand-text;
+}
+
+.media-slider-wrap {
+  @apply overflow-visible;
+}
+
+.slider-nav-btn {
+  @apply absolute top-1/2 -translate-y-1/2 z-10 text-brand-text bg-surface/80 border border-brand-text/10 p-1.5 sm:p-2 rounded-full transition-all duration-200 cursor-pointer hidden sm:flex items-center justify-center shadow-md;
+  backdrop-filter: blur(6px);
+}
+.slider-nav-prev { @apply -left-4; }
+.slider-nav-next { @apply -right-4; }
+
+.media-slider-card { @apply cursor-pointer select-none; }
+.media-slider-card-img-wrap { @apply relative overflow-hidden rounded-xl; aspect-ratio: 2/3; }
+.media-slider-card-img-wrap img { @apply w-full h-full object-cover transition-transform duration-400; }
+.media-slider-card:hover .media-slider-card-img-wrap img { @apply scale-120; }
+.media-slider-card-overlay { @apply absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 transition-opacity duration-300 flex items-end; }
+.media-slider-card:hover .media-slider-card-overlay { @apply opacity-100; }
+.media-slider-card-overlay-inner { @apply w-full flex items-center justify-between px-2.5 pb-2.5; }
+.media-card-rating { @apply flex items-center gap-1 text-white text-[12px] sm:text-[15px] font-bold; }
+.media-card-play-btn { @apply bg-indigo-600 hover:bg-indigo-500 text-white p-1.5 rounded-full transition-colors duration-200; }
+.media-type-tag { @apply absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded-md; }
+.media-type-tag-movie { @apply bg-indigo-600/90 text-white; }
+.media-type-tag-tv { @apply bg-amber-700/90 text-white; }
+.media-slider-card-info { @apply mt-2 px-0.5; }
+
+.media-slider-card-title {
+  @apply text-brand-text text-[11px] sm:text-[15px] font-semibold line-clamp-1 leading-snug;
+}
+
+.media-slider-card-meta {
+  @apply flex items-center gap-1.5 mt-0.5 text-muted text-[11px] sm:text-[12px];
+}
+
+/* ==========================================================================
+   ADVANCED SEARCH HUB PAGE
+   ========================================================================== */
+.search-page-wrapper {
+  @apply max-w-7xl mx-auto px-3 sm:px-6 pt-24 pb-10 relative z-10;
+}
+
+/* Full-bleed variant for pages with a left filter rail — no side centering gutter */
+.browse-page-wrapper {
+  @apply w-full px-3 sm:px-6 pt-24 pb-10 relative z-10;
+}
+
+.search-filter-card {
+  @apply bg-surface border border-brand-text/10 rounded-2xl p-5 sm:p-6 shadow-xs backdrop-blur-md;
+}
+
+.search-filter-title {
+  @apply text-brand-text font-bold text-xl sm:text-2xl mb-4;
+}
+
+.search-filter-input-row { @apply flex gap-3 items-stretch; }
+
+.search-filter-input-wrap {
+  @apply flex-1 flex items-center gap-2 bg-brand-bg border border-brand-text/10 rounded-xl px-3 py-2.5 focus-within:border-accent transition3s;
+}
+
+.search-filter-input {
+  @apply flex-1 bg-transparent text-sm text-brand-text placeholder-muted outline-none;
+}
+
+.search-filter-btn {
+  @apply bg-accent hover:bg-accent-hover text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition3s cursor-pointer shrink-0;
+}
+
+.search-filter-row { @apply flex flex-wrap gap-3 items-end; }
+.search-results-grid { @apply mt-6 grid gap-4; grid-template-columns: repeat(2, 1fr); }
+
+@media (min-width: 480px) { .search-results-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 768px) { .search-results-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 1024px) { .search-results-grid { grid-template-columns: repeat(5, 1fr); } }
+
+/* ==========================================================================
+   SHARED OVERLAY MOTION (dropdowns, modals)
+   ========================================================================== */
+@keyframes wpFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes wpPopIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Ends on `transform: none` (not translateY(0)) so the settled element does not
+   become a containing block for the `position: fixed` dropdown backdrops inside it. */
+@keyframes wpRise {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes wpAmbientIn {
+  from { opacity: 0; transform: scale(1.3); }
+  to   { opacity: 1; transform: scale(1.15); }
+}
+
+@keyframes wpPulseRing {
+  0%   { transform: scale(1); opacity: 0.55; }
+  70%  { transform: scale(1.55); opacity: 0; }
+  100% { transform: scale(1.55); opacity: 0; }
+}
+
+@keyframes wpBlink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.25; }
+}
+
+.animate-fade-in { animation: wpFadeIn 0.2s ease-out both; }
+.modal-animation,
+.scale-in { animation: wpPopIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* Entrance choreography — each element sets its own `--d` delay */
+.wp-rise {
+  animation: wpRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--d, 0s);
+}
+
+/* ==========================================================================
+   WATCH PAGE — Movie & TV player experience
+   ========================================================================== */
+.watch-page {
+  @apply relative min-h-screen bg-brand-bg;
+  overflow-x: clip;
+  --wp-accent: #6366f1;
+  --wp-soft: rgba(99, 102, 241, 0.14);
+  --wp-ring: rgba(99, 102, 241, 0.4);
+}
+
+.watch-page.is-tv {
+  --wp-accent: #d97706;
+  --wp-soft: rgba(217, 119, 6, 0.15);
+  --wp-ring: rgba(217, 119, 6, 0.4);
+}
+
+.dark .watch-page.is-tv { --wp-accent: #f59e0b; }
+
+/* ── Ambient backdrop glow behind the whole stage ── */
+.wp-ambient {
+  @apply absolute inset-x-0 top-0 pointer-events-none z-0 overflow-hidden;
+  height: min(760px, 78vh);
+}
+
+.wp-ambient-img {
+  @apply w-full h-full object-cover object-top;
+  filter: blur(48px) saturate(1.35);
+  transform: scale(1.15);
+  opacity: 0.55;
+  animation: wpAmbientIn 1.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dark .wp-ambient-img { opacity: 0.42; }
+
+.wp-ambient-veil {
+  @apply absolute inset-0;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--brand-bg) 62%, transparent) 0%,
+    color-mix(in srgb, var(--brand-bg) 82%, transparent) 45%,
+    var(--brand-bg) 100%
+  );
+}
+
+.wp-shell {
+  @apply relative z-10 w-full max-w-7xl mx-auto px-3 sm:px-6 pt-24 pb-10;
+}
+
+/* ── Top bar: back + breadcrumbs ── */
+.wp-topbar { @apply flex items-center justify-between gap-3 mb-4; }
+
+.wp-back {
+  @apply inline-flex items-center gap-2 text-sm font-medium text-muted px-2.5 py-1.5 -ml-2.5 rounded-lg cursor-pointer transition-all duration-200 hover:text-brand-text hover:bg-brand-text/5;
+}
+.wp-back svg { @apply w-4 h-4 transition-transform duration-200; }
+.wp-back:hover svg { transform: translateX(-3px); }
+
+.wp-crumbs { @apply hidden sm:flex items-center gap-2 text-xs text-muted min-w-0; }
+.wp-crumbs-current { @apply text-brand-text font-medium truncate max-w-[320px]; }
+
+/* ── Stage: player + rail ── */
+.wp-stage {
+  @apply grid gap-4 items-start;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 1024px) {
+  .wp-stage {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    grid-template-rows: auto auto;
+    gap: 20px;
+  }
+  /* Rail spans both rows so a long episode list is balanced by the detail
+     block beneath the player instead of leaving a dead gutter. */
+  .wp-stage-main { grid-column: 1; grid-row: 1; }
+  .wp-rail { grid-column: 2; grid-row: 1 / span 2; }
+  .wp-detail { grid-column: 1; grid-row: 2; }
+}
+
+.wp-stage-main { @apply min-w-0; }
+
+.wp-player {
+  @apply relative w-full overflow-hidden rounded-2xl bg-black;
+  aspect-ratio: 16 / 9;
+  box-shadow:
+    0 40px 80px -40px rgba(0, 0, 0, 0.7),
+    0 0 0 1px color-mix(in srgb, var(--brand-text) 10%, transparent);
+}
+
+.wp-frame { @apply absolute inset-0 w-full h-full border-0; }
+
+/* ── Pre-roll preview state ── */
+.wp-preview { @apply absolute inset-0 cursor-pointer; }
+
+.wp-preview-img {
+  @apply absolute inset-0 w-full h-full object-cover;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.wp-preview:hover .wp-preview-img { transform: scale(1.06); }
+
+.wp-preview-scrim {
+  @apply absolute inset-0 transition-opacity duration-500;
+  background:
+    radial-gradient(60% 60% at 50% 45%, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.55) 100%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.15) 55%, rgba(0, 0, 0, 0.35) 100%);
+}
+
+.wp-play {
+  @apply absolute left-1/2 top-1/2 grid place-items-center rounded-full text-white cursor-pointer;
+  width: clamp(64px, 8vw, 88px);
+  height: clamp(64px, 8vw, 88px);
+  transform: translate(-50%, -50%);
+  background: var(--wp-accent);
+  box-shadow: 0 18px 50px -10px var(--wp-ring);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+}
+.wp-play svg { @apply w-8 h-8 sm:w-10 sm:h-10 translate-x-[2px]; }
+.wp-preview:hover .wp-play {
+  transform: translate(-50%, -50%) scale(1.09);
+  box-shadow: 0 24px 60px -8px var(--wp-ring);
+}
+.wp-preview:active .wp-play { transform: translate(-50%, -50%) scale(0.97); }
+
+.wp-play-ring {
+  @apply absolute inset-0 rounded-full pointer-events-none;
+  border: 2px solid var(--wp-accent);
+  animation: wpPulseRing 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.wp-preview-caption {
+  @apply absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-4 sm:p-6;
+}
+
+.wp-preview-kicker {
+  @apply text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.18em] mb-1;
+  color: color-mix(in srgb, var(--wp-accent) 70%, white);
+}
+
+.wp-preview-title {
+  @apply text-white font-bold text-lg sm:text-2xl leading-tight line-clamp-1 drop-shadow-lg;
+}
+
+.wp-preview-hint {
+  @apply hidden sm:inline-flex items-center gap-1.5 shrink-0 text-[11px] font-semibold text-white/85 px-3 py-1.5 rounded-full border border-white/15;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+}
+
+/* ── Player status bar ── */
+.wp-playbar {
+  @apply mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-text/10 px-3.5 py-2.5;
+  background: color-mix(in srgb, var(--surface) 75%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+.wp-playbar-label { @apply flex items-center gap-2 text-xs text-muted min-w-0; }
+.wp-playbar-label b { @apply text-brand-text font-semibold; }
+.wp-playbar-actions { @apply flex items-center gap-2 ml-auto; }
+
+.wp-live-dot {
+  @apply w-2 h-2 rounded-full shrink-0;
+  background: var(--wp-accent);
+  box-shadow: 0 0 0 3px var(--wp-soft);
+  animation: wpBlink 1.8s ease-in-out infinite;
+}
+
+.wp-ghost-btn {
+  @apply inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-brand-text/10 text-brand-text cursor-pointer transition-all duration-200 hover:bg-brand-text/5 disabled:opacity-35 disabled:cursor-not-allowed disabled:hover:bg-transparent;
+}
+.wp-ghost-btn svg { @apply w-3.5 h-3.5; }
+.wp-ghost-btn:not(:disabled):hover { border-color: var(--wp-ring); }
+
+/* ── Right rail cards ── */
+.wp-rail { @apply flex flex-col gap-4 min-w-0; }
+
+@media (min-width: 1024px) {
+  .wp-rail { @apply sticky; top: 96px; }
+}
+
+.wp-card {
+  @apply rounded-2xl border border-brand-text/10 overflow-hidden;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 20px 45px -30px rgba(0, 0, 0, 0.6);
+}
+
+.wp-card-head {
+  @apply flex items-center justify-between gap-2 px-4 py-3 border-b border-brand-text/10;
+}
+
+.wp-card-title {
+  @apply text-[11px] font-bold uppercase tracking-[0.16em] text-muted;
+}
+
+.wp-card-count {
+  @apply text-[10px] font-bold px-2 py-0.5 rounded-full;
+  color: var(--wp-accent);
+  background: var(--wp-soft);
+}
+
+.wp-card-body { @apply p-3; }
+
+/* ── Source (server) chips ── */
+.wp-server-grid { @apply grid grid-cols-2 gap-2; }
+
+.wp-server {
+  @apply flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-[12px] font-semibold text-brand-text border border-brand-text/10 cursor-pointer select-none;
+  background: color-mix(in srgb, var(--brand-bg) 60%, transparent);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease,
+    border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+
+.wp-server:hover {
+  transform: translateY(-2px);
+  border-color: var(--wp-ring);
+  box-shadow: 0 8px 20px -12px var(--wp-ring);
+}
+
+.wp-server.is-active {
+  background: var(--wp-accent);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 10px 24px -10px var(--wp-ring);
+}
+
+.wp-server-dot {
+  @apply w-1.5 h-1.5 rounded-full shrink-0;
+  background: currentColor;
+  opacity: 0.4;
+}
+.wp-server.is-active .wp-server-dot { opacity: 1; animation: wpBlink 1.8s ease-in-out infinite; }
+.wp-server-label { @apply truncate; }
+
+.wp-hint { @apply px-1 pt-3 text-[11px] leading-relaxed text-muted; }
+
+/* ── Key/value detail rows ── */
+.wp-meta-row {
+  @apply flex items-start justify-between gap-3 px-1 py-2 border-b border-brand-text/5 last:border-0;
+}
+.wp-meta-k { @apply text-[11px] uppercase tracking-wider text-muted shrink-0 pt-px; }
+.wp-meta-v { @apply text-[12px] font-semibold text-brand-text text-right; }
+
+/* ── Season picker + episode list (TV) ── */
+.wp-select {
+  @apply w-full text-sm font-medium text-brand-text rounded-xl px-3 py-2.5 border border-brand-text/10 cursor-pointer outline-none transition-colors duration-200;
+  background: color-mix(in srgb, var(--brand-bg) 70%, transparent);
+}
+.wp-select:focus { border-color: var(--wp-accent); }
+
+.wp-eplist {
+  @apply flex flex-col gap-1 overflow-y-auto pr-1 mt-3;
+  max-height: 360px;
+  scrollbar-width: thin;
+}
+.wp-eplist::-webkit-scrollbar { width: 4px; }
+.wp-eplist::-webkit-scrollbar-thumb {
+  background-color: var(--wp-ring);
+  border-radius: 999px;
+}
+
+.wp-ep {
+  @apply flex items-center gap-3 rounded-xl p-2 text-left cursor-pointer border border-transparent;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.wp-ep:hover { @apply bg-brand-text/5; transform: translateX(2px); }
+.wp-ep.is-active {
+  background: var(--wp-soft);
+  border-color: var(--wp-ring);
+}
+
+.wp-ep-thumb {
+  @apply relative w-[86px] shrink-0 rounded-lg overflow-hidden bg-brand-text/10 grid place-items-center;
+  aspect-ratio: 16 / 9;
+}
+.wp-ep-thumb img { @apply w-full h-full object-cover; }
+.wp-ep-badge {
+  @apply absolute left-1 top-1 text-[9px] font-bold px-1.5 py-0.5 rounded text-white;
+  background: rgba(0, 0, 0, 0.65);
+}
+.wp-ep-body { @apply min-w-0 flex-1; }
+.wp-ep-title { @apply text-[12px] font-semibold text-brand-text line-clamp-1; }
+.wp-ep-meta { @apply text-[11px] text-muted line-clamp-1 mt-0.5; }
+.wp-ep-now {
+  @apply text-[10px] font-bold uppercase tracking-wider mt-1 inline-block;
+  color: var(--wp-accent);
+}
+.wp-ep-skeleton { @apply h-[66px] rounded-xl bg-brand-text/5 animate-pulse; }
+
+/* ── Detail block: poster + copy ── */
+.wp-detail {
+  @apply grid gap-6 mt-8 sm:mt-10;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 640px) {
+  .wp-detail { grid-template-columns: 160px minmax(0, 1fr); gap: 28px; }
+}
+@media (min-width: 1024px) {
+  .wp-detail { grid-template-columns: 210px minmax(0, 1fr); gap: 36px; }
+}
+
+.wp-poster {
+  @apply relative hidden sm:block rounded-2xl overflow-hidden border border-brand-text/10;
+  aspect-ratio: 2 / 3;
+  box-shadow: 0 30px 60px -35px rgba(0, 0, 0, 0.85);
+}
+.wp-poster img {
+  @apply w-full h-full object-cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.wp-poster:hover img { transform: scale(1.06); }
+
+.wp-info { @apply min-w-0; }
+
+/* Overrides the global centered `h1` base style */
+.wp-title {
+  @apply text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-brand-text;
+  line-height: 1.06;
+  text-align: left;
+  margin-inline: 0;
+  max-width: none;
+}
+
+.wp-tagline { @apply mt-2.5 text-sm sm:text-[15px] italic text-muted; }
+
+.wp-badges { @apply flex flex-wrap items-center gap-2 mt-4; }
+
+.wp-badge {
+  @apply inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg border border-brand-text/10 bg-brand-text/5 text-brand-text;
+}
+
+.wp-badge-imdb {
+  @apply text-amber-600 dark:text-yellow-400 border-amber-500/25 dark:border-yellow-400/25;
+  background: color-mix(in srgb, #f59e0b 12%, transparent);
+}
+.wp-badge-imdb svg { @apply w-3.5 h-3.5; }
+
+.wp-badge-type {
+  color: var(--wp-accent);
+  background: var(--wp-soft);
+  border-color: var(--wp-ring);
+}
+
+.wp-genres { @apply flex flex-wrap gap-2 mt-3; }
+
+.wp-genre {
+  @apply text-xs px-3 py-1 rounded-full border border-brand-text/10 text-muted transition-all duration-200;
+}
+.wp-genre:hover { color: var(--wp-accent); border-color: var(--wp-ring); }
+
+.wp-overview {
+  @apply mt-5 text-sm sm:text-[15px] leading-relaxed text-muted;
+  max-width: 68ch;
+}
+
+.wp-facts { @apply grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6; }
+
+.wp-fact {
+  @apply rounded-xl border border-brand-text/10 px-3 py-2.5;
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+}
+.wp-fact-k { @apply text-[10px] uppercase tracking-[0.12em] text-muted; }
+.wp-fact-v { @apply text-sm font-semibold text-brand-text mt-1 truncate; }
+
+.wp-actions { @apply flex flex-wrap items-center gap-2.5 mt-6 relative; }
+
+/* TrailerButton / ImdbButton ship their own margins + mobile height — level them
+   with the 40px icon buttons so the action row reads as one control cluster. */
+.wp-actions > a {
+  height: 40px;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.wp-icon-btn {
+  @apply h-10 w-10 shrink-0 grid place-items-center rounded-full border border-brand-text/10 bg-brand-text/5 text-brand-text cursor-pointer;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease,
+    color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.wp-icon-btn:hover { @apply bg-brand-text/10; transform: translateY(-2px); }
+.wp-icon-btn svg { @apply w-5 h-5; }
+
+.wp-icon-btn.is-fav {
+  @apply bg-rose-600 border-rose-500 text-white;
+  box-shadow: 0 10px 24px -10px rgba(225, 29, 72, 0.8);
+}
+.wp-icon-btn.is-fav:hover { @apply bg-rose-500; }
+
+.wp-icon-btn.is-open {
+  background: var(--wp-accent);
+  border-color: transparent;
+  color: #fff;
+}
+
+/* ── Playlist dropdown (theme aware) ── */
+.wp-menu {
+  @apply absolute left-0 top-12 z-50 w-56 rounded-xl border border-brand-text/10 p-1.5 text-left overflow-hidden;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.55);
+  animation: wpPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.wp-menu-new {
+  @apply flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-xs font-semibold cursor-pointer transition-colors duration-150 hover:bg-brand-text/5;
+  color: var(--wp-accent);
+}
+.wp-menu-new svg { @apply w-4 h-4; }
+
+.wp-menu-divider { @apply my-1 border-t border-brand-text/10; }
+.wp-menu-scroll { @apply max-h-44 overflow-y-auto; }
+.wp-menu-empty { @apply px-3 py-2 text-[11px] text-muted; }
+
+.wp-menu-item {
+  @apply block w-full truncate rounded-lg px-3 py-2 text-left text-xs text-brand-text cursor-pointer transition-colors duration-150 hover:bg-brand-text/5;
+}
+
+/* ── Playlist modal (theme aware) ── */
+.wp-modal-backdrop {
+  @apply fixed inset-0 z-[100] flex items-center justify-center p-4;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  animation: wpFadeIn 0.2s ease-out both;
+}
+
+.wp-modal {
+  @apply w-full max-w-sm rounded-2xl border border-brand-text/10 bg-surface p-6;
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.7);
+  animation: wpPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.wp-modal h3 { @apply text-lg font-semibold text-brand-text mb-1.5; }
+.wp-modal p { @apply text-xs text-muted mb-4; }
+
+.wp-modal-input {
+  @apply w-full rounded-xl border border-brand-text/10 px-3 py-2.5 text-sm text-brand-text placeholder-muted outline-none mb-5 transition-colors duration-200;
+  background: color-mix(in srgb, var(--brand-bg) 80%, transparent);
+}
+.wp-modal-input:focus { border-color: var(--wp-accent); }
+
+.wp-btn-secondary {
+  @apply px-4 py-2 rounded-lg text-sm bg-brand-text/10 text-brand-text cursor-pointer transition-colors duration-200 hover:bg-brand-text/20;
+}
+
+.wp-btn-primary {
+  @apply px-4 py-2 rounded-lg text-sm font-medium text-white cursor-pointer transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed;
+  background: var(--wp-accent);
+}
+.wp-btn-primary:not(:disabled):hover { filter: brightness(1.12); }
+
+/* ── Motion opt-out ── */
+@media (prefers-reduced-motion: reduce) {
+  .wp-rise,
+  .wp-ambient-img,
+  .animate-fade-in,
+  .modal-animation,
+  .scale-in,
+  .wp-menu,
+  .wp-modal,
+  .wp-modal-backdrop {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+  .wp-play-ring,
+  .wp-live-dot,
+  .wp-server.is-active .wp-server-dot { animation: none !important; }
+  .wp-preview:hover .wp-preview-img,
+  .wp-poster:hover img { transform: none; }
 }

@@ -1,7 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 const ErrorPage = () => {
+  useDocumentTitle("Page Not Found");
   const homenavigate = useNavigate();
 
   const handleClick = () => {
@@ -10,13 +13,8 @@ const ErrorPage = () => {
 
   return (
     <>
-      <img src="footer.png" alt="" className="z-0 absolute bottom-0 w-full" />
-      <div className="error-page fade-in">
-        <div className="error-page-nav">
-          <h1 className="error-text" onClick={handleClick}>
-            EZ Movies
-          </h1>
-        </div>
+      <div className="error-page min-h-screen bg-brand-bg text-brand-text transition-colors duration-300 pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
+        <Navbar />
         <div className="w-full flex flex-col justify-center items-center animate-slide-up">
           <img
             className="w-[70vw] sm:w-[20vw] "
@@ -95,7 +93,7 @@ const ErrorPage = () => {
               </a>
             </div>
             <p className="text-gray-100 font-light text-xs sm:text-base">
-              © 2025 EZ Movies - By{" "}
+              © 2026 EZ Movies v2 - By{" "}
               <a
                 href="https://github.com/Banukajanith2"
                 target="_blank"

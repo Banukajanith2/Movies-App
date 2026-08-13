@@ -40,7 +40,7 @@ const ImdbButton = ({ id, mediaType = "movie" }) => {
       href={`https://www.imdb.com/title/${imdbId}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5 mt-3 mb-3 bg-dark-200 hover:bg-dark-200/30 text-white font-medium text-sm px-4 py-1.5 rounded-2xl transition-all duration-200 cursor-pointer w-fit h-12 border border-white/5"
+      className="inline-flex items-center gap-1.5 mt-3 mb-3 bg-dark-200 hover:bg-dark-200/30 text-white font-medium text-sm px-4 py-1.5 rounded-2xl transition-all duration-200 cursor-pointer w-fit lg:h-[40px] h-[56px] border border-white/5"
     >
       {/* Pure CSS IMDb Yellow Badge */}
       <span className="bg-[#f5c518] text-black font-black text-[11px] px-1.5 py-0.5 rounded-md tracking-tighter select-none">

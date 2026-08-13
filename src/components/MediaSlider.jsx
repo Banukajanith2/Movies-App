@@ -1,24 +1,24 @@
 import { useState, useEffect } from "react";
-import { createPortal } from "react-dom"; // Imported Portal utility for modal safety
+import { createPortal } from "react-dom"; // 1. Imported Portal utility
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Autoplay } from "swiper/modules";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
+import "swiper/css";
+import "swiper/css/navigation";
+
+// Firebase Context & Firestore Modules
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { db } from "../firebase/config";
 import { doc, onSnapshot } from "firebase/firestore";
-import { addMovieToFavorites, removeMovieFromFavorites } from "../firebase/useFirestore";
-import { getUserPlaylists, createPlaylistAndAddItem, addItemToPlaylist } from "../firebase/useFirestore";
+import {
+  addMovieToFavorites, removeMovieFromFavorites,
+  addTvToFavorites, removeTvFromFavorites,
+  getUserPlaylists, createPlaylistAndAddItem, addItemToPlaylist
+} from "../firebase/useFirestore";
 
-const MovieCard = ({
-  movie: {
-    id,
-    title,
-    vote_average,
-    poster_path,
-    release_date,
-    original_language,
-  },
-  className = "",
-}) => {
+const SliderCard = ({ item }) => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const { showToast } = useToast();
@@ -31,7 +31,15 @@ const MovieCard = ({
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [isLoadingPlaylists, setIsLoadingPlaylists] = useState(false);
 
-  // 1. Real-time active favorite tracking
+  // Determine media classification dynamically
+  const isMovie = item.media_type === "movie" || item.release_date !== undefined;
+  const title = item.title || item.name;
+  const year = (item.release_date || item.first_air_date || "").split("-")[0];
+  const isTV = !item.title && item.name;
+  const rating = item.vote_average;
+  const episodeInfo = item.episode_count ? `${item.episode_count} eps` : null;
+
+  // Real-time isolated favorite syncing block
   useEffect(() => {
     if (!currentUser) {
       setIsFavorite(false);
@@ -39,22 +47,26 @@ const MovieCard = ({
     }
 
     const userRef = doc(db, "users", currentUser.uid);
-    
     const unsubscribe = onSnapshot(userRef, (docSnap) => {
       if (docSnap.exists()) {
         const userData = docSnap.data();
-        const favs = userData.favoriteMovies || [];
-        setIsFavorite(favs.includes(Number(id)));
+        if (isMovie) {
+          const favs = userData.favoriteMovies || [];
+          setIsFavorite(favs.includes(Number(item.id)));
+        } else {
+          const favs = userData.favoriteTvShows || [];
+          setIsFavorite(favs.includes(Number(item.id)));
+        }
       } else {
         setIsFavorite(false);
       }
     }, (error) => {
-      console.error("Snapshot error:", error);
+      console.error("Firestore slider listener mismatch:", error);
       setIsFavorite(false);
     });
 
     return () => unsubscribe();
-  }, [currentUser, id]);
+  }, [currentUser, item.id, isMovie]);
 
   const createSlug = (title, id) => {
     const slug = (title || "unknown")
@@ -65,30 +77,42 @@ const MovieCard = ({
   };
 
   const handleClick = () => {
-    navigate(`/movie/${createSlug(title, id)}`);
+    const slug = createSlug(title, item.id);
+    if (isMovie) {
+      navigate(`/movie/${slug}`);
+    } else {
+      navigate(`/tv/${slug}`);
+    }
   };
 
   const handleFavoriteClick = async (e) => {
-    e.stopPropagation();
+    e.stopPropagation(); 
     if (!currentUser) {
       navigate("/login");
       return;
     }
 
     try {
-      if (isFavorite) {
-        await removeMovieFromFavorites(currentUser.uid, id);
+      if (isMovie) {
+        if (isFavorite) {
+          await removeMovieFromFavorites(currentUser.uid, item.id);
+        } else {
+          await addMovieToFavorites(currentUser.uid, item.id);
+        }
       } else {
-        await addMovieToFavorites(currentUser.uid, id);
+        if (isFavorite) {
+          await removeTvFromFavorites(currentUser.uid, item.id);
+        } else {
+          await addTvToFavorites(currentUser.uid, item.id);
+        }
       }
     } catch (error) {
-      console.error("Error toggling favorite movie state:", error);
+      console.error("Slider runtime error updating favorite state:", error);
     }
   };
 
-  // On-demand playlist loading when clicking the "+" button
-  const handlePlaylistButtonClick = async (e) => {
-    e.stopPropagation();
+  const handlePlaylistClick = async (e) => {
+    e.stopPropagation(); 
     if (!currentUser) {
       navigate("/login");
       return;
@@ -105,25 +129,20 @@ const MovieCard = ({
       const userLists = await getUserPlaylists(currentUser.uid);
       setPlaylists(userLists);
     } catch (err) {
-      console.error("Failed to load user playlists", err);
+      console.error("Failed to load user playlists inside slider context", err);
     } finally {
       setIsLoadingPlaylists(false);
     }
   };
 
-  // Move data parsing logic UP so the payload can access them safely
-  const year = release_date ? release_date.split("-")[0] : null;
-  const lang = original_language === "en" ? "EN" : original_language?.toUpperCase();
-
-  // ── Extended Payload Object ──
   const currentItemPayload = {
-    id: Number(id),
-    type: "movie",
+    id: Number(item.id),
+    type: isMovie ? "movie" : "tv",
     title: title,
-    poster_path: poster_path,
-    year: year,                          // Added field
-    rating: Number(vote_average),        // Added field
-    language: lang                       // Added field
+    poster_path: item.poster_path,
+    year: year,                        // already derived above
+    rating: Number(rating) || 0,       // already derived above
+    language: item.original_language === "en" ? "EN" : item.original_language?.toUpperCase() || null,
   };
 
   const handleSelectExistingPlaylist = async (e, playlistId) => {
@@ -133,7 +152,7 @@ const MovieCard = ({
       setIsDropdownOpen(false);
       showToast("Added to playlist!");
     } catch (error) {
-      console.error("Error saving to playlist", error);
+      console.error("Error saving item to selected slider list", error);
     }
   };
 
@@ -151,44 +170,39 @@ const MovieCard = ({
       await createPlaylistAndAddItem(currentUser.uid, newPlaylistName.trim(), currentItemPayload);
       setNewPlaylistName("");
       setIsModalOpen(false);
-      showToast("Playlist created and movie added!");
+      showToast("Playlist created and media item added!");
     } catch (error) {
-      console.error("Error creating new playlist", error);
+      console.error("Error handling new slider collection workflow", error);
     }
   };
 
   return (
     <>
-      <div className={`movie-card-new relative ${className}`} onClick={handleClick}>
-
-        {/* ── Poster image wrap ── */}
-        <div className="mcn-img-wrap relative">
+      <div className="media-slider-card" onClick={handleClick}>
+        <div className="media-slider-card-img-wrap relative">
           <img
-            src={poster_path ? `https://image.tmdb.org/t/p/w500/${poster_path}` : "no-movie.png"}
+            src={
+              item.poster_path
+                ? `https://image.tmdb.org/t/p/w342${item.poster_path}`
+                : "/no-movie.png"
+            }
             alt={title}
             loading="lazy"
           />
-
-          {/* Hover overlay */}
-          <div className="mcn-overlay">
-            <div className="mcn-overlay-inner">
-              
-              {/* Vote/Rating Counter */}
-              {vote_average > 0 && (
-                <span className="mcn-rating">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#facc15" className="w-5 h-5 shrink-0">
+          <div className="media-slider-card-overlay">
+            <div className="media-slider-card-overlay-inner">
+              {rating > 0 && (
+                <span className="media-card-rating">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#facc15" className="w-5 h-5">
                     <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clipRule="evenodd" />
                   </svg>
-                  {vote_average.toFixed(1)}
+                  {rating.toFixed(1)}
                 </span>
               )}
-
-              {/* Controls Cluster */}
-              <div className="movie-controls">
-                
-                {/* Playlist Addition Plus Button */}
+              
+              <div className="flex items-center gap-1.5 matches-card-action-cluster">
                 <button 
-                  onClick={handlePlaylistButtonClick}
+                  onClick={handlePlaylistClick}
                   className="w-8 h-8 rounded-full bg-zinc-900/80 hover:bg-indigo-600 text-gray-300 hover:text-white border border-white/10 flex items-center justify-center transition-all cursor-pointer backdrop-blur-sm"
                   aria-label="Add to Playlist"
                 >
@@ -197,7 +211,6 @@ const MovieCard = ({
                   </svg>
                 </button>
 
-                {/* Heart Favorite Button */}
                 <button 
                   onClick={handleFavoriteClick}
                   className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all cursor-pointer backdrop-blur-sm ${
@@ -205,7 +218,7 @@ const MovieCard = ({
                       ? "bg-rose-600/90 border-rose-500 text-white" 
                       : "bg-zinc-900/80 border-white/10 text-gray-300 hover:text-rose-400"
                   }`}
-                  aria-label="Favorite Movie"
+                  aria-label="Favorite Media Item"
                 >
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
@@ -219,18 +232,15 @@ const MovieCard = ({
                   </svg>
                 </button>
 
-                {/* Standard Play Button */}
-                <button className="mcn-play-btn" aria-label="Watch">
+                <button className="media-card-play-btn" aria-label="Watch Details">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
                     <path fillRule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clipRule="evenodd" />
                   </svg>
                 </button>
               </div>
-              
             </div>
           </div>
 
-          {/* ── Dropdown Options Menu ── */}
           {isDropdownOpen && (
             <>
               <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setIsDropdownOpen(false); }} />
@@ -267,21 +277,21 @@ const MovieCard = ({
             </>
           )}
 
-          <span className="mcn-type-badge">Movie</span>
+          <div className={`media-type-tag ${isTV ? "media-type-tag-tv" : "media-type-tag-movie"}`}>
+            {isTV ? "TV Show" : "Movie"}
+          </div>
         </div>
 
-        {/* ── Info below poster ── */}
-        <div className="mcn-info">
-          <p className="mcn-title">{title}</p>
-          <div className="mcn-meta">
+        <div className="media-slider-card-info">
+          <p className="media-slider-card-title">{title}</p>
+          <div className="media-slider-card-meta">
             {year && <span>{year}</span>}
-            {year && lang && <span className="text-gray-600">•</span>}
-            {lang && <span>{lang}</span>}
+            {episodeInfo && <><span className="text-gray-600">•</span><span>{episodeInfo}</span></>}
           </div>
         </div>
       </div>
 
-      {/* ── Playlist Creation Modal (Portaled to body to completely prevent layout clipping) ── */}
+      {/* ── 2. Wrapped the Modal Markup inside createPortal to escape Swiper's layout constraints ── */}
       {isModalOpen && createPortal(
         <div 
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm"
@@ -292,14 +302,14 @@ const MovieCard = ({
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-white mb-2">Create New Playlist</h3>
-            <p className="text-xs text-zinc-400 mb-4">Enter a name for your playlist. This movie will be added automatically.</p>
+            <p className="text-xs text-zinc-400 mb-4">Enter a name for your playlist. This item will be added automatically.</p>
             
             <input
               type="text"
               autoFocus
               value={newPlaylistName}
               onChange={(e) => setNewPlaylistName(e.target.value)}
-              placeholder="e.g., Friday Night Thrillers"
+              placeholder="e.g., Marathon List"
               className="w-full rounded-lg bg-zinc-950 border border-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-600 outline-none focus:border-indigo-500 transition-colors mb-5"
             />
 
@@ -320,10 +330,121 @@ const MovieCard = ({
             </div>
           </div>
         </div>,
-        document.body
+        document.body // Appends the HTML node cleanly straight into the root DOM body
       )}
     </>
   );
 };
 
-export default MovieCard;
+const ENDPOINTS = {
+  popularTV: `${API_BASE_URL}/tv/popular?language=en-US&page=1`,
+  popularMovies: `${API_BASE_URL}/movie/popular?language=en-US&vote_count.gte=500&page=1`,
+  upcoming: `${API_BASE_URL}/movie/upcoming?language=en-US&page=1`,
+};
+
+const MediaSlider = ({ title, endpoint, accentColor = "indigo", sectionRef }) => {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { currentUser } = useAuth();
+  
+  const safeId = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  const nextId = `slider-next-${safeId}`;
+  const prevId = `slider-prev-${safeId}`;
+
+  const accentMap = {
+    indigo: { title: "text-indigo-400", btn: "hover:bg-indigo-600", border: "border-indigo-500", dot: "bg-indigo-500" },
+    amber: { title: "text-amber-400", btn: "hover:bg-amber-700", border: "border-amber-600", dot: "bg-amber-500" },
+    cyan: { title: "text-cyan-500", btn: "hover:bg-cyan-700", border: "border-cyan-600", dot: "bg-cyan-500" },
+  };
+
+  const accent = accentMap[accentColor] || accentMap.indigo;
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(endpoint, API_OPTIONS);
+        const data = await response.json();
+        setItems((data.results || []).slice(0, 25));
+      } catch (error) {
+        console.error(`Error fetching ${title}:`, error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchItems();
+  }, [endpoint, title]);
+
+  if (!loading && items.length === 0) return null;
+
+  return (
+    <section className="media-slider-section" ref={sectionRef}>
+      <div className="media-slider-header">
+        <div className="media-slider-title-row">
+          <span className={`media-slider-dot ${accent.dot}`} />
+          <h2 className={`media-slider-title ${accent.title}`}>{title}</h2>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 py-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="media-slider-card-img-wrap bg-brand-text/10" />
+              <div className="media-slider-card-info">
+                <div className="h-3 w-4/5 rounded bg-brand-text/10 mb-2" />
+                <div className="h-2.5 w-2/5 rounded bg-brand-text/10" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="relative media-slider-wrap">
+          <Swiper
+            modules={[Navigation, Autoplay]}
+            spaceBetween={12}
+            slidesPerView={2}
+            loop={items.length > 5}
+            speed={700}
+            autoplay={{
+              delay: 3500,
+              disableOnInteraction: false,
+              pauseOnMouseEnter: true,
+            }}
+            navigation={{
+              nextEl: `.${nextId}`,
+              prevEl: `.${prevId}`,
+            }}
+            breakpoints={{
+              480: { slidesPerView: 3, spaceBetween: 14 },
+              768: { slidesPerView: 4, spaceBetween: 16 },
+              1024: { slidesPerView: 5, spaceBetween: 18 },
+            }}
+            className="w-full py-3"
+          >
+            {items.map((item) => (
+              <SwiperSlide key={`${currentUser?.uid || "guest"}-${item.id}`}>
+                <SliderCard item={item} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+
+          {/* Nav Buttons */}
+          <button className={`slider-nav-btn slider-nav-prev ${prevId} ${accent.btn}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
+          </button>
+          <button className={`slider-nav-btn slider-nav-next ${nextId} ${accent.btn}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
+        </div>
+      )}
+    </section>
+  );
+};
+
+export { ENDPOINTS };
+export default MediaSlider;

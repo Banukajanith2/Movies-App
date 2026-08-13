@@ -1,80 +1,103 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
-import { useDebounce } from "../hooks/useDebounce";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom"; // Safe absolute container rendering
 import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
-import MovieCard from "../components/MovieCard";
-import TvCard from "../components/TvCard";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
+import { db } from "../firebase/config";
+import { doc, onSnapshot } from "firebase/firestore";
+import {
+  addTvToFavorites,
+  removeTvFromFavorites,
+  getUserPlaylists,
+  createPlaylistAndAddItem,
+  addItemToPlaylist,
+  recordContinueWatching,
+} from "../firebase/useFirestore";
+
 import Spinner from "../components/Spinner";
-import Search from "../components/Search";
+import Navbar from "../components/Navbar";
 import TrailerButton from "../components/TrailerButton";
 import ImdbButton from "../components/ImdbButton";
-import TrendingTVShows from "../components/TrendingTVShows";
+import ShareButton from "../components/ShareButton";
+import CastCrew from "../components/CastCrew";
+import MediaSlider from "../components/MediaSlider.jsx";
 import Footer from "../components/Footer";
+import BackToTop from "../components/BackToTop";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
+
+// ── TV Streaming Servers ──
+// season & episode are passed through to each URL that supports them.
+const TV_SERVERS = [
+  {
+    label: "VidSrc",
+    url: (id, s, e) => `https://vidsrcme.ru/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
+  },
+  {
+    label: "EmbosTop",
+    url: (id, s, e) => `https://embos.top/tv/?mid=${id}&s=${s}&e=${e}`,
+  },
+  {
+    label: "VidSrc 2",
+    url: (id, s, e) => `https://vidsrc.to/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    label: "VidKing",
+    url: (id, s, e) => `https://www.vidking.net/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    label: "2Embed",
+    url: (id, s, e) => `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`,
+  },
+  {
+    label: "MultiEmbed",
+    url: (id, s, e) => `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`,
+  },
+  {
+    label: "VidPlus",
+    url: (id, s, e) => `https://player.vidplus.to/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    label: "Vid Easy",
+    url: (id, s, e) => `https://player.videasy.net/tv/${id}/${s}/${e}`,
+  },
+];
 
 const TVPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  const { showToast } = useToast();
 
+  // TV Show Core States
   const [tvShow, setTvShow] = useState(null);
   const [pageLoading, setPageLoading] = useState(true);
   const [showPlayer, setShowPlayer] = useState(false);
 
+  // Video Streaming Track States
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [episodesList, setEpisodesList] = useState([]);
   const [episodesLoading, setEpisodesLoading] = useState(false);
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  // Server Selection
+  const [activeServer, setActiveServer] = useState(0);
+  // Bumped to force-remount the iframe when the user asks for a reload
+  const [reloadKey, setReloadKey] = useState(0);
+
+  // Firestore Syncing & UI States
+  const [isFavorite, setIsFavorite] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const wrapperRef = useRef(null);
-
-  const debouncedSearchTerm = useDebounce(searchTerm, 1000);
-
-  const fetchUnifiedSearch = async (query, pageNumber = 1) => {
-    setIsLoading(true);
-    setErrorMessage("");
-    try {
-      const endpoint = `${API_BASE_URL}/search/multi?query=${encodeURIComponent(query)}&page=${pageNumber}&language=en-US`;
-      const response = await fetch(endpoint, API_OPTIONS);
-      if (!response.ok) throw new Error("Failed to fetch search results");
-
-      const data = await response.json();
-      const filteredMedia = (data.results || []).filter(
-        (item) => item.media_type === "movie" || item.media_type === "tv"
-      );
-
-      setSearchResults(filteredMedia);
-      if (filteredMedia.length === 0) setErrorMessage("No results found");
-    } catch (error) {
-      setErrorMessage("Error fetching results: " + error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (debouncedSearchTerm) {
-      fetchUnifiedSearch(debouncedSearchTerm);
-    } else {
-      setSearchResults([]);
-    }
-  }, [debouncedSearchTerm]);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [playlists, setPlaylists] = useState([]);
+  const [newPlaylistName, setNewPlaylistName] = useState("");
+  const [isLoadingPlaylists, setIsLoadingPlaylists] = useState(false);
 
   const tvId = slug?.split("-").pop();
 
+  useDocumentTitle(tvShow?.name);
+
+  // 1. Fetch Core TV Show details
   useEffect(() => {
     if (!tvId) return;
 
@@ -98,6 +121,7 @@ const TVPage = () => {
     fetchTVDetails();
   }, [tvId, navigate]);
 
+  // 2. Fetch Episode lists when Season changes
   useEffect(() => {
     if (!tvId || !tvShow) return;
 
@@ -120,9 +144,43 @@ const TVPage = () => {
     fetchSeasonDetails();
   }, [selectedSeason, tvId, tvShow]);
 
+  // 3. Real-time TV-specific favorite tracking
+  useEffect(() => {
+    if (!currentUser || !tvShow?.id) {
+      setIsFavorite(false);
+      return;
+    }
+
+    const userRef = doc(db, "users", currentUser.uid);
+    const targetId = Number(tvShow.id);
+
+    const unsubscribe = onSnapshot(userRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        const favs = userData.favoriteTvShows || [];
+        const hasIt = favs.map(id => Number(id)).includes(targetId);
+        setIsFavorite(hasIt);
+      } else {
+        setIsFavorite(false);
+      }
+    }, (error) => {
+      console.error("Snapshot error:", error);
+      setIsFavorite(false);
+    });
+
+    return () => unsubscribe();
+  }, [currentUser, tvShow?.id]);
+
+  // Reset server + player when navigating to a different show
+  useEffect(() => {
+    setActiveServer(0);
+    setShowPlayer(false);
+    window.scrollTo({ top: 0 });
+  }, [tvId]);
+
   if (pageLoading) {
     return (
-      <div className="fixed inset-0 bg-dark-100 flex items-center justify-center z-99">
+      <div className="fixed inset-0 bg-brand-bg flex items-center justify-center z-[9999]">
         <Spinner />
       </div>
     );
@@ -133,168 +191,550 @@ const TVPage = () => {
     return null;
   }
 
-  const homeClick = () => navigate("/");
   const standardSeasons = tvShow.seasons?.filter((s) => s.season_number > 0) || [];
 
+  const year = tvShow.first_air_date ? tvShow.first_air_date.split("-")[0] : null;
+  const lang = tvShow.original_language === "en" ? "EN" : tvShow.original_language?.toUpperCase();
+  const rating = tvShow.vote_average ? tvShow.vote_average.toFixed(1) : null;
+  const spokenLanguage =
+    tvShow.original_language === "en"
+      ? "English"
+      : tvShow.spoken_languages?.[0]?.english_name || tvShow.original_language?.toUpperCase();
+
+  const placeholder = `${import.meta.env.BASE_URL}no-movie.png`;
+  const backdropUrl = tvShow.backdrop_path
+    ? `https://image.tmdb.org/t/p/w1280${tvShow.backdrop_path}`
+    : tvShow.poster_path
+      ? `https://image.tmdb.org/t/p/w780${tvShow.poster_path}`
+      : placeholder;
+
+  // Episode count fallback for shows whose season payload fails to load
+  const seasonEpisodeCount =
+    episodesList.length ||
+    tvShow.seasons?.find((s) => s.season_number === selectedSeason)?.episode_count ||
+    1;
+
+  const activeEpisode = episodesList.find((ep) => ep.episode_number === selectedEpisode);
+
+  const currentItemPayload = {
+    id: Number(tvShow.id),
+    type: "tv",
+    title: tvShow.name,
+    poster_path: tvShow.poster_path,
+    year: year,
+    rating: Number(tvShow.vote_average),
+    language: lang
+  };
+
+  const facts = [
+    { key: "Status", value: tvShow.status },
+    { key: "Seasons", value: tvShow.number_of_seasons },
+    { key: "Episodes", value: tvShow.number_of_episodes },
+    { key: "Network", value: tvShow.networks?.[0]?.name },
+    { key: "First aired", value: tvShow.first_air_date },
+    { key: "Language", value: spokenLanguage },
+  ].filter((fact) => fact.value);
+
+  // ── Action Handlers ──
+  const handleFavoriteClick = async () => {
+    if (!currentUser) { navigate("/login"); return; }
+    try {
+      if (isFavorite) {
+        await removeTvFromFavorites(currentUser.uid, Number(tvShow.id));
+      } else {
+        await addTvToFavorites(currentUser.uid, Number(tvShow.id));
+      }
+    } catch (error) {
+      console.error("Error toggling favorite TV state:", error);
+    }
+  };
+
+  const handlePlaylistButtonClick = async () => {
+    if (!currentUser) { navigate("/login"); return; }
+    if (isDropdownOpen) { setIsDropdownOpen(false); return; }
+
+    setIsDropdownOpen(true);
+    setIsLoadingPlaylists(true);
+    try {
+      const userLists = await getUserPlaylists(currentUser.uid);
+      setPlaylists(userLists);
+    } catch (err) {
+      console.error("Failed to load user playlists", err);
+    } finally {
+      setIsLoadingPlaylists(false);
+    }
+  };
+
+  const handleSelectExistingPlaylist = async (playlistId) => {
+    try {
+      await addItemToPlaylist(currentUser.uid, playlistId, currentItemPayload);
+      setIsDropdownOpen(false);
+      showToast("Added to playlist!");
+    } catch (error) {
+      console.error("Error saving to playlist", error);
+    }
+  };
+
+  const handleOpenCreateModal = () => {
+    setIsDropdownOpen(false);
+    setIsModalOpen(true);
+  };
+
+  const handleCreatePlaylistSubmit = async (e) => {
+    e.preventDefault();
+    if (!newPlaylistName.trim()) return;
+    try {
+      await createPlaylistAndAddItem(currentUser.uid, newPlaylistName.trim(), currentItemPayload);
+      setNewPlaylistName("");
+      setIsModalOpen(false);
+      showToast("Playlist created and TV show added!");
+    } catch (error) {
+      console.error("Error creating new playlist", error);
+    }
+  };
+
+  const handlePlayClick = () => {
+    setShowPlayer(true);
+    if (currentUser) {
+      recordContinueWatching(currentUser.uid, currentItemPayload);
+    }
+  };
+
+  const handleServerChange = (index) => {
+    setActiveServer(index);
+    if (!showPlayer) handlePlayClick();
+  };
+
+  const handleEpisodeSelect = (episodeNumber) => {
+    setSelectedEpisode(episodeNumber);
+    if (!showPlayer) handlePlayClick();
+  };
+
   return (
-    <div className="relative">
-      <img src="footer.png" alt="" className="z-0 hidden sm:block absolute bottom-0 w-full" />
-      <div className="tv fade-in pt-18">
-        <nav className="nav fixed top-0 left-0 right-0 z-50 bg-[#06040d]/80 backdrop-blur-md">
-          <div className="nav-bar">
-            <h1 className="nav-text" onClick={homeClick}>EZ Movies</h1>
-            <div className="relative" ref={wrapperRef}>
-              <Search
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                className="search-nav"
-                onFocus={() => setIsDropdownOpen(true)}
-              />
-              {debouncedSearchTerm && isDropdownOpen && (
-                <section onClick={() => setIsDropdownOpen(false)} className="fade-in absolute top-12 right-0 z-20 w-[100vw] sm:w-md transition3s mx-auto rounded-lg bg-dark-100">
-                  {isLoading ? (
-                    <p className="text-gray-100 text-center py-4">Loading...</p>
-                  ) : errorMessage ? (
-                    <p className="text-red-500 p-4">{errorMessage}</p>
-                  ) : (
-                    <div className="relative">
-                      <ul className="animate-slide-up grid grid-cols-1 max-h-120 overflow-y-scroll pb-10">
-                        {searchResults.map((item) => (
-                          <li key={item.id}>
-                            {item.media_type === "movie" ? (
-                              <MovieCard movie={item} className="moviesearch-card-nav" />
-                            ) : (
-                              <TvCard tvShow={item} className="tvsearch-card-nav" />
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                      <div className="bg-dark-200 flex absolute bottom-0 left-0 right-0 justify-center items-center h-10 rounded-lg">
-                        <p className="text-white hover:underline cursor-pointer">Show All Results</p>
-                      </div>
-                    </div>
-                  )}
-                </section>
-              )}
-            </div>
-          </div>
-        </nav>
+    <main className="watch-page is-tv fade-in">
+      {/* Ambient blurred backdrop — fills the previously empty side gutters */}
+      <div className="wp-ambient" aria-hidden="true">
+        <img className="wp-ambient-img" src={backdropUrl} alt="" />
+        <div className="wp-ambient-veil" />
+      </div>
 
-        <div className="backdrop animate-slide-up" onClick={() => !showPlayer && setShowPlayer(true)}>
-          {showPlayer ? (
-            <div className="player">
-              <iframe
-                className="iframe"
-                src={`https://vidsrcme.ru/embed/tv?tmdb=${tvShow.id}&season=${selectedSeason}&episode=${selectedEpisode}`}
-                referrerPolicy="origin"
-                allowFullScreen
-              ></iframe>
-            </div>
-          ) : (
-            <>
-              <img
-                className="backdrop-img"
-                src={tvShow.backdrop_path ? `https://image.tmdb.org/t/p/w500/${tvShow.backdrop_path}` : "no-movie.png"}
-                alt={tvShow.name}
-              />
-              <svg
-                className="play-icon"
-                onClick={() => setShowPlayer(true)}
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z"
-                  clipRule="evenodd"
+      <Navbar />
+
+      <div className="wp-shell">
+
+        {/* ── Top bar ── */}
+        <div className="wp-topbar wp-rise" style={{ "--d": "0s" }}>
+          <button className="wp-back" onClick={() => navigate(-1)}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
+            Back
+          </button>
+          <div className="wp-crumbs">
+            <button className="hover:text-brand-text transition-colors cursor-pointer" onClick={() => navigate("/tv-shows")}>
+              TV Shows
+            </button>
+            <span>/</span>
+            <span className="wp-crumbs-current">{tvShow.name}</span>
+          </div>
+        </div>
+
+        {/* ── Stage: player (left) + sources & episodes rail (right) ── */}
+        <div className="wp-stage">
+
+          <div className="wp-stage-main wp-rise" style={{ "--d": "0.06s" }}>
+            <div className="wp-player">
+              {showPlayer ? (
+                <iframe
+                  key={`${activeServer}-${selectedSeason}-${selectedEpisode}-${reloadKey}`}
+                  className="wp-frame"
+                  src={TV_SERVERS[activeServer].url(tvShow.id, selectedSeason, selectedEpisode)}
+                  title={`${tvShow.name} S${selectedSeason}E${selectedEpisode} — ${TV_SERVERS[activeServer].label}`}
+                  referrerPolicy="origin"
+                  allowFullScreen
                 />
-              </svg>
-            </>
-          )}
-        </div>
-
-        <div className="animate-slide-up w-full my-6 flex flex-col items-center justify-center sm:flex-row sm:flex-wrap sm:items-center gap-4 bg-dark-100/60 p-4 rounded-xl border border-light-100/10 backdrop-blur-md">
-          <div className="flex flex-col w-full sm:w-auto sm:min-w-[140px]">
-            <label className="text-xs lg:text-sm font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Season</label>
-            <select
-              value={selectedSeason}
-              onChange={(e) => {
-                setSelectedSeason(Number(e.target.value));
-                setSelectedEpisode(1);
-              }}
-              className="bg-dark-200 text-white rounded-lg px-3 py-2 border border-light-100/20 focus:outline-none focus:border-indigo-500 cursor-pointer text-sm font-medium transition w-full"
-            >
-              {standardSeasons.length > 0 ? (
-                standardSeasons.map((s) => (
-                  <option key={s.id} value={s.season_number}>
-                    Season {s.season_number}
-                  </option>
-                ))
               ) : (
-                <option value={1}>Season 1</option>
-              )}
-            </select>
-          </div>
+                <div
+                  className="wp-preview"
+                  onClick={handlePlayClick}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handlePlayClick();
+                    }
+                  }}
+                >
+                  <img className="wp-preview-img" src={backdropUrl} alt={tvShow.name} />
+                  <div className="wp-preview-scrim" />
 
-          <div className="flex flex-col w-full sm:w-auto sm:min-w-[140px]">
-            <label className="text-xs lg:text-sm font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Episode</label>
-            <select
-              value={selectedEpisode}
-              disabled={episodesLoading}
-              onChange={(e) => setSelectedEpisode(Number(e.target.value))}
-              className="bg-dark-200 text-white rounded-lg px-3 py-2 border border-light-100/20 focus:outline-none focus:border-indigo-500 cursor-pointer text-sm font-medium transition disabled:opacity-50 w-full"
-            >
-              {episodesLoading ? (
-                <option>Loading...</option>
-              ) : episodesList.length > 0 ? (
-                episodesList.map((ep) => (
-                  <option key={ep.id} value={ep.episode_number}>
-                    Ep {ep.episode_number} : {ep.name || `Episode ${ep.episode_number}`}
-                  </option>
-                ))
-              ) : (
-                Array.from({ length: tvShow.seasons?.find(s => s.season_number === selectedSeason)?.episode_count || 1 }, (_, i) => i + 1).map((num) => (
-                  <option key={num} value={num}>
-                    Episode {num}
-                  </option>
-                ))
-              )}
-            </select>
-          </div>
+                  <span className="wp-play">
+                    <span className="wp-play-ring" />
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                      <path fillRule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clipRule="evenodd" />
+                    </svg>
+                  </span>
 
-          {showPlayer && (
-            <div className="w-full items-center justify-center text-center text-xs sm:text-sm text-gray-400 italic pt-2 self-center">
-              Playing Season {selectedSeason}, Episode {selectedEpisode}
+                  <div className="wp-preview-caption">
+                    <div className="min-w-0">
+                      <p className="wp-preview-kicker">
+                        Season {selectedSeason} · Episode {selectedEpisode}
+                      </p>
+                      <p className="wp-preview-title">
+                        {activeEpisode?.name || tvShow.name}
+                      </p>
+                    </div>
+                    <span className="wp-preview-hint">{TV_SERVERS.length} sources</span>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        <div className="poster-and-info animate-slide-up">
-          <div className="poster">
+            {/* Player status bar + episode stepper */}
+            <div className="wp-playbar">
+              <span className="wp-playbar-label">
+                {showPlayer && <i className="wp-live-dot" />}
+                <span className="truncate">
+                  <b>S{selectedSeason} · E{selectedEpisode}</b>
+                  {activeEpisode?.name ? ` — ${activeEpisode.name}` : ""}
+                </span>
+              </span>
+
+              <div className="wp-playbar-actions">
+                <button
+                  className="wp-ghost-btn"
+                  onClick={() => setSelectedEpisode((n) => Math.max(1, n - 1))}
+                  disabled={selectedEpisode <= 1}
+                  title="Previous episode"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                  </svg>
+                  Prev
+                </button>
+                <button
+                  className="wp-ghost-btn"
+                  onClick={() => handleEpisodeSelect(Math.min(seasonEpisodeCount, selectedEpisode + 1))}
+                  disabled={selectedEpisode >= seasonEpisodeCount}
+                  title="Next episode"
+                >
+                  Next
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                  </svg>
+                </button>
+                <button
+                  className="wp-ghost-btn"
+                  onClick={() => setReloadKey((k) => k + 1)}
+                  disabled={!showPlayer}
+                  title="Reload the current source"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992V4.356m-4.992 4.992-1.5-1.5A7.5 7.5 0 0 0 4.5 12m15-3.652V12a7.5 7.5 0 0 1-12.516 5.652l-1.5-1.5m0 0H2.985v4.992" />
+                  </svg>
+                  Reload
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Rail ── */}
+          <aside className="wp-rail wp-rise" style={{ "--d": "0.12s" }}>
+
+            {/* Sources */}
+            <div className="wp-card">
+              <div className="wp-card-head">
+                <span className="wp-card-title">Sources</span>
+                <span className="wp-card-count">{TV_SERVERS.length}</span>
+              </div>
+              <div className="wp-card-body">
+                <div className="wp-server-grid">
+                  {TV_SERVERS.map((server, index) => (
+                    <button
+                      key={server.label}
+                      onClick={() => handleServerChange(index)}
+                      className={`wp-server ${activeServer === index ? "is-active" : ""}`}
+                      aria-pressed={activeServer === index}
+                    >
+                      <span className="wp-server-dot" />
+                      <span className="wp-server-label">{server.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="wp-hint">
+                  Some sources lag behind on new episodes — switch if this one won't load.
+                </p>
+              </div>
+            </div>
+
+            {/* Episodes */}
+            <div className="wp-card">
+              <div className="wp-card-head">
+                <span className="wp-card-title">Episodes</span>
+                <span className="wp-card-count">{seasonEpisodeCount}</span>
+              </div>
+              <div className="wp-card-body">
+                <select
+                  value={selectedSeason}
+                  onChange={(e) => {
+                    setSelectedSeason(Number(e.target.value));
+                    setSelectedEpisode(1);
+                  }}
+                  className="wp-select"
+                  aria-label="Select season"
+                >
+                  {standardSeasons.length > 0 ? (
+                    standardSeasons.map((s) => (
+                      <option key={s.id} value={s.season_number}>
+                        Season {s.season_number}
+                        {s.episode_count ? ` · ${s.episode_count} episodes` : ""}
+                      </option>
+                    ))
+                  ) : (
+                    <option value={1}>Season 1</option>
+                  )}
+                </select>
+
+                <div className="wp-eplist">
+                  {episodesLoading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="wp-ep-skeleton" />
+                    ))
+                  ) : episodesList.length > 0 ? (
+                    episodesList.map((ep) => (
+                      <button
+                        key={ep.id}
+                        onClick={() => handleEpisodeSelect(ep.episode_number)}
+                        className={`wp-ep ${selectedEpisode === ep.episode_number ? "is-active" : ""}`}
+                      >
+                        <span className="wp-ep-thumb">
+                          {ep.still_path ? (
+                            <img
+                              src={`https://image.tmdb.org/t/p/w300${ep.still_path}`}
+                              alt={ep.name || `Episode ${ep.episode_number}`}
+                              loading="lazy"
+                            />
+                          ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-muted">
+                              <path fillRule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                          <span className="wp-ep-badge">E{ep.episode_number}</span>
+                        </span>
+
+                        <span className="wp-ep-body">
+                          <span className="wp-ep-title">{ep.name || `Episode ${ep.episode_number}`}</span>
+                          <span className="wp-ep-meta">
+                            {[ep.runtime ? `${ep.runtime}m` : null, ep.air_date]
+                              .filter(Boolean)
+                              .join(" · ") || "—"}
+                          </span>
+                          {selectedEpisode === ep.episode_number && showPlayer && (
+                            <span className="wp-ep-now">Now playing</span>
+                          )}
+                        </span>
+                      </button>
+                    ))
+                  ) : (
+                    Array.from({ length: seasonEpisodeCount }, (_, i) => i + 1).map((num) => (
+                      <button
+                        key={num}
+                        onClick={() => handleEpisodeSelect(num)}
+                        className={`wp-ep ${selectedEpisode === num ? "is-active" : ""}`}
+                      >
+                        <span className="wp-ep-thumb">
+                          <span className="wp-ep-badge">E{num}</span>
+                        </span>
+                        <span className="wp-ep-body">
+                          <span className="wp-ep-title">Episode {num}</span>
+                        </span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* ── Poster + info — sits under the player so the tall rail has a partner column ── */}
+        <section className="wp-detail wp-rise" style={{ "--d": "0.18s" }}>
+          <div className="wp-poster">
             <img
-              className="poster-img"
-              src={tvShow.poster_path ? `https://image.tmdb.org/t/p/w500/${tvShow.poster_path}` : "no-movie.png"}
+              src={tvShow.poster_path ? `https://image.tmdb.org/t/p/w500${tvShow.poster_path}` : placeholder}
               alt={tvShow.name}
             />
           </div>
-          <div className="movie-info">
-            <h2 className="mb-3">{tvShow.name}</h2>
-            <p className="mb-4 overflow-y-scroll max-h-40">{tvShow.overview || "No overview available."}</p>
-            <p><strong>First Air Date :</strong> {tvShow.first_air_date || "N/A"}</p>
-            <p><strong>IMDb :</strong> {tvShow.vote_average?.toFixed(1) || "N/A"}/10</p>
-            <p><strong>Language :</strong> {tvShow.original_language === "en" ? "English" : tvShow.spoken_languages?.[0]?.english_name || tvShow.original_language}</p>
-            <p><strong>Genre :</strong> {tvShow.genres?.map((genre, key) => (<span key={key}>{genre.name}{key < tvShow.genres.length - 1 ? ", " : ""}</span>))}</p>
-            <div className="flex items-center gap-3">
-              <TrailerButton id={tvShow.id} mediaType="tvshow" />
-              <ImdbButton id={tvShow.id} mediaType="tvshow" />
+
+          <div className="wp-info">
+            <h1 className="wp-title">{tvShow.name}</h1>
+            {tvShow.tagline && <p className="wp-tagline">“{tvShow.tagline}”</p>}
+
+            <div className="wp-badges">
+              <span className="wp-badge wp-badge-type">TV Show</span>
+              {year && <span className="wp-badge">{year}</span>}
+              {tvShow.number_of_seasons && (
+                <span className="wp-badge">
+                  {tvShow.number_of_seasons} season{tvShow.number_of_seasons > 1 ? "s" : ""}
+                </span>
+              )}
+              {rating && (
+                <span className="wp-badge wp-badge-imdb">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clipRule="evenodd" />
+                  </svg>
+                  {rating}
+                </span>
+              )}
+              {lang && <span className="wp-badge">{lang}</span>}
+            </div>
+
+            {tvShow.genres?.length > 0 && (
+              <div className="wp-genres">
+                {tvShow.genres.map((genre) => (
+                  <span className="wp-genre" key={genre.id}>{genre.name}</span>
+                ))}
+              </div>
+            )}
+
+            {tvShow.overview && <p className="wp-overview">{tvShow.overview}</p>}
+
+            {facts.length > 0 && (
+              <div className="wp-facts">
+                {facts.map((fact) => (
+                  <div className="wp-fact" key={fact.key}>
+                    <p className="wp-fact-k">{fact.key}</p>
+                    <p className="wp-fact-v">{fact.value}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Action Bar */}
+            <div className="wp-actions">
+              <TrailerButton id={tvShow.id} mediaType="tv" />
+              <ImdbButton id={tvShow.id} mediaType="tv" />
+
+              <button
+                onClick={handleFavoriteClick}
+                className={`wp-icon-btn ${isFavorite ? "is-fav" : ""}`}
+                aria-label="Favorite TV Show"
+                title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill={isFavorite ? "currentColor" : "none"}
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                </svg>
+              </button>
+
+              {/* Playlist button + dropdown anchor */}
+              <div className="relative flex items-center justify-center">
+                <button
+                  onClick={handlePlaylistButtonClick}
+                  className={`wp-icon-btn ${isDropdownOpen ? "is-open" : ""}`}
+                  aria-label="Add to Playlist"
+                  title="Add to Playlist"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                </button>
+
+                {isDropdownOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
+
+                    <div className="wp-menu">
+                      <button onClick={handleOpenCreateModal} className="wp-menu-new">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        Make a new playlist
+                      </button>
+
+                      {playlists.length > 0 && <div className="wp-menu-divider" />}
+
+                      <div className="wp-menu-scroll">
+                        {isLoadingPlaylists ? (
+                          <p className="wp-menu-empty">Loading lists...</p>
+                        ) : playlists.length === 0 ? (
+                          <p className="wp-menu-empty">No playlists available</p>
+                        ) : (
+                          playlists.map((list) => (
+                            <button
+                              key={list.id}
+                              onClick={() => handleSelectExistingPlaylist(list.id)}
+                              className="wp-menu-item"
+                            >
+                              {list.name}
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <ShareButton className="wp-icon-btn" />
             </div>
           </div>
+          </section>
         </div>
-        <TrendingTVShows scrollOnClick={true} />
-        
+
+        <div className="wp-rise" style={{ "--d": "0.24s" }}>
+          <CastCrew id={tvShow.id} mediaType="tv" creators={tvShow.created_by?.map((c) => c.name) || []} />
+
+          <MediaSlider
+            title="More Like This"
+            endpoint={`${API_BASE_URL}/tv/${tvShow.id}/recommendations?language=en-US`}
+            accentColor="amber"
+          />
+        </div>
+
         <Footer />
       </div>
-    </div>
+
+      <BackToTop />
+
+      {/* ── Playlist Creation Modal ── */}
+      {isModalOpen && createPortal(
+        <div className="wp-modal-backdrop" onClick={() => setIsModalOpen(false)}>
+          <form
+            className="wp-modal"
+            onClick={(e) => e.stopPropagation()}
+            onSubmit={handleCreatePlaylistSubmit}
+          >
+            <h3>Create New Playlist</h3>
+            <p>Enter a name for your playlist. This series will be added automatically.</p>
+
+            <input
+              type="text"
+              autoFocus
+              value={newPlaylistName}
+              onChange={(e) => setNewPlaylistName(e.target.value)}
+              placeholder="e.g., Series Binge List"
+              className="wp-modal-input"
+            />
+
+            <div className="flex justify-end gap-2">
+              <button type="button" onClick={() => setIsModalOpen(false)} className="wp-btn-secondary">
+                Cancel
+              </button>
+              <button type="submit" disabled={!newPlaylistName.trim()} className="wp-btn-primary">
+                Create
+              </button>
+            </div>
+          </form>
+        </div>,
+        document.body
+      )}
+    </main>
   );
 };
 
