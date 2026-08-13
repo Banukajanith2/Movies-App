@@ -6,6 +6,7 @@ import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
 import TrailerButton from "./TrailerButton";
 import ImdbButton from "./ImdbButton";
+import TitleLogo from "./TitleLogo";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -186,7 +187,14 @@ const HeroSlideItem = ({ item, handleWatch, onPause, onResume }) => {
         </div>
 
         {/* Title */}
-        <h2 className="hero-title">{title}</h2>
+        <h2 className="hero-title">
+          <TitleLogo
+            id={item.id}
+            mediaType={item.media_type}
+            title={title}
+            logoClassName="title-logo-hero"
+          />
+        </h2>
 
         {/* Overview */}
         <p className="hero-overview">{truncatedOverview}</p>

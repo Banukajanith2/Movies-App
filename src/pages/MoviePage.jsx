@@ -29,6 +29,7 @@ import WatchProviders from "../components/WatchProviders";
 import RatingGauge from "../components/RatingGauge";
 import Reviews from "../components/Reviews";
 import ShortcutsHelp from "../components/ShortcutsHelp";
+import TitleLogo from "../components/TitleLogo";
 import { usePageMeta } from "../hooks/usePageMeta";
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 
@@ -439,7 +440,14 @@ const MoviePage = () => {
                   <div className="wp-preview-caption">
                     <div className="min-w-0">
                       <p className="wp-preview-kicker">Ready to play</p>
-                      <p className="wp-preview-title">{movie.title}</p>
+                      <p className="wp-preview-title">
+                        <TitleLogo
+                          id={movie.id}
+                          mediaType="movie"
+                          title={movie.title}
+                          logoClassName="title-logo-preview"
+                        />
+                      </p>
                     </div>
                     <span className="wp-preview-hint">
                       {runtime ? `${runtime} · ` : ""}{SERVERS.length} sources

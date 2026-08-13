@@ -29,6 +29,7 @@ import RatingGauge from "../components/RatingGauge";
 import Reviews from "../components/Reviews";
 import SeasonsOverview from "../components/SeasonsOverview";
 import ShortcutsHelp from "../components/ShortcutsHelp";
+import TitleLogo from "../components/TitleLogo";
 import { usePageMeta } from "../hooks/usePageMeta";
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 
@@ -463,8 +464,16 @@ const TVPage = () => {
                         Season {selectedSeason} · Episode {selectedEpisode}
                       </p>
                       <p className="wp-preview-title">
-                        {activeEpisode?.name || tvShow.name}
+                        <TitleLogo
+                          id={tvShow.id}
+                          mediaType="tv"
+                          title={tvShow.name}
+                          logoClassName="title-logo-preview"
+                        />
                       </p>
+                      {activeEpisode?.name && (
+                        <p className="wp-preview-episode">{activeEpisode.name}</p>
+                      )}
                     </div>
                     <span className="wp-preview-hint">{TV_SERVERS.length} sources</span>
                   </div>
