@@ -30,7 +30,9 @@ import Reviews from "../components/Reviews";
 import SeasonsOverview from "../components/SeasonsOverview";
 import ShortcutsHelp from "../components/ShortcutsHelp";
 import TitleLogo from "../components/TitleLogo";
+import NextEpisode from "../components/NextEpisode";
 import { usePageMeta } from "../hooks/usePageMeta";
+import { srcSet } from "../utils/tmdbImage";
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 
 // ── TV Streaming Servers ──
@@ -261,6 +263,11 @@ const TVPage = () => {
       ? `https://image.tmdb.org/t/p/w780${tvShow.poster_path}`
       : placeholder;
 
+  // The ambient layer is blurred 48px, so a large source would be wasted bytes
+  const ambientUrl = tvShow.backdrop_path
+    ? `https://image.tmdb.org/t/p/w780${tvShow.backdrop_path}`
+    : backdropUrl;
+
   // Episode count fallback for shows whose season payload fails to load
   const seasonEpisodeCount =
     episodesList.length ||
@@ -396,7 +403,7 @@ const TVPage = () => {
     <main className="watch-page is-tv fade-in">
       {/* Ambient blurred backdrop — fills the previously empty side gutters */}
       <div className="wp-ambient" aria-hidden="true">
-        <img className="wp-ambient-img" src={backdropUrl} alt="" />
+        <img className="wp-ambient-img" src={ambientUrl} alt="" />
         <div className="wp-ambient-veil" />
       </div>
 
@@ -448,7 +455,13 @@ const TVPage = () => {
                     }
                   }}
                 >
-                  <img className="wp-preview-img" src={backdropUrl} alt={tvShow.name} />
+                  <img
+                    className="wp-preview-img"
+                    src={backdropUrl}
+                    srcSet={srcSet(tvShow.backdrop_path, "backdrop")}
+                    sizes="(min-width: 1024px) 1050px, 100vw"
+                    alt={tvShow.name}
+                  />
                   <div className="wp-preview-scrim" />
 
                   <span className="wp-play">
@@ -573,6 +586,16 @@ const TVPage = () => {
               </div>
             </div>
 
+            {/* Upcoming episode for returning series */}
+            <NextEpisode
+              episode={tvShow.next_episode_to_air}
+              onSelect={(season, episode) => {
+                setSelectedSeason(season);
+                setSelectedEpisode(episode);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+            />
+
             {/* Legal streaming availability */}
             <WatchProviders id={tvShow.id} mediaType="tv" />
 
@@ -619,7 +642,9 @@ const TVPage = () => {
                         <span className="wp-ep-thumb">
                           {ep.still_path ? (
                             <img
-                              src={`https://image.tmdb.org/t/p/w300${ep.still_path}`}
+                              src={`https://image.tmdb.org/t/p/w185${ep.still_path}`}
+                              srcSet={srcSet(ep.still_path, "still")}
+                              sizes="86px"
                               alt={ep.name || `Episode ${ep.episode_number}`}
                               loading="lazy"
                             />
@@ -670,6 +695,8 @@ const TVPage = () => {
           <div className="wp-poster">
             <img
               src={tvShow.poster_path ? `https://image.tmdb.org/t/p/w500${tvShow.poster_path}` : placeholder}
+              srcSet={srcSet(tvShow.poster_path)}
+              sizes="(min-width: 1024px) 210px, 160px"
               alt={tvShow.name}
             />
           </div>

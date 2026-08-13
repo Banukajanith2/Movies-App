@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
+import { useNavigate } from "react-router-dom";
+import { profileSrcSet } from "../utils/tmdbImage";
 import "swiper/css";
 import "swiper/css/navigation";
 
@@ -9,6 +11,8 @@ const PersonAvatar = ({ profilePath, name }) =>
   profilePath ? (
     <img
       src={`https://image.tmdb.org/t/p/w185${profilePath}`}
+      srcSet={profileSrcSet(profilePath)}
+      sizes="96px"
       alt={name}
       loading="lazy"
       className="w-full h-full object-cover"
@@ -38,7 +42,14 @@ const CastCrewSkeleton = () => (
  * `creators` lets TV pages pass along `created_by` names already present on the show's own payload
  * instead of parsing crew job titles, which TMDB doesn't tag consistently for TV.
  */
+const createSlug = (name, id) =>
+  `${(name || "unknown")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")}-${id}`;
+
 const CastCrew = ({ id, mediaType = "movie", creators = [] }) => {
+  const navigate = useNavigate();
   const [cast, setCast] = useState([]);
   const [director, setDirector] = useState("");
   const [loading, setLoading] = useState(true);
@@ -103,13 +114,17 @@ const CastCrew = ({ id, mediaType = "movie", creators = [] }) => {
           >
             {cast.map((person) => (
               <SwiperSlide key={person.id} className="!w-24 shrink-0">
-                <div className="aspect-[2/3] rounded-xl overflow-hidden bg-surface border border-brand-text/10">
-                  <PersonAvatar profilePath={person.profile_path} name={person.name} />
-                </div>
-                <p className="text-xs font-semibold text-brand-text mt-2 line-clamp-1">{person.name}</p>
-                {person.character && (
-                  <p className="text-[11px] text-muted line-clamp-1">{person.character}</p>
-                )}
+                <button
+                  className="cast-link"
+                  onClick={() => navigate(`/person/${createSlug(person.name, person.id)}`)}
+                  title={`See more from ${person.name}`}
+                >
+                  <span className="cast-avatar">
+                    <PersonAvatar profilePath={person.profile_path} name={person.name} />
+                  </span>
+                  <span className="cast-name">{person.name}</span>
+                  {person.character && <span className="cast-character">{person.character}</span>}
+                </button>
               </SwiperSlide>
             ))}
           </Swiper>

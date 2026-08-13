@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { srcSet } from "../utils/tmdbImage";
 import { createPortal } from "react-dom"; // Imported Portal utility for layout insurance
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -168,6 +169,8 @@ const TvCard = ({
         <div className="mcn-img-wrap relative">
           <img
             src={poster_path ? `https://image.tmdb.org/t/p/w500${poster_path}` : `${import.meta.env.BASE_URL}no-movie.png`}
+            srcSet={srcSet(poster_path)}
+            sizes="(min-width: 1024px) 210px, (min-width: 480px) 30vw, 45vw"
             alt={name}
             loading="lazy"
           />

@@ -1,3 +1,5 @@
+import { srcSet } from "../utils/tmdbImage";
+
 /**
  * Season-by-season overview for a series. Selecting a card drives the player's
  * season, so this doubles as navigation rather than being a dead info panel.
@@ -29,6 +31,8 @@ const SeasonsOverview = ({ seasons = [], selectedSeason, onSelectSeason }) => {
                 {season.poster_path ? (
                   <img
                     src={`https://image.tmdb.org/t/p/w342${season.poster_path}`}
+                    srcSet={srcSet(season.poster_path)}
+                    sizes="(min-width: 1024px) 230px, (min-width: 640px) 30vw, 45vw"
                     alt={season.name}
                     loading="lazy"
                   />

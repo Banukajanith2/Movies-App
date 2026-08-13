@@ -30,7 +30,9 @@ import RatingGauge from "../components/RatingGauge";
 import Reviews from "../components/Reviews";
 import ShortcutsHelp from "../components/ShortcutsHelp";
 import TitleLogo from "../components/TitleLogo";
+import CollectionRow from "../components/CollectionRow";
 import { usePageMeta } from "../hooks/usePageMeta";
+import { srcSet } from "../utils/tmdbImage";
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 
 // ── Streaming Servers ──
@@ -249,6 +251,11 @@ const MoviePage = () => {
       ? `https://image.tmdb.org/t/p/w780${movie.poster_path}`
       : placeholder;
 
+  // The ambient layer is blurred 48px, so a large source would be wasted bytes
+  const ambientUrl = movie.backdrop_path
+    ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}`
+    : backdropUrl;
+
   const currentItemPayload = {
     id: Number(movie.id),
     type: "movie",
@@ -375,7 +382,7 @@ const MoviePage = () => {
     <main className="watch-page is-movie fade-in">
       {/* Ambient blurred backdrop — fills the previously empty side gutters */}
       <div className="wp-ambient" aria-hidden="true">
-        <img className="wp-ambient-img" src={backdropUrl} alt="" />
+        <img className="wp-ambient-img" src={ambientUrl} alt="" />
         <div className="wp-ambient-veil" />
       </div>
 
@@ -427,7 +434,13 @@ const MoviePage = () => {
                     }
                   }}
                 >
-                  <img className="wp-preview-img" src={backdropUrl} alt={movie.title} />
+                  <img
+                    className="wp-preview-img"
+                    src={backdropUrl}
+                    srcSet={srcSet(movie.backdrop_path, "backdrop")}
+                    sizes="(min-width: 1024px) 1050px, 100vw"
+                    alt={movie.title}
+                  />
                   <div className="wp-preview-scrim" />
 
                   <span className="wp-play">
@@ -566,6 +579,8 @@ const MoviePage = () => {
           <div className="wp-poster">
             <img
               src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : placeholder}
+              srcSet={srcSet(movie.poster_path)}
+              sizes="(min-width: 1024px) 210px, 160px"
               alt={movie.title}
             />
           </div>
@@ -682,6 +697,8 @@ const MoviePage = () => {
 
         <div className="wp-rise" style={{ "--d": "0.24s" }}>
           <CastCrew id={movie.id} mediaType="movie" />
+
+          <CollectionRow collection={movie.belongs_to_collection} currentMovieId={movie.id} />
 
           <Reviews id={movie.id} mediaType="movie" />
 

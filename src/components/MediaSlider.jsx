@@ -4,6 +4,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
+import { srcSet } from "../utils/tmdbImage";
 import "swiper/css";
 import "swiper/css/navigation";
 
@@ -186,6 +187,8 @@ const SliderCard = ({ item }) => {
                 ? `https://image.tmdb.org/t/p/w342${item.poster_path}`
                 : `${import.meta.env.BASE_URL}no-movie.png`
             }
+            srcSet={srcSet(item.poster_path)}
+            sizes="(min-width: 1024px) 230px, (min-width: 768px) 22vw, 45vw"
             alt={title}
             loading="lazy"
           />

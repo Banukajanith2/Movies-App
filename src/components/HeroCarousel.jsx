@@ -7,6 +7,7 @@ import { API_BASE_URL, API_OPTIONS } from "../constants/tmdbapicall";
 import TrailerButton from "./TrailerButton";
 import ImdbButton from "./ImdbButton";
 import TitleLogo from "./TitleLogo";
+import { srcSet } from "../utils/tmdbImage";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -167,7 +168,9 @@ const HeroSlideItem = ({ item, handleWatch, onPause, onResume }) => {
       {/* Backdrop image */}
       <img
         className="hero-backdrop"
-        src={`https://image.tmdb.org/t/p/original${item.backdrop_path}`}
+        src={`https://image.tmdb.org/t/p/w1280${item.backdrop_path}`}
+        srcSet={srcSet(item.backdrop_path, "backdrop")}
+        sizes="100vw"
         alt={title}
         loading="lazy"
       />
