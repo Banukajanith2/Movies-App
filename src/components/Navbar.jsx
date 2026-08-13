@@ -40,6 +40,10 @@ const Navbar = () => {
       document.documentElement.classList.remove("dark");
       localStorage.setItem("theme", "light");
     }
+    // Keep the mobile browser chrome matched to the theme (set initially by the
+    // boot script in index.html).
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    if (themeColor) themeColor.setAttribute("content", darkMode ? "#030014" : "#f8fafc");
   }, [darkMode]);
   // ----------------------------
 

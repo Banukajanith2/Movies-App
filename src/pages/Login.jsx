@@ -48,11 +48,13 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-brand-bg flex items-center justify-center px-4 relative">
+    <div className="min-h-screen bg-brand-bg flex flex-col px-4 relative">
       <Navbar />
-      
+
       <div className="pattern" />
-      
+
+      {/* Card is centred in the space left over above the footer */}
+      <div className="flex-1 flex items-center justify-center py-10">
       {/* Container now uses 'bg-surface' for theme-aware background */}
       <div className="bg-surface backdrop-blur-md border border-brand-text/10 p-8 lg:mt-[95px] rounded-2xl w-full max-w-md shadow-2xl z-10">
         <h2 className="text-2xl font-bold text-brand-text text-center mb-6">
@@ -129,6 +131,11 @@ const Login = () => {
             {isRegistering ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
           </button>
         </div>
+      </div>
+      </div>
+
+      {/* Full-width, outside the auth card */}
+      <div className="w-full max-w-7xl mx-auto z-10">
         <Footer />
       </div>
     </div>

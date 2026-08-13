@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import App from './App.jsx';
 import PageLoad from './components/PageLoad.jsx';
+import Spinner from './components/Spinner.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 import { AuthProvider } from './context/AuthContext.jsx'; // 1. Imported the AuthProvider
 import { ToastProvider } from './context/ToastContext.jsx';
 import './index.css';
@@ -17,26 +19,30 @@ const Login  = lazy(() => import('./pages/Login.jsx'));
 const Account = lazy(() => import('./pages/Account.jsx'));
 
 createRoot(document.getElementById('root')).render(
-  <BrowserRouter basename={import.meta.env.BASE_URL}>
-    <AuthProvider> {/* 2. Wrapped the app inside the Auth Context */}
-      <ToastProvider>
-        <Suspense>
+  <ErrorBoundary>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <AuthProvider> {/* 2. Wrapped the app inside the Auth Context */}
+        <ToastProvider>
           <PageLoad>
-            <Routes>
-              <Route path='/'           element={<App />} />
-              <Route path='/movies'      element={<MoviesPage />} />
-              <Route path='/tv-shows'    element={<TVShowsPage />} />
-              <Route path='/movie/:slug' element={<MoviePage />} />
-              <Route path='/tv/:slug'    element={<TVPage />} />
-              <Route path='/search'      element={<SearchPage />} />
-              <Route path='/login'      element={<Login />} />
-              <Route path='/account'    element={<Account />} />
-              <Route path='/404-Error'   element={<ErrorPage />} />
-              <Route path='*'            element={<ErrorPage />} />
-            </Routes>
+            {/* Without a fallback, navigating to any lazy route renders nothing
+                until its chunk lands. */}
+            <Suspense fallback={<div className="route-fallback"><Spinner /></div>}>
+              <Routes>
+                <Route path='/'           element={<App />} />
+                <Route path='/movies'      element={<MoviesPage />} />
+                <Route path='/tv-shows'    element={<TVShowsPage />} />
+                <Route path='/movie/:slug' element={<MoviePage />} />
+                <Route path='/tv/:slug'    element={<TVPage />} />
+                <Route path='/search'      element={<SearchPage />} />
+                <Route path='/login'      element={<Login />} />
+                <Route path='/account'    element={<Account />} />
+                <Route path='/404-Error'   element={<ErrorPage />} />
+                <Route path='*'            element={<ErrorPage />} />
+              </Routes>
+            </Suspense>
           </PageLoad>
-        </Suspense>
-      </ToastProvider>
-    </AuthProvider>
-  </BrowserRouter>
+        </ToastProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  </ErrorBoundary>
 );

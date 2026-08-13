@@ -1188,3 +1188,172 @@
   .wp-preview:hover .wp-preview-img,
   .wp-poster:hover img { transform: none; }
 }
+
+/* ==========================================================================
+   GLOBAL FOCUS VISIBILITY
+   Several inputs apply `outline-none`; these unlayered rules win on keyboard
+   focus so every interactive element still has a visible indicator.
+   ========================================================================== */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Mouse/touch focus stays clean — only keyboard focus draws the ring */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Text fields that already signal focus through their own border — or their
+   wrapper's — don't take the ring on top of it; it reads as a second border
+   drawn inside the field. The container carries the indicator instead. */
+.navbar-search-input:focus-visible,
+.search-filter-input:focus-visible,
+.wp-modal-input:focus-visible,
+.wp-select:focus-visible {
+  outline: none;
+}
+
+.navbar-search-input-row:focus-within {
+  border-color: var(--accent);
+}
+
+/* On dark media surfaces the indigo ring is low contrast; use white instead */
+.wp-preview:focus-visible,
+.wp-play:focus-visible,
+.hero-nav-prev:focus-visible,
+.hero-nav-next:focus-visible,
+.slider-nav-btn:focus-visible {
+  outline-color: #ffffff;
+}
+
+/* ==========================================================================
+   ROUTE SUSPENSE FALLBACK
+   ========================================================================== */
+.route-fallback {
+  @apply fixed inset-0 z-[9998] flex items-center justify-center bg-brand-bg;
+}
+
+/* ==========================================================================
+   ERROR BOUNDARY
+   ========================================================================== */
+.error-boundary {
+  @apply fixed inset-0 z-[10000] flex items-center justify-center p-5 bg-brand-bg;
+}
+
+.error-boundary-card {
+  @apply w-full max-w-lg rounded-2xl border border-brand-text/10 bg-surface p-7 text-center;
+  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.55);
+}
+
+.error-boundary-icon {
+  @apply mx-auto mb-4 grid place-items-center w-14 h-14 rounded-full text-rose-500;
+  background: color-mix(in srgb, #f43f5e 12%, transparent);
+}
+.error-boundary-icon svg { @apply w-7 h-7; }
+
+.error-boundary-title {
+  @apply text-2xl font-bold text-brand-text mb-2;
+  text-align: center;
+  margin-inline: auto;
+  max-width: none;
+}
+
+.error-boundary-text { @apply text-sm leading-relaxed text-muted; }
+
+.error-boundary-detail {
+  @apply mt-4 max-h-40 overflow-auto rounded-xl border border-brand-text/10 p-3 text-left text-[11px] leading-relaxed text-muted whitespace-pre-wrap;
+  background: color-mix(in srgb, var(--brand-bg) 80%, transparent);
+}
+
+.error-boundary-actions { @apply flex items-center justify-center gap-3 mt-6; }
+
+.error-boundary-btn-primary {
+  @apply px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-accent hover:bg-accent-hover transition-colors duration-200 cursor-pointer;
+}
+
+.error-boundary-btn-secondary {
+  @apply px-4 py-2.5 rounded-xl text-sm font-semibold text-brand-text bg-brand-text/5 hover:bg-brand-text/10 border border-brand-text/10 transition-colors duration-200 cursor-pointer;
+}
+
+/* ==========================================================================
+   SITE FOOTER
+   ========================================================================== */
+/* Container query, not a media query: the footer is dropped into hosts of wildly
+   different widths (the full-bleed home wrapper vs. the max-w-md login card), so
+   it has to lay itself out from its own width, not the viewport's. */
+.site-footer {
+  @apply mt-14 pt-10 border-t border-brand-text/10;
+  container-type: inline-size;
+  container-name: sitefooter;
+}
+
+.site-footer-grid {
+  @apply grid gap-8 pb-8;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@container sitefooter (min-width: 560px) {
+  .site-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@container sitefooter (min-width: 900px) {
+  .site-footer-grid { grid-template-columns: 1.6fr 1fr 1fr 1.6fr; gap: 40px; }
+}
+
+.site-footer-brand { @apply flex flex-col items-start gap-3; }
+
+.site-footer-logo {
+  @apply font-bold text-xl leading-tight;
+  background: linear-gradient(90deg, #4f46e5, #7c3aed);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dark .site-footer-logo {
+  background: linear-gradient(90deg, #d6c7ff, #6366f1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.site-footer-tagline {
+  @apply text-sm leading-relaxed text-muted;
+  max-width: 34ch;
+}
+
+.site-footer-brand .social-icons { @apply justify-start gap-4 mt-1; }
+.site-footer-brand .social-icons svg { @apply w-5 h-5; }
+
+.site-footer-col { @apply flex flex-col items-start gap-2.5; }
+
+.site-footer-heading {
+  @apply text-[11px] font-bold uppercase tracking-[0.16em] text-brand-text mb-1;
+}
+
+.site-footer-link {
+  @apply text-sm text-muted hover:text-accent transition-colors duration-200 cursor-pointer text-left;
+}
+
+.site-footer-tmdb {
+  @apply inline-flex items-center gap-2 text-sm text-muted hover:text-brand-text transition-colors duration-200;
+}
+
+.site-footer-tmdb-badge {
+  @apply text-[10px] font-black tracking-tight text-white px-1.5 py-0.5 rounded select-none;
+  background: linear-gradient(90deg, #90cea1, #01b4e4);
+}
+
+.site-footer-note {
+  @apply text-[11px] leading-relaxed text-muted;
+  max-width: 40ch;
+}
+
+.site-footer-bar {
+  @apply flex items-center justify-center pt-5 pb-2 border-t border-brand-text/10;
+}
+
+.site-footer-bar p { @apply text-xs text-muted; }
+
+.site-footer-author { @apply text-brand-text underline underline-offset-2 hover:no-underline; }
