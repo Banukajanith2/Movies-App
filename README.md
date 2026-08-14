@@ -36,7 +36,7 @@ A modern movie and TV show browsing app built with React, TMDB API, and Firebase
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/banukajanith2/Movies-App.git
+git clone https://github.com/banukajanith2/EZ-Movies.git
 cd movies-app
 ```
 
